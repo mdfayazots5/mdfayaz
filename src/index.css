@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap');
+@import "tailwindcss";
+
+:root {
+  --color-bg: #F0F9FF;
+  --color-surface: #FFFFFF;
+  --color-border: #BAE6FD;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #64748B;
+  --color-accent: #0EA5E9;
+  --color-accent-hover: #0284C7;
+  --color-accent-foreground: #FFFFFF;
+}
+
+.dark {
+  --color-bg: #0B1220;
+  --color-surface: #15233A;
+  --color-border: #1E3A5F;
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-accent: #38BDF8;
+  --color-accent-hover: #7DD3FC;
+  --color-accent-foreground: #0B1220;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "DM Sans", sans-serif;
+  --font-space: "Space Grotesk", sans-serif;
+  --font-code: "IBM Plex Mono", monospace;
+  --font-serif: "Playfair Display", serif;
+  --font-body-serif: "Lora", serif;
+  --font-outfit: "Outfit", sans-serif;
+  --font-luxury: "Cormorant Garamond", serif;
+  
+  --color-background: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-foreground: var(--color-accent-foreground);
+
+  --radius-tag: 6px;
+  --radius-card: 12px;
+  --radius-btn: 8px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-background text-text-primary font-sans antialiased;
+    transition: background-color 0.2s ease, border-color 0.2s ease, text-color 0.2s ease;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  .page-transition {
+    animation: fadeIn 200ms ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}

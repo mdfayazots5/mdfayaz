@@ -1,0 +1,56 @@
+        "Architected complete patient journey — registration → hospital search → doctor mapping → real-time slot booking",
+      { version: "v1.4", date: "Aug 2023", features: ["Slot booking concurrency lock", "Doctor mapping", "Patient journey"],             project: "HCM"    },
+  const points = data.map((d, i) => {
+  const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
+        {[0.2, 0.4, 0.6, 0.8, 1].map((r, i) => (
+        {data.map((_, i) => {
+        {data.map((d, i) => {
+      {data.map((d, i) => (
+              {navItems.map((item) => (
+          {navItems.map((item) => (
+            {transaction.dashboardWidgets.map((widget: any) => (
+            {master.projects.map((project: any) => (
+                    {project.tech.slice(0, 4).map((t: string) => (
+                  {transaction.activityLog.map((log: any, idx: number) => (
+                            {[...Array(5)].map((_, i) => (
+          {demo.steps.map((step: any, idx: number) => (
+            {transaction.personas.map((persona: any) => (
+              {master.skills.map((skill: any) => (
+                    {skill.items.map((item: string) => (
+              {master.projects.map((project: any) => (
+                    {project.tech.map((t: string) => (
+              {messages.map((msg, idx) => (
+                {selectedPersona.suggestedQuestions.map((q: string) => (
+              {transaction.interactiveDemos.map((demo: any) => (
+          {chapter.metrics.map((metric: any, idx: number) => (
+              {chapter.milestones.map((ms: any, idx: number) => (
+          {chapter.tech.map((t: string) => (
+            {transaction.chapters.map((chapter: any, idx: number) => (
+            {transaction.chapters.map((chapter: any, idx: number) => (
+        {transaction.chapters.map((chapter: any, idx: number) => (
+            {transaction.roles.map((role: any) => (
+                {master.skills[0].items.map((skill: string) => (
+            {selectedRole.sections.map((section: any, idx: number) => (
+                  {section.items.map((item: any, itemIdx: number) => (
+                          {item.tags.map((tag: string) => (
+                          {item.metrics.map((m: any, mIdx: number) => (
+            {transaction.manifesto.map((text: string, idx: number) => (
+            {transaction.caseStudies.map((study: any, idx: number) => (
+              {master.skills.map((skill: any) => (
+                    {skill.items.map((item: string) => (
+    const points = transaction.performanceTimeline.map((d: any, i: number) => {
+    const cachePoints = transaction.performanceTimeline.map((d: any, i: number) => {
+    const linePath = points.map((p: any, i: number) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    const cachePath = cachePoints.map((p: any, i: number) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+          {[0, 25, 50, 75, 100].map((v) => (
+          {points.map((p: any, i: number) => (
+          {transaction.performanceTimeline.map((d: any, i: number) => (
+          {navItems.map((item) => (
+              {navItems.map((item) => (
+              {[1, 2, 3].map(i => (
+          {transaction.kpiCards.map((kpi: any, idx: number) => (
+                  {transaction.techAdoptionScore.slice(0, 4).map((tech: any) => (
+                  ].map((insight, i) => (
+                {transaction.featureReleases.map((release: any, idx: number) => (
+                      {release.features.map((f: string, i: number) => (
+            {[1, 2, 3, 4, 5, 6].map((num) => (

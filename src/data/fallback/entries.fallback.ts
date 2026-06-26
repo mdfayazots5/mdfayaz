@@ -1,0 +1,163 @@
+import { Entry } from "../../models/portfolio.model";
+
+export const ENTRIES_FALLBACK: Entry[] = [
+  {
+    id: 1,
+    type: "company",
+    title: "Healthcare Management System (HCM)",
+    tagline: "HCM",
+    categoryTag: "Healthcare ERP",
+    description: "Architected a centralized, web-based Healthcare ERP driving multi-facility hospital administration, live doctor-patient scheduling workflows, and dynamic digital prescription processing.",
+    features: [
+      "Spearheaded the registration, multi-parameter doctor search, mapping core, and high-security digital prescription models, eliminating patient scheduling friction.",
+      "Developed reactive state machines for doctor availability and scheduling, ensuring automatic, collision-free calendar bookings.",
+      "Engineered granular administrative features to securely coordinate master records across hospitals, doctors, and auxiliary staff.",
+      "Built secure, high-throughput REST APIs and core business microservices in ASP.NET Core matching architectural repository patterns.",
+      "Participated directly in agile ceremonies, allocating tasks to 5 developers, performing strict code reviews, and driving fast deployment cycles."
+    ],
+    tech: ["ASP.NET Core", "Web API", "SQL Server", "Web-based UI"],
+    achievements: [],
+    companyName: "Revalsys Technologies",
+    role: "Team Lead + Dot Net Developer",
+    teamSize: 5,
+    startDate: "Feb 2023",
+    endDate: "Dec 2023",
+    featured: false,
+    displayOrder: 1,
+    color: "#0EA5E9",
+    icon: "🏥"
+  },
+  {
+    id: 2,
+    type: "company",
+    title: "Requisition & Onboarding System (HRMS)",
+    tagline: "HRMS",
+    categoryTag: "HRMS / Recruitment",
+    description: "Built a cohesive Human Resource Management SaaS application automating end-to-end recruitment pipelines, multi-partner assignments, and automated candidate onboarding.",
+    features: [
+      "Engineered complete candidate pipelines mapping Job Descriptions (JDs), agency consultant handoffs, dynamic candidate pipelines, and automated offer letters.",
+      "Developed multi-phase transactional interview pipelines with hierarchical roles-based authorization filters and centralized feedback trackers.",
+      "Designed custom checklist engines managing post-offer document validation, occupational health clearances, and IT onboarding triggers.",
+      "Delivered scalable RESTful endpoints and highly indexed relational database structures in ASP.NET Core and SQL Server."
+    ],
+    tech: ["ASP.NET Core", "Web API", "SQL Server"],
+    achievements: [],
+    companyName: "Revalsys Technologies",
+    role: "Team Lead + Dot Net Developer",
+    teamSize: 5,
+    startDate: "Jan 2024",
+    endDate: "Aug 2024",
+    featured: false,
+    displayOrder: 2,
+    color: "#8B5CF6",
+    icon: "👥"
+  },
+  {
+    id: 3,
+    type: "company",
+    title: "TrusTerra (Vehicle Marketplace & Inspection Platform)",
+    tagline: "TrusTerra",
+    categoryTag: "Automotive & eCommerce",
+    description: "Designed an interactive peer-to-peer automotive marketplace introducing rigorous condition checklists, Firebase push alerts, and direct buyer-to-seller handshakes.",
+    features: [
+      "Architected real-time catalogs, full-text catalog searching, wishlist state persistence, and modular inventory management platforms.",
+      "Constructed a granular, standardized inspection checklist interface to document exact automobile health parameters, reducing marketplace data asymmetry.",
+      "Configured and integrated Firebase Cloud Messaging (FCM) system pipelines delivering transactional push notifications across Web, Android, and iOS channels.",
+      "Crafted backend API pathways and optimized relational database queries, maintaining sub-120ms execution times under heavy traffic loads."
+    ],
+    tech: ["ASP.NET Core", "Web API", "SQL Server", "Firebase Cloud Messaging (FCM)"],
+    achievements: [],
+    companyName: "Revalsys Technologies",
+    role: "Dot Net Developer",
+    startDate: "Sep 2024",
+    endDate: "May 2026",
+    featured: false,
+    displayOrder: 3,
+    color: "#10B981",
+    icon: "⚡"
+  },
+  {
+    id: 4,
+    type: "personal",
+    title: "PulseTrack",
+    tagline: "Lightweight uptime and service monitoring for small teams",
+    description: "PulseTrack is a self-hosted monitoring tool for tracking API and service uptime, with configurable health checks and real-time alerts. Built to give small teams visibility into their infrastructure without relying on expensive third-party monitoring platforms.",
+    status: "In Development",
+    categoryTag: "Monitoring Tool",
+    tech: ["ASP.NET Core", "SQL Server", "SignalR"],
+    features: [
+      "HTTP and database health checks with custom intervals",
+      "Real-time alerting via email and webhook",
+      "Public status pages for transparency"
+    ],
+    audience: "Engineering teams running small-scale infrastructure",
+    icon: "Activity",
+    featured: false,
+    displayOrder: 4,
+    color: "#0EA5E9",
+    achievements: []
+  },
+  {
+    id: 5,
+    type: "personal",
+    title: "LinkFolio",
+    tagline: "A customizable link-in-bio page for creators and freelancers",
+    description: "LinkFolio lets users build a personal landing page with custom links, themes, and click analytics. Designed for creators and freelancers who want a clean, branded hub for their online presence.",
+    status: "Live",
+    categoryTag: "Web App",
+    tech: ["React", "ASP.NET Core", "SQL Server"],
+    features: [
+      "Drag-and-drop link organization",
+      "Click and visitor analytics",
+      "Multiple theme presets with custom branding"
+    ],
+    audience: "Creators, freelancers, and small businesses",
+    icon: "Link2",
+    featured: false,
+    displayOrder: 5,
+    color: "#8B5CF6",
+    achievements: []
+  },
+  {
+    id: 6,
+    type: "personal",
+    title: "TaskRelay",
+    tagline: "Visual workflow automation for repetitive business tasks",
+    description: "TaskRelay is a workflow automation tool that lets users chain together API calls, conditions, and scheduled jobs through a visual builder. Aimed at small businesses looking to automate routine processes without writing code.",
+    status: "Private Beta",
+    categoryTag: "Automation Platform",
+    tech: ["ASP.NET Core", "Angular", "Hangfire"],
+    features: [
+      "Drag-and-drop workflow builder",
+      "Scheduled and event-triggered runs",
+      "Built-in connectors for common APIs"
+    ],
+    audience: "Small businesses automating manual workflows",
+    icon: "Workflow",
+    featured: false,
+    displayOrder: 6,
+    color: "#10B981",
+    achievements: []
+  },
+  {
+    id: 7,
+    type: "personal",
+    title: "NotesVault",
+    tagline: "Secure notes and code snippet manager for developers",
+    description: "NotesVault is a personal notes and code snippet manager with end-to-end encryption, tagging, and full-text search. Built for developers who want a private space to store reference material and reusable code.",
+    status: "Completed",
+    categoryTag: "Productivity Tool",
+    tech: ["ASP.NET Core", "Angular", "SQL Server"],
+    features: [
+      "End-to-end encrypted storage",
+      "Syntax-highlighted code snippets",
+      "Tag-based organization and full-text search"
+    ],
+    audience: "Developers and individuals managing personal references",
+    icon: "Lock",
+    featured: false,
+    displayOrder: 7,
+    color: "#3B82F6",
+    achievements: []
+  }
+];

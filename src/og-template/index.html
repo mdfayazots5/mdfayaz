@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mohammed Fayaz OG Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 1200px;
+      height: 630px;
+      background-color: #F0F9FF; /* Phase 1 Light theme background */
+      color: #0F172A;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 80px 100px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Elegant sky-accent bar on the left */
+    .accent-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 16px;
+      background-color: #0EA5E9; /* Sky accent */
+    }
+
+    /* Branded subtle geometrical corner accent */
+    .accent-corner {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 100px;
+      height: 100px;
+      border-bottom-left-radius: 100px;
+      background-color: rgba(14, 165, 233, 0.15); /* Sky accent translucent */
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex-grow: 1;
+    }
+
+    .title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 80px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      color: #0F172A;
+      margin-bottom: 24px;
+    }
+
+    .tagline {
+      font-size: 28px;
+      font-weight: 500;
+      color: #64748B;
+      line-height: 1.4;
+      max-width: 1000px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(148, 163, 184, 0.25);
+      padding-top: 36px;
+    }
+
+    .brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #0EA5E9;
+    }
+
+    .meta {
+      font-size: 18px;
+      font-weight: 700;
+      color: #64748B;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="accent-bar"></div>
+  <div class="accent-corner"></div>
+
+  <div class="main-content">
+    <h1 class="title">Mohammed Fayaz</h1>
+    <p class="tagline">.NET Full Stack Developer · ASP.NET Core · Angular · SQL Server</p>
+  </div>
+
+  <div class="footer">
+    <div class="brand">Systems Engineer Portfolio</div>
+    <div class="meta">PORTFOLIO // v1.0.0</div>
+  </div>
+</body>
+</html>

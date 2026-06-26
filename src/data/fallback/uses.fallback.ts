@@ -1,0 +1,222 @@
+import { UsesCategory } from "../../models/portfolio.model";
+
+export const USES_FALLBACK: UsesCategory[] = [
+  {
+    id: "operating_systems",
+    name: "OPERATING SYSTEMS",
+    subtitle: "What I boot into.",
+    items: [
+      {
+        id: "win11",
+        name: "Windows 11",
+        tag: "DAILY DRIVER",
+        description: "Primary OS for daily work, .NET dev, and most everything else."
+      },
+      {
+        id: "fedora",
+        name: "Fedora",
+        description: "Linux side — clean, current, and a great match for server-style work."
+      }
+    ]
+  },
+  {
+    id: "editor_coding",
+    name: "EDITOR & CODING",
+    subtitle: "Where most of the actual work happens.",
+    items: [
+      {
+        id: "vscode",
+        name: "Visual Studio Code",
+        tag: "DAILY DRIVER",
+        description: "Primary editor for web, scripting, and quick edits across languages."
+      },
+      {
+        id: "rider",
+        name: "JetBrains Rider",
+        description: "Goes here for serious .NET work — refactors, debugging, profiling."
+      },
+      {
+        id: "claudecode",
+        name: "Claude Code",
+        tag: "DAILY DRIVER",
+        description: "AI pair-programmer in the terminal. Used heavily for refactors and reviews."
+      },
+      {
+        id: "terminal",
+        name: "Windows Terminal + PowerShell",
+        description: "Default shell. Tabs, profiles, and a sane font stack."
+      },
+      {
+        id: "git",
+        name: "Git + GitHub CLI",
+        description: "Version control and PR workflows straight from the terminal."
+      }
+    ]
+  },
+  {
+    id: "languages_runtimes",
+    name: "LANGUAGES & RUNTIMES",
+    subtitle: "The platforms I build on day to day.",
+    items: [
+      {
+        id: "dotnet_cs",
+        name: ".NET / C#",
+        description: "Backend APIs, worker services, and SignalR realtime stacks."
+      },
+      {
+        id: "nodejs",
+        name: "Node.js",
+        description: "Tooling, scripts, and the Next.js side of every project."
+      },
+      {
+        id: "python",
+        name: "Python",
+        description: "AI/RAG pipelines, FastAPI services, OpenCV, and data work."
+      }
+    ]
+  },
+  {
+    id: "frameworks_libraries",
+    name: "FRAMEWORKS & LIBRARIES",
+    subtitle: "The toolkits I reach for first.",
+    items: [
+      {
+        id: "dotnet_frame",
+        name: ".NET",
+        tag: "DAILY DRIVER",
+        description: "Primary backend platform — APIs, worker services, and realtime stacks."
+      },
+      {
+        id: "fastapi",
+        name: "FastAPI",
+        description: "Python's most ergonomic API framework — typed, async, fast."
+      }
+    ]
+  },
+  {
+    id: "data_infra",
+    name: "DATA & INFRA",
+    subtitle: "Storage, caches, and the plumbing behind the apps.",
+    items: [
+      {
+        id: "postgres",
+        name: "PostgreSQL",
+        description: "Default relational store. Boring, predictable, powerful."
+      },
+      {
+        id: "redis",
+        name: "Redis",
+        description: "Caching, locks, signaling fanout, ephemeral state."
+      },
+      {
+        id: "mongodb",
+        name: "MongoDB",
+        description: "For document-shaped data and quick prototypes."
+      },
+      {
+        id: "docker",
+        name: "Docker",
+        description: "Consistent local environments and deploy artifacts."
+      },
+      {
+        id: "cloudflare",
+        name: "Cloudflare",
+        description: "DNS, CDN, and edge bits that keep the site quick."
+      }
+    ]
+  },
+  {
+    id: "productivity",
+    name: "PRODUCTIVITY",
+    subtitle: "Notes, tasks, and keeping things from falling through the cracks.",
+    items: [
+      {
+        id: "notion",
+        name: "Notion",
+        description: "Long-form notes, project docs, and personal wiki."
+      },
+      {
+        id: "gh_projects",
+        name: "GitHub Projects",
+        description: "Lightweight issue and roadmap tracking next to the code."
+      },
+      {
+        id: "obsidian",
+        name: "Obsidian",
+        description: "Local-first markdown notebook for quick capture."
+      }
+    ]
+  },
+  {
+    id: "browser_web",
+    name: "BROWSER & WEB",
+    subtitle: "Where the rest of work happens.",
+    items: [
+      {
+        id: "brave",
+        name: "Brave",
+        description: "Primary browser. Fast, private, Chromium-compatible."
+      },
+      {
+        id: "devtools",
+        name: "Chrome DevTools",
+        description: "Profiling, network inspection, and the occasional console hack."
+      }
+    ]
+  },
+  {
+    id: "audio_production",
+    name: "AUDIO PRODUCTION",
+    subtitle: "What I use when making and mixing music.",
+    items: [
+      {
+        id: "flstudio",
+        name: "FL Studio",
+        tag: "DAILY DRIVER",
+        description: "Primary DAW for production, sequencing, and mixing."
+      },
+      {
+        id: "izotope",
+        name: "iZotope",
+        description: "Goes here for mixing, mastering, and audio repair — Ozone, Neutron, RX."
+      }
+    ]
+  },
+  {
+    id: "hardware",
+    name: "HARDWARE",
+    subtitle: "The physical kit I sit in front of every day.",
+    items: [
+      {
+        id: "thinkpad",
+        name: "ThinkPad E14",
+        description: "Intel Core Ultra 5, 32 GB RAM. Daily driver for everything."
+      },
+      {
+        id: "monitor",
+        name: "BenQ GW2790Q",
+        description: "27-inch 2K (1440p) IPS display. Easy on the eyes for long sessions."
+      },
+      {
+        id: "keyboard",
+        name: "Keychron K3 Pro",
+        description: "Low-profile mechanical keyboard. Compact, quiet, and built for long typing sessions."
+      },
+      {
+        id: "mouse",
+        name: "Razer DeathAdder V2 X HyperSpeed",
+        description: "Wireless gaming mouse. Comfortable shape, reliable for both work and play."
+      },
+      {
+        id: "headphones",
+        name: "Beyerdynamic DT 990 Pro",
+        description: "Open-back studio headphones. Wide soundstage, comfortable for long listens."
+      },
+      {
+        id: "interface",
+        name: "Focusrite Scarlett Solo",
+        description: "USB audio interface. Clean preamp for monitoring and recording."
+      }
+    ]
+  }
+];

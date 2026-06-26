@@ -1,0 +1,13 @@
+import { SiteSettings } from "../../models/portfolio.model";
+
+export const SETTINGS_FALLBACK: SiteSettings = {
+  contactEmail: "mdfayazots5@gmail.com",
+  socialLinks: {
+    github: "https://github.com/mdfayaz",
+    linkedin: "https://linkedin.com/in/mdfayaz",
+    dob: "26 August 2002",
+    mobile: "+91 70954 41960"
+  },
+  resumeUrl: "#",
+  tagline: "I build enterprise systems that scale from database to UI — production-ready."
+};
