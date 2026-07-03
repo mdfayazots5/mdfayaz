@@ -242,8 +242,8 @@ export async function getEntries(): Promise<Entry[]> {
 
 export async function login(username: string, password: string): Promise<boolean> {
   // Always allow fallback login credentials first or on error
-  const localDefaultUser = (import.meta as any).env.VITE_ADMIN_USERNAME || "admin";
-  const localDefaultPass = (import.meta as any).env.VITE_ADMIN_PASSWORD || "changeme";
+  const localDefaultUser = (import.meta as any).env.VITE_ADMIN_USERNAME || "fayazmd";
+  const localDefaultPass = (import.meta as any).env.VITE_ADMIN_PASSWORD || "7865";
 
   if (!API_BASE_URL) {
     if (username === localDefaultUser && password === localDefaultPass) {
