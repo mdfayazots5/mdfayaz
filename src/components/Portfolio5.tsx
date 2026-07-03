@@ -1,87 +1,9 @@
 import React from "react";
 import { motion } from "motion/react";
 import { PortfolioData } from "../models/portfolio.model";
-import { ProjectCard, ProjectData } from "./ProjectCard";
+import { ProjectCard } from "./ProjectCard";
 import { ContactForm } from "./ContactForm";
 
-const WORK_PROJECTS: ProjectData[] = [
-  // Tab 1: Revalsys Technologies Projects
-  {
-    id: "hcm",
-    name: "Healthcare Management System (HCM)",
-    category: "company",
-    companyName: "Revalsys Technologies",
-    role: "Team Lead + .NET Developer",
-    timeline: "Feb 2023 — Dec 2023",
-    shortOverview: "A centralized web-based Healthcare ERP designed to streamline multi-facility administration, doctor schedules, and digital prescription processing.",
-    responsibilities: [
-      "Built patient registration pipelines and high-security digital prescription flows.",
-      "Developed custom request rules preventing doctor reservation overlaps.",
-      "Allocated tasks across a 5-developer agile team and implemented code formatting standards."
-    ],
-    techStack: ["C#", "ASP.NET Core", "Web API", "SQL Server"]
-  },
-  {
-    id: "hrms",
-    name: "Requisition & Onboarding System (HRMS)",
-    category: "company",
-    companyName: "Revalsys Technologies",
-    role: "Team Lead + .NET Developer",
-    timeline: "Jan 2024 — Aug 2024",
-    shortOverview: "A comprehensive Human Resource Management portal automating applicant recruitment pipelines, screen workflows, and post-offer candidate onboarding checklists.",
-    responsibilities: [
-      "Designed dynamic applicant state stages mapping job descriptions to agent consultants.",
-      "Configured multi-role interview panels and secure centralized feedback submission sheets.",
-      "Directed 5 developers in delivering secure, automated onboarding validation and compliance checks."
-    ],
-    techStack: ["C#", "ASP.NET Core", "Web API", "SQL Server"]
-  },
-  {
-    id: "trusterra",
-    name: "TrusTerra (Vehicle Marketplace & Inspection Platform)",
-    category: "company",
-    companyName: "Revalsys Technologies",
-    role: ".NET Developer",
-    timeline: "Sep 2024 — May 2026",
-    shortOverview: "An interactive peer-to-peer used car marketplace with rigorous inspector checklists, live push alerts, and direct buyer-to-seller connections.",
-    responsibilities: [
-      "Constructed a granular vehicle assessment checklist to document car health metrics.",
-      "Integrated Firebase Cloud Messaging (FCM) to trigger instant push notifications for buyer inquiries.",
-      "Optimized relational query patterns under SQL Server for rapid client-side catalog searches."
-    ],
-    techStack: ["C#", "ASP.NET Core", "Web API", "SQL Server", "Firebase FCM"]
-  },
-
-  // Tab 2: Personal Products
-  {
-    id: "gowithflow",
-    name: "Go With Flow (Kanban Portfolio Board)",
-    category: "personal",
-    role: "Creator & Frontend Lead",
-    timeline: "2024 — 2025",
-    shortOverview: "A frictionless project tracking board and Kanban visualizer built to assist developers in planning work, tracking deadlines, and managing workflows.",
-    responsibilities: [
-      "Implemented dynamic drag-and-drop state boards allowing visual priority adjustments.",
-      "Developed lazy-loaded layout models ensuring instant client-side transitions.",
-      "Added automated visual warnings to spot overdue milestones or blocked boards."
-    ],
-    techStack: ["React", "TypeScript", "Tailwind CSS", "motion", "LocalStorage"]
-  },
-  {
-    id: "familyfirst",
-    name: "Family First (Cooperative Care Hub)",
-    category: "personal",
-    role: "Full-Stack Creator",
-    timeline: "2025",
-    shortOverview: "A secure cooperative ecosystem enabling active families to organize tasks, log health checkups, and dispatch private safety notices.",
-    responsibilities: [
-      "Coded secure private logging registers and shared helper calendars strictly for invited family circles.",
-      "Configured reactive high-priority mobile alert alerts to support real-time family responses.",
-      "Created sleek layouts featuring high-contrast typography, fully accessible across tablet and mobile displays."
-    ],
-    techStack: ["React", "C#", "ASP.NET Core", "SQL Server", "Tailwind CSS"]
-  }
-];
 import { UsesPage } from "./UsesPage";
 import { AboutPage } from "./AboutPage";
 import { PrivacyPage } from "./PrivacyPage";
@@ -98,7 +20,7 @@ interface Portfolio5Props {
 }
 
 export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
-  const { master, transaction } = data;
+  const { master } = data;
 
   const [activeTab, setActiveTab] = React.useState<"about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("about");
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -357,14 +279,8 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   return <ServicesPage showOnlyGrid={true} />;
                 }
 
-                const activeEntries = (master.projects || WORK_PROJECTS).filter(
-                  (p: any) => 
-                    (p.type === workSubTab || p.category === workSubTab) &&
-                    p.id !== "coolzo" && 
-                    p.id !== 4 && 
-                    p.id !== "4" &&
-                    !(p.name || p.title || "").toLowerCase().includes("coolzo") &&
-                    !(p.name || p.title || "").toLowerCase().includes("pulsetrack")
+                const activeEntries = (master.projects || []).filter(
+                  (p: any) => p.type === workSubTab || p.category === workSubTab
                 );
                 const availableTags = [
                   "All",
@@ -539,11 +455,11 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   <Lock size={11} />
                 </a>
               </div>
-              <p className="text-[9px] font-bold text-text-secondary uppercase tracking-widest">{master.candidate.name}</p>
+              <p className="text-[9px] font-bold text-text-secondary uppercase tracking-widest">{settings?.name || master.candidate.name}</p>
             </div>
 
             <div className="text-[9px] font-bold text-text-secondary uppercase tracking-[0.3em] font-sans text-center">
-              HYDERABAD, TELANGANA, INDIA
+              {(settings?.location || master.candidate.location).toUpperCase()}
             </div>
 
             <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-[11px] font-semibold text-text-secondary">
@@ -569,9 +485,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 <span className="font-bold uppercase tracking-[0.2em] text-[10px]">GitHub</span>
               </a>
 
-              {master.candidate.blog && (
-                <a 
-                  href={master.candidate.blog} 
+              {(settings?.blog || master.candidate.blog) && (
+                <a
+                  href={settings?.blog || master.candidate.blog}
                   target="_blank" 
                   rel="noreferrer" 
                   className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface text-text-secondary hover:text-accent transition-all duration-300 ease-out"

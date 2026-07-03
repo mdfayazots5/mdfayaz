@@ -1,25 +1,29 @@
 import { test, expect } from '@playwright/test';
 
-test('portfolio type 1 (System Dashboard) renders correctly', async ({ page }) => {
-  // Wait for server to be ready
-  await new Promise(r => setTimeout(r, 5000));
-  
-  // Go to the app
+// The public site is fully admin-driven: identity comes from Site Settings and
+// the experience list comes from Entries (both seeded from the local fallback
+// data on first run). These tests assert that seeded content renders.
+
+test('home renders the admin-driven identity', async ({ page }) => {
   await page.goto('/');
 
-  // Wait for the main content to appear
-  await page.waitForSelector('text=System Overview', { timeout: 15000 });
+  // Name comes from Site Settings (falls back to seed "Mohammed Fayaz").
+  await expect(page.getByText('Mohammed Fayaz').first()).toBeVisible({ timeout: 15000 });
 
-  // Check if the name "Mohammed Fayaz" is visible
-  await expect(page.getByText('Mohammed Fayaz').first()).toBeVisible();
+  // The About hero shows the active perspective role.
+  await expect(
+    page.getByText('System Architect & .NET Engineer').first()
+  ).toBeVisible();
+});
 
-  // Check if "System Overview" is visible (specific to Type 1)
-  await expect(page.getByRole('heading', { name: 'System Overview' })).toBeVisible();
+test('work tab renders admin-driven entries', async ({ page }) => {
+  await page.goto('/#work');
 
-  // Check if the sidebar navigation exists
-  const sidebar = page.locator('aside');
-  await expect(sidebar).toBeVisible();
+  // A seeded company Entry should render via ProjectCard.
+  await expect(
+    page.getByRole('heading', { name: 'Healthcare Management System (HCM)' })
+  ).toBeVisible({ timeout: 15000 });
 
-  // Check for specific KPI cards (e.g., "Modules Delivered")
-  await expect(page.getByText('Modules Delivered')).toBeVisible();
+  // Tech-stack pills prove the entry's structured fields render.
+  await expect(page.getByText('ASP.NET Core').first()).toBeVisible();
 });

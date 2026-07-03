@@ -3,11 +3,11 @@ import { getSiteSettings, updateSiteSettings } from "../../services/api";
 import { SiteSettings } from "../../models/portfolio.model";
 import { LoadingScreen } from "../LoadingScreen";
 import { 
-  Save, 
-  Plus, 
-  Trash2, 
-  Users, 
-  Settings, 
+  Save,
+  Plus,
+  Trash2,
+  Users,
+  Settings,
   CheckCircle,
   HelpCircle,
   Mail,
@@ -15,7 +15,13 @@ import {
   Link,
   MessageSquare,
   Download,
-  Upload
+  Upload,
+  User,
+  MapPin,
+  Briefcase,
+  Calendar,
+  Plane,
+  BookOpen
 } from "lucide-react";
 
 export const AdminSettingsPage: React.FC = () => {
@@ -23,6 +29,13 @@ export const AdminSettingsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   
   // Flat state fields
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+  const [location, setLocation] = useState("");
+  const [availability, setAvailability] = useState("");
+  const [openToRelocation, setOpenToRelocation] = useState(false);
+  const [yearsExperience, setYearsExperience] = useState("");
+  const [blog, setBlog] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [resumeUrl, setResumeUrl] = useState("");
   const [tagline, setTagline] = useState("");
@@ -98,6 +111,13 @@ export const AdminSettingsPage: React.FC = () => {
         const data = await getSiteSettings();
         if (data) {
           setSettings(data);
+          setName(data.name || "");
+          setRole(data.role || "");
+          setLocation(data.location || "");
+          setAvailability(data.availability || "");
+          setOpenToRelocation(Boolean(data.openToRelocation));
+          setYearsExperience(data.yearsExperience || "");
+          setBlog(data.blog || "");
           setContactEmail(data.contactEmail || "");
           setResumeUrl(data.resumeUrl || "");
           setTagline(data.tagline || "");
@@ -160,6 +180,13 @@ export const AdminSettingsPage: React.FC = () => {
       });
 
       const updatedPayload: SiteSettings = {
+        name: name.trim(),
+        role: role.trim(),
+        location: location.trim(),
+        availability: availability.trim(),
+        openToRelocation,
+        yearsExperience: yearsExperience.trim(),
+        blog: blog.trim(),
         contactEmail: contactEmail.trim(),
         resumeUrl: resumeUrl.trim(),
         tagline: tagline.trim(),
@@ -223,12 +250,126 @@ export const AdminSettingsPage: React.FC = () => {
       <div>
         <h2 className="text-xl font-luxury font-bold tracking-tight uppercase">Site Settings</h2>
         <p className="text-xs text-text-secondary mt-1">
-          Configure site brand tagline, career resume resources, primary contact details, and social credentials
+          Configure your identity (name, role, location, availability), headline stats, brand tagline, resume, contact details, and social credentials
         </p>
       </div>
 
       <form onSubmit={handleSaveSettings} className="space-y-8">
-        
+
+        {/* Identity & Profile Section */}
+        <section className="bg-surface p-6 rounded-2xl border border-border space-y-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-border/60">
+            <User className="text-accent" size={16} />
+            <h3 className="text-sm font-bold uppercase tracking-wider">Identity & Profile</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Full Name */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
+                <User size={11} className="text-text-secondary" />
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                placeholder="e.g. Mohammed Fayaz"
+              />
+            </div>
+
+            {/* Headline Role */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
+                <Briefcase size={11} className="text-text-secondary" />
+                Headline Role
+              </label>
+              <input
+                type="text"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                placeholder="e.g. .NET Full Stack Developer"
+              />
+            </div>
+
+            {/* Location */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
+                <MapPin size={11} className="text-text-secondary" />
+                Location
+              </label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                placeholder="e.g. Hyderabad, Telangana, India"
+              />
+            </div>
+
+            {/* Availability / Notice */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
+                <Calendar size={11} className="text-text-secondary" />
+                Availability / Notice Period
+              </label>
+              <input
+                type="text"
+                value={availability}
+                onChange={(e) => setAvailability(e.target.value)}
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                placeholder="e.g. Immediate"
+              />
+            </div>
+
+            {/* Years of Experience */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
+                <Briefcase size={11} className="text-text-secondary" />
+                Years of Experience (headline stat)
+              </label>
+              <input
+                type="text"
+                value={yearsExperience}
+                onChange={(e) => setYearsExperience(e.target.value)}
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                placeholder="e.g. 3.3"
+              />
+            </div>
+
+            {/* Blog URL */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
+                <BookOpen size={11} className="text-text-secondary" />
+                Blog URL (optional)
+              </label>
+              <input
+                type="text"
+                value={blog}
+                onChange={(e) => setBlog(e.target.value)}
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                placeholder="e.g. https://dev.to/mdfayaz"
+              />
+            </div>
+          </div>
+
+          {/* Open to Relocation toggle */}
+          <label className="flex items-center gap-3 cursor-pointer select-none w-fit">
+            <input
+              type="checkbox"
+              checked={openToRelocation}
+              onChange={(e) => setOpenToRelocation(e.target.checked)}
+              className="w-4 h-4 accent-accent cursor-pointer"
+            />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
+              <Plane size={11} className="text-text-secondary" />
+              Open to Relocation
+            </span>
+          </label>
+        </section>
+
         {/* Core Parameters Section */}
         <section className="bg-surface p-6 rounded-2xl border border-border space-y-6">
           <div className="flex items-center gap-2 pb-3 border-b border-border/60">

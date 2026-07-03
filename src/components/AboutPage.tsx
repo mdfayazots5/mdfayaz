@@ -92,6 +92,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
     return <LoadingScreen />;
   }
 
+  const displayName = settings.name || master.candidate.name;
+  const nameParts = displayName.split(" ");
+  const yearsExperience = settings.yearsExperience || master.stats.years;
+
 
   return (
     <>
@@ -102,8 +106,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
           className="text-center z-10 flex flex-col items-center"
         >
           <h1 className="text-[14vw] lg:text-[11vw] font-luxury font-light tracking-tighter leading-[0.85] mb-8 select-none text-text-primary">
-            {master.candidate.name.split(' ')[0]}<br />
-            {master.candidate.name.split(' ')[1]}
+            {nameParts[0]}<br />
+            {nameParts.slice(1).join(" ")}
           </h1>
           <div className="flex flex-col items-center gap-6">
             <motion.span 
@@ -154,7 +158,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
               <span className="text-7xl lg:text-9xl font-luxury font-light text-accent select-none">MF</span>
             </div>
             <div className="absolute -bottom-4 lg:right-6 bg-background p-6 rounded-2xl shadow-xl shadow-text-secondary/10 border border-border select-none">
-              <p className="text-3xl font-luxury font-bold text-text-primary mb-1">3.3</p>
+              <p className="text-3xl font-luxury font-bold text-text-primary mb-1">{yearsExperience}</p>
               <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Years Experience</p>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { PortfolioData } from "../models/portfolio.model";
-import { MASTER_DATA, PORTFOLIO_TRANSACTION_DATA } from "../mocks/portfolio.mock";
+import { MASTER_DATA } from "../mocks/portfolio.mock";
 import { getEntries } from "../services/api";
 
 export const usePortfolioData = (portfolioType: number) => {
@@ -18,7 +18,6 @@ export const usePortfolioData = (portfolioType: number) => {
               ...MASTER_DATA,
               projects: entries,
             },
-            transaction: PORTFOLIO_TRANSACTION_DATA[`type${portfolioType}`] || PORTFOLIO_TRANSACTION_DATA[`type5`],
           });
           setLoading(false);
         }

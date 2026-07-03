@@ -203,7 +203,9 @@ function getLocalSettings(): SiteSettings {
     return SETTINGS_FALLBACK;
   }
   try {
-    return JSON.parse(cached);
+    // Merge over the fallback so settings stored before newer fields were
+    // added still resolve those fields to their defaults.
+    return { ...SETTINGS_FALLBACK, ...JSON.parse(cached) };
   } catch (e) {
     return SETTINGS_FALLBACK;
   }

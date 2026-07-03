@@ -1,4 +1,4 @@
-import { MasterData, TransactionData } from "../models/portfolio.model";
+import { MasterData } from "../models/portfolio.model";
 
 // 1. DATABASE CONFIGURATION
 export const DB_CONFIG = {
@@ -146,48 +146,4 @@ export const MASTER_DATA: MasterData = {
       metric: "FCM Push Integrated",
     },
   ],
-};
-
-// 4. PORTFOLIO TRANSACTION DATA
-export const PORTFOLIO_TRANSACTION_DATA: Record<string, TransactionData> = {
-  type5: {
-    manifesto: [
-      "I believe software should solve real problems, not create new ones.",
-      "Performance is a feature, not an afterthought.",
-      "Clean code is a professional obligation.",
-      "The best architecture is the one your team can maintain at 2am.",
-      "AI tools are force multipliers for thoughtful developers.",
-    ],
-    caseStudies: [
-      {
-        number: "01",
-        project: "HCM",
-        headline: "Streamlining Multi-Facility Healthcare Operations",
-        problem: "Hospital networks relied on disjointed manual workflows for appointments, doctor calendars, and prescription handling, creating critical data bottlenecks.",
-        approach: "Led a team of five to design an ASP.NET Core centralized ERP with automated doctor calendars, mapping algorithms, and secure digital prescription channels.",
-        result: "Paper worksheets was fully automated; hospital operations, patient registrations, and doctor schedules consolidated into a zero-collision unified system.",
-        keyMetric: "Team Lead of 5 Developers",
-      },
-      {
-        number: "02",
-        project: "HRMS",
-        headline: "Automating Enterprise Hiring and Compliant Onboarding",
-        problem: "Recruiting cycles were slowed by disjointed emails, disconnected external agencies, and prolonged manual document-verification bottlenecks.",
-        approach: "Engineered a systematic ATS/HRMS in ASP.NET Core, incorporating conditional workflows, feedback logging, and automated compliance checklist triggers.",
-        result: "Transitioned the HR pipeline to an entirely self-guided workflow, reducing candidate-to-offer times and document clearing delays.",
-        keyMetric: "Team Lead of 5 Developers",
-      },
-      {
-        number: "03",
-        project: "TrusTerra",
-        headline: "Engineering Transparency in Peer-to-Peer Car Sales",
-        problem: "Used-car marketplaces suffer from severe condition mistrust and delayed communication regarding wishlist status and inspections.",
-        approach: "Created a rigid automotive checklist evaluator and live Firebase alerts coupled with OTP security, built on top of ASP.NET Core and SQL Server.",
-        result: "Instantly pushed SMS and push alerts about inspect actions and verified checklists directly to user devices, reducing transaction uncertainty.",
-        keyMetric: "Firebase FCM Integration",
-      },
-    ],
-    selectedWork: "Selected Work — 2023 to 2026",
-    closingStatement: "Looking for a .NET developer who takes full ownership? Let's talk.",
-  },
 };

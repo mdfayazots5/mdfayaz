@@ -75,26 +75,8 @@ export interface MasterData {
   achievements: Achievement[];
 }
 
-export interface CaseStudyModel {
-  number: string;
-  project: string;
-  headline: string;
-  problem: string;
-  approach: string;
-  result: string;
-  keyMetric: string;
-}
-
-export interface TransactionData {
-  manifesto: string[];
-  caseStudies: CaseStudyModel[];
-  selectedWork: string;
-  closingStatement: string;
-}
-
 export interface PortfolioData {
   master: MasterData;
-  transaction: TransactionData;
 }
 
 export interface AboutProfile {
@@ -139,6 +121,13 @@ export interface PrivacySection {
 }
 
 export interface SiteSettings {
+  name: string;              // full display name, e.g. "Mohammed Fayaz"
+  role: string;              // headline role, e.g. ".NET Full Stack Developer"
+  location: string;          // e.g. "Hyderabad, Telangana, India"
+  availability: string;      // notice period / availability, e.g. "Immediate"
+  openToRelocation: boolean;
+  yearsExperience: string;   // headline stat, e.g. "3.3"
+  blog: string;              // optional blog URL ("" if none)
   contactEmail: string;
   socialLinks: {
     github: string;

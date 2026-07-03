@@ -1,6 +1,13 @@
 import { SiteSettings } from "../../models/portfolio.model";
 
 export const SETTINGS_FALLBACK: SiteSettings = {
+  name: "Mohammed Fayaz",
+  role: ".NET Full Stack Developer",
+  location: "Hyderabad, Telangana, India",
+  availability: "Immediate",
+  openToRelocation: true,
+  yearsExperience: "3.3",
+  blog: "https://dev.to/mdfayaz",
   contactEmail: "mdfayazots5@gmail.com",
   socialLinks: {
     github: "https://github.com/mdfayaz",
