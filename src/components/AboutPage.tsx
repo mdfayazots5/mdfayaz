@@ -100,7 +100,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
   return (
     <>
       {/* Hero Section */}
-      <header className="h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden bg-background animate-fadeIn">
+      <header className="min-h-[78vh] lg:min-h-screen flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden bg-background animate-fadeIn">
         <motion.div 
           style={{ opacity, scale }}
           className="text-center z-10 flex flex-col items-center"
@@ -115,7 +115,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="text-xs lg:text-sm font-bold text-accent uppercase tracking-[0.6em] text-center"
+              className="text-xs lg:text-sm font-bold text-accent uppercase tracking-[0.3em] lg:tracking-[0.6em] text-center"
             >
               {activeContent.heroRole}
             </motion.span>
@@ -139,7 +139,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
               ))}
             </div>
  
-            <div className="w-px h-16 bg-gradient-to-b from-accent to-transparent mt-4" />
+            <div className="w-px h-10 lg:h-16 bg-gradient-to-b from-accent to-transparent mt-4" />
           </div>
         </motion.div>
         
@@ -263,12 +263,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
             <div className="space-y-12">
               {profile.experienceTimeline && profile.experienceTimeline.map((exp: any, index: number) => (
                 <div key={index} className="space-y-6">
-                  <div className="flex justify-between items-start border-b border-border pb-8">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 border-b border-border pb-8">
                     <div>
                       <h4 className="text-xl font-luxury font-bold text-text-primary mb-1">{exp.company}</h4>
                       <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">{exp.role}</p>
                     </div>
-                    <p className="text-xs font-bold text-accent uppercase tracking-widest">{exp.period.toUpperCase()}</p>
+                    <p className="text-xs font-bold text-accent uppercase tracking-widest shrink-0">{exp.period.toUpperCase()}</p>
                   </div>
                   <div className="pt-2">
                     <h4 className="text-xs font-bold text-text-primary uppercase tracking-widest mb-4">Recognition</h4>

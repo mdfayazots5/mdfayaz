@@ -49,9 +49,6 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onViewDetails
           <h3 className="text-lg md:text-xl font-bold text-text-primary tracking-tight font-luxury">
             {service.name}
           </h3>
-          <p className="text-xs font-mono font-bold text-text-secondary uppercase tracking-wider">
-            Display Order: {service.displayOrder}
-          </p>
         </div>
 
         {/* Tagline */}

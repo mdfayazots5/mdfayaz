@@ -9,14 +9,15 @@ export const ScrollToTop: React.FC = () => {
 
   React.useEffect(() => {
     const toggleVisibility = () => {
-      if (window.pageYOffset > 500) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      const scrolled = window.pageYOffset;
+      const nearBottom =
+        window.innerHeight + scrolled >= document.documentElement.scrollHeight - 140;
+      // Show after a bit of scroll, but hide near the very bottom so it never overlaps the footer.
+      setIsVisible(scrolled > 500 && !nearBottom);
     };
 
-    window.addEventListener("scroll", toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility, { passive: true });
+    toggleVisibility();
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
