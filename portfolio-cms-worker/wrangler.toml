@@ -6,11 +6,15 @@ account_id = "84ecd2ee1ee7671dc35a4ef3b56e16b0"
 [vars]
 ENVIRONMENT = "development"
 ADMIN_USERNAME = "admin"
-ALLOWED_ORIGIN_PROD = "http://localhost:3000"            # TEMP: using local until real prod domain is given
+# TODO(H2): set this to the real deployed site origin before production (e.g. https://mohammedfayaz.dev).
+# CORS rejects any Origin not listed here, so leaving it on localhost blocks the live site.
+ALLOWED_ORIGIN_PROD = "http://localhost:3000"
 ALLOWED_ORIGIN_DEV  = "http://localhost:3000"            # Vite dev server (NOT :4200)
 R2_PUBLIC_URL = "https://pub-6b37856b9c4e4ea5b0581e9b4e646c2b.r2.dev"
 
 [[r2_buckets]]
 binding = "CMS_BUCKET"
 bucket_name = "mdfayaz"
-preview_bucket_name = "mdfayaz"
+# C2: preview bucket MUST differ from prod so `wrangler dev` never mutates live data.
+# Create it once: `wrangler r2 bucket create mdfayaz-dev`
+preview_bucket_name = "mdfayaz-dev"

@@ -52,7 +52,7 @@ All paths are relative to `VITE_API_BASE_URL`. No `/api` prefix, no `/admin` seg
 
 | Method | Path        | Returns             |
 | ------ | ----------- | -------------------- |
-| GET    | `/health`   | `{ status: 'ok' }`  |
+| GET    | `/health`   | `{ status: 'ok', r2: true }` (200) or `{ status: 'degraded', r2: false }` (503) — pings R2 |
 | POST   | `/auth/login` | `{ token, expiresAt }` or 401 |
 | GET    | `/entries`  | `Entry[]`           |
 | GET    | `/services` | `Service[]`         |
@@ -103,8 +103,24 @@ npm run dev                    # wrangler dev
 npm run typecheck              # tsc --noEmit
 ```
 
-`wrangler dev` runs against the `preview_bucket_name` R2 bucket (`portfolio-cms-dev`) defined
-in `wrangler.toml`.
+`wrangler dev` runs against the `preview_bucket_name` R2 bucket (`mdfayaz-dev`) defined in
+`wrangler.toml` — deliberately separate from the production bucket (`mdfayaz`) so local testing
+never mutates live data. Create it once with `wrangler r2 bucket create mdfayaz-dev`.
+
+### Secrets & production hardening
+
+`.dev.vars` holds **local** placeholders only and is git-ignored (never commit it). For the
+deployed Worker, set real secrets via Wrangler — they must never live in `wrangler.toml [vars]`:
+
+```bash
+wrangler secret put JWT_SECRET            # 32+ random bytes, NOT a guessable word
+wrangler secret put ADMIN_PASSWORD_HASH   # salt:hash from generateHash() in src/auth.ts
+wrangler secret put ADMIN_USERNAME
+```
+
+Rotating `JWT_SECRET` immediately invalidates every issued token (the app's revocation lever).
+Before going live, also set `ALLOWED_ORIGIN_PROD` to the real site origin — CORS rejects any
+Origin not listed, so leaving it on `localhost` blocks the deployed frontend.
 
 ## Seeding data
 
