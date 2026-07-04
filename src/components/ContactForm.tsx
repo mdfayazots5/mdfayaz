@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Send, CheckCircle, AlertCircle, Loader2, Sparkles, Building2, User2, Mail, MessageSquare } from "lucide-react";
+import { Send, CheckCircle, AlertCircle, Loader2, Building2, User2, Mail, MessageSquare } from "lucide-react";
 
 interface ContactFormProps {
   candidateEmail: string;
@@ -179,19 +179,6 @@ ${formData.message}
               <p className="text-text-secondary max-w-md text-sm leading-relaxed">
                 Thank you for reaching out! Your strategic inquiry is valuable. Fayaz will review the systems requirements/role details and contact you via your email or phone shortly.
               </p>
-            </div>
-
-            <div className="bg-background p-5 rounded-2xl border border-dashed border-border text-xs text-text-secondary max-w-md space-y-2">
-              <div className="flex gap-2 items-center text-accent font-semibold uppercase tracking-wider mb-1">
-                <Sparkles size={14} />
-                <span>Production Form Config Guide</span>
-              </div>
-              <p>
-                To route submissions directly to your custom email address, register for a free key on <strong>Web3Forms</strong> and configure it in your <code>.env</code> as:
-              </p>
-              <code className="block bg-surface border border-border text-text-secondary p-2 rounded text-[10px] font-mono break-all text-left">
-                VITE_WEB3FORMS_ACCESS_KEY=your-access-key-here
-              </code>
             </div>
 
             <button
