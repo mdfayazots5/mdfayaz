@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 
-  NOTE: Hash-based client side routes (#about, #work, #uses, #faq, #privacy, #contact) 
+  NOTE: Hash-based client side routes (#home, #about, #work, #uses, #faq, #privacy, #contact)
   are not separately indexable by standard search engine crawler bots without full
   server-side rendering (SSR) or pre-rendering engines. This is a deliberate architectural 
   and runtime design layout limitation for single-page applications. Deep linking URLs are 

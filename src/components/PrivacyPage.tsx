@@ -41,7 +41,7 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
     if (onBack) {
       onBack();
     } else {
-      window.location.hash = "#about";
+      window.location.hash = "#home";
     }
   };
 

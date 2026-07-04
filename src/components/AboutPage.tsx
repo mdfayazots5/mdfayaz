@@ -1,30 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
-import { PortfolioData, AboutProfile, SiteSettings } from "../models/portfolio.model";
-import { Briefcase, Package, Wrench } from "lucide-react";
-import { getAboutProfile, getSiteSettings } from "../services/api";
-import { LoadingScreen } from "./LoadingScreen";
-import { SectionError } from "./SectionState";
-
-// One clear, recruiter-first identity — no persona switching. Grounded in the real
-// track record: 3+ years, ASP.NET Core + SQL Server, and end-to-end team-led delivery.
-const IDENTITY = {
-  badge: "WHO I AM",
-  headline: "Building enterprise systems that scale from database to UI.",
-  philosophyTitle: "How I Work",
-  philosophyText: "Clean, modular, layered architecture with a focus on long-term maintainability — from SQL Server schema design and stored-procedure optimization to secure JWT-protected APIs and responsive front-ends.",
-  focusTitle: "What I Bring",
-  focusText: "3+ years shipping production healthcare (HMS) and HR (HRMS) platforms with ASP.NET Core, C#, and SQL Server — including leading a 4-member team through full end-to-end delivery.",
-};
+import * as Icons from "lucide-react";
+import { ArrowRight, Download, Briefcase, TrendingUp, Clock, GraduationCap, MapPin } from "lucide-react";
+import { AboutProfile, SiteSettings, Service } from "../models/portfolio.model";
+import { getAboutProfile, getSiteSettings, getServices } from "../services/api";
+import { SectionLoader, SectionError } from "./SectionState";
 
 interface AboutPageProps {
-  master: PortfolioData["master"];
   handleNavClick: (tab: any, targetId?: string) => void;
 }
 
-export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) => {
+const resolveIcon = (name?: string) => {
+  const Cmp = name ? (Icons as any)[name] : null;
+  return Cmp || Icons.Layers;
+};
+
+export const AboutPage: React.FC<AboutPageProps> = ({ handleNavClick }) => {
   const [profile, setProfile] = useState<AboutProfile | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -33,239 +26,240 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
     let isMounted = true;
     setLoading(true);
     setError(false);
-    Promise.all([getAboutProfile(), getSiteSettings()])
-      .then(([profileData, settingsData]) => {
+    Promise.all([getAboutProfile(), getSiteSettings(), getServices()])
+      .then(([profileData, settingsData, servicesData]) => {
         if (isMounted) {
           setProfile(profileData);
           setSettings(settingsData);
-          setLoading(false);
+          setServices(servicesData || []);
         }
       })
       .catch(() => {
-        if (isMounted) {
-          setError(true);
-          setLoading(false);
-        }
+        if (isMounted) setError(true);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
       });
     return () => {
       isMounted = false;
     };
   }, [reloadKey]);
 
-  const { scrollYProgress } = useScroll();
-  const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.1], [1, 0.95]);
-
-  if (error) {
-    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="100vh" />;
+  if (loading) {
+    return <SectionLoader label="Loading profile..." minHeight="70vh" />;
   }
 
-  if (loading || !profile || !settings) {
-    return <LoadingScreen />;
+  if (error || !profile || !settings) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="70vh" />;
   }
 
-  const displayName = settings.name || master.candidate.name;
-  const nameParts = displayName.split(" ");
-  const yearsExperience = settings.yearsExperience || master.stats.years;
-  // Show a clean "3+" instead of a precise "3.3" — reads better as a hiring signal.
+  const fullName = settings.name || "Me";
+  const firstName = fullName.split(" ")[0];
+  const tagline = settings.tagline || profile.tagline || "";
   const yearsDisplay = (() => {
-    const n = parseFloat(yearsExperience);
-    return Number.isFinite(n) ? `${Math.floor(n)}+` : yearsExperience;
+    const n = parseFloat(settings.yearsExperience || "");
+    return Number.isFinite(n) ? `${Math.floor(n)}+` : settings.yearsExperience || "";
   })();
 
-  // Admin-managed media (R2 URLs). Mobile falls back to desktop; empty = keep the default look.
-  const heroDesktop = settings.heroBackground?.desktop || "";
-  const heroMobile = settings.heroBackground?.mobile || heroDesktop;
-  const hasHero = !!heroDesktop;
-  const profileDesktop = settings.profileImage?.desktop || "";
-  const profileMobile = settings.profileImage?.mobile || profileDesktop;
-  const hasProfile = !!profileDesktop;
-  const workActions = [
-    {
-      label: "Experience",
-      description: "Company work, delivery ownership, timelines, and impact.",
-      icon: Briefcase,
-      tab: "company",
-    },
-    {
-      label: "Projects",
-      description: "Personal products, side builds, links, and technology choices.",
-      icon: Package,
-      tab: "products",
-    },
-  ];
+  // "At a glance" — only real, known facts.
+  const glance = [
+    settings.role && { icon: Briefcase, label: "Focus", value: settings.role },
+    yearsDisplay && { icon: TrendingUp, label: "Experience", value: `${yearsDisplay} Years` },
+    settings.availability && { icon: Clock, label: "Availability", value: settings.availability },
+    settings.location && { icon: MapPin, label: "Based in", value: settings.location },
+  ].filter(Boolean) as { icon: any; label: string; value: string }[];
 
+  // Narrative — the "who I am" story, drawn from the tri-perspective bios.
+  const narrative = [profile.architectBio, profile.leadBio, profile.developerBio]
+    .filter(Boolean)
+    .slice(0, 2);
+
+  // "What I do" — published services, else skill groups as a fallback.
+  const activeServices = services.filter((s) => s.status === "Active");
+  const capabilities =
+    activeServices.length > 0
+      ? activeServices.slice(0, 6).map((s) => ({ icon: resolveIcon(s.icon), title: s.name, desc: s.tagline }))
+      : (profile.skills ?? []).slice(0, 6).map((g) => ({
+          icon: Icons.Layers,
+          title: g.category,
+          desc: g.items.join(" · "),
+        }));
+
+  const personalDetails = profile.personalDetails ?? [];
+  const education = profile.education ?? [];
 
   return (
-    <>
-      {/* Hero Section */}
-      <header className="min-h-[58vh] lg:min-h-screen flex flex-col items-center justify-center px-6 py-12 lg:py-16 relative overflow-hidden bg-background animate-fadeIn">
-        {/* Admin-managed hero background (responsive: mobile variant under md, desktop at md+). A
-            theme-aware scrim keeps the name/subtitle legible over any photo in light & dark. */}
-        {hasHero && (
-          <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
-            <picture>
-              {heroMobile && <source media="(max-width: 767px)" srcSet={heroMobile} />}
-              <img
-                src={heroDesktop}
-                alt=""
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover max-w-full"
-              />
-            </picture>
-            <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/60 to-background/90" />
-          </div>
-        )}
-        <motion.div
-          style={{ opacity, scale }}
-          className="text-center z-10 flex flex-col items-center"
-        >
-          <h1 className="text-[14vw] lg:text-[11vw] font-luxury font-light tracking-tighter leading-[0.85] mb-8 select-none text-text-primary">
-            {nameParts[0]}<br />
-            {nameParts.slice(1).join(" ")}
-          </h1>
-          <div className="flex flex-col items-center gap-6">
-            <motion.span
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="text-xs lg:text-sm font-bold text-accent uppercase tracking-[0.3em] lg:tracking-[0.6em] text-center"
-            >
-              {settings.role || master.candidate.role}
-            </motion.span>
+    <div id="about-details-root" className="bg-background min-h-screen pt-28 md:pt-32 pb-24 text-left select-none text-text-primary">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 space-y-6">
 
-            <div className="w-px h-10 lg:h-16 bg-gradient-to-b from-accent to-transparent mt-4" />
-          </div>
-        </motion.div>
-      </header>
-
-      {/* About Section */}
-      <section id="about" className="py-14 lg:py-28 px-5 md:px-8 lg:px-24 bg-surface/30">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-14 lg:gap-24 items-center">
-          <div className="lg:w-1/3 w-full relative flex justify-center">
-            <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-full border border-border flex items-center justify-center relative bg-background/50 backdrop-blur-sm overflow-hidden">
-              {hasProfile ? (
-                <picture>
-                  {profileMobile && <source media="(max-width: 767px)" srcSet={profileMobile} />}
-                  <img
-                    src={profileDesktop}
-                    alt={displayName}
-                    loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover max-w-full rounded-full"
-                  />
-                </picture>
-              ) : (
-                <>
-                  <div className="absolute inset-4 rounded-full border border-accent/25" />
-                  <span className="text-7xl lg:text-9xl font-luxury font-light text-accent select-none">MF</span>
-                </>
+        {/* Hero + At a glance */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Hero */}
+          <div className="lg:col-span-2 bg-surface border border-border rounded-3xl p-8 md:p-12 flex flex-col justify-center">
+            <span className="self-start px-3 py-1 rounded-full bg-background border border-border text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+              Portfolio
+            </span>
+            <h1 className="mt-6 text-4xl md:text-6xl font-luxury font-bold tracking-tight leading-none text-text-primary">
+              Hi, I'm <span className="text-accent">{firstName}.</span>
+            </h1>
+            {tagline && (
+              <p className="mt-5 text-base md:text-lg text-text-secondary font-medium leading-relaxed max-w-xl">
+                {tagline}
+              </p>
+            )}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                onClick={() => handleNavClick("contact")}
+                className="group inline-flex items-center gap-2 px-5 py-3 bg-accent text-accent-foreground text-[11px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all cursor-pointer"
+              >
+                <span>Work with me</span>
+                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+              </button>
+              <button
+                onClick={() => handleNavClick("products")}
+                className="inline-flex items-center gap-2 px-5 py-3 bg-background border border-border text-text-primary hover:border-accent hover:text-accent text-[11px] font-bold uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
+              >
+                View projects
+              </button>
+              {settings.resumeUrl && settings.resumeUrl !== "#" && (
+                <a
+                  href={settings.resumeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-background border border-border text-text-primary hover:border-accent hover:text-accent text-[11px] font-bold uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
+                >
+                  <span>Resume</span>
+                  <Download size={13} />
+                </a>
               )}
             </div>
-            <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:-right-3 flex items-center gap-3 bg-background pl-4 pr-5 py-3 rounded-2xl shadow-xl shadow-text-secondary/10 border border-border select-none">
-              <span className="text-4xl font-luxury font-bold text-accent leading-none">{yearsDisplay}</span>
-              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest leading-tight max-w-[4.5rem]">
-                Years Experience
-              </span>
-            </div>
-          </div>
-          <div className="lg:w-2/3 w-full">
-            <div className="space-y-8">
-              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] block">
-                {IDENTITY.badge}
-              </span>
-              <h2 className="text-4xl lg:text-5xl font-luxury font-medium leading-tight text-text-primary">
-                {IDENTITY.headline}
-              </h2>
-              <p className="text-lg text-text-secondary font-medium leading-relaxed max-w-2xl">
-                {profile.tagline}
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 pt-4">
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold text-text-primary uppercase tracking-widest border-b border-border pb-2">
-                    {IDENTITY.philosophyTitle}
-                  </h4>
-                  <p className="text-sm text-text-secondary font-medium leading-relaxed">
-                    {IDENTITY.philosophyText}
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  <h4 className="text-xs font-bold text-text-primary uppercase tracking-widest border-b border-border pb-2">
-                    {IDENTITY.focusTitle}
-                  </h4>
-                  <p className="text-sm text-text-secondary font-medium leading-relaxed">
-                    {IDENTITY.focusText}
-                  </p>
-                </div>
-              </div>
-
-              {/* Inline Setup / Uses CTA Block */}
-              <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6" id="about-uses-cta">
-                <div className="space-y-1">
-                  <span className="text-[9px] font-bold text-accent uppercase tracking-[0.3em] block">WORKSTATION & TOOLS</span>
-                  <h5 className="text-base font-luxury font-bold text-text-primary">Want to inspect my enterprise setup & workstation?</h5>
-                  <p className="text-xs text-text-secondary font-medium leading-relaxed max-w-lg">
-                    The languages, editor, gear, and OS I ship with every day.
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleNavClick("uses")}
-                  className="group flex items-center gap-1.5 px-4 py-2.5 bg-text-primary hover:bg-accent text-background hover:text-accent-foreground text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer shrink-0"
-                >
-                  <span>View Uses Setup</span>
-                  <Wrench size={10} className="group-hover:scale-110 transition-transform" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Work Preview */}
-      <section className="py-14 lg:py-28 px-5 md:px-8 lg:px-24">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] block">WORK OVERVIEW</span>
-              <h3 className="text-3xl lg:text-5xl font-luxury font-medium text-text-primary leading-tight">
-                Start with the right section.
-              </h3>
-              <p className="text-sm text-text-secondary font-medium leading-relaxed">
-                The home page keeps the story short. Full experience and project details each have a dedicated page for deeper review.
-              </p>
-            </div>
-            <button
-              onClick={() => handleNavClick("company")}
-              className="px-5 py-3 bg-text-primary hover:bg-accent text-background hover:text-accent-foreground text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer shrink-0"
-            >
-              View Full Experience
-            </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {workActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={action.label}
-                  onClick={() => handleNavClick(action.tab)}
-                  className="p-5 bg-surface border border-border hover:border-accent/50 rounded-2xl text-left transition-all duration-300 cursor-pointer group"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center mb-5">
-                    <Icon size={17} />
+          {/* At a glance */}
+          <div className="bg-surface border border-border rounded-3xl p-6 md:p-8">
+            <h2 className="text-lg font-luxury font-bold text-text-primary mb-5">At a glance</h2>
+            <div className="space-y-3">
+              {glance.map((g) => {
+                const Icon = g.icon;
+                return (
+                  <div key={g.label} className="p-4 rounded-2xl bg-background border border-border">
+                    <div className="flex items-center gap-2 text-text-secondary">
+                      <Icon size={13} className="text-accent" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">{g.label}</span>
+                    </div>
+                    <p className="mt-1.5 text-sm font-bold text-text-primary">{g.value}</p>
                   </div>
-                  <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider group-hover:text-accent transition-colors">
-                    {action.label}
-                  </h4>
-                  <p className="text-xs text-text-secondary font-medium leading-relaxed mt-2">
-                    {action.description}
-                  </p>
-                </button>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
-      </section>
-    </>
+
+        {/* Purpose / Who I am */}
+        {narrative.length > 0 && (
+          <div className="bg-surface border border-border rounded-3xl p-8 md:p-12">
+            <span className="px-3 py-1 rounded-full bg-background border border-border text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+              About Me
+            </span>
+            <h2 className="mt-6 text-2xl md:text-3xl font-luxury font-bold text-text-primary">
+              Who I am
+            </h2>
+            <div className="mt-5 space-y-4 max-w-4xl">
+              {narrative.map((para, idx) => (
+                <p key={idx} className="text-sm md:text-base text-text-secondary font-medium leading-relaxed">
+                  {para}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* What I do */}
+        {capabilities.length > 0 && (
+          <section className="pt-8">
+            <h2 className="text-2xl md:text-3xl font-luxury font-bold text-text-primary">What I do</h2>
+            <p className="mt-2 text-sm text-text-secondary font-medium">
+              Product-minded development with design sensitivity and system rigor.
+            </p>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {capabilities.map((c, idx) => {
+                const Icon = c.icon;
+                return (
+                  <div key={idx} className="bg-surface border border-border rounded-2xl p-6 hover:border-accent/40 transition-colors">
+                    <div className="w-11 h-11 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center mb-5">
+                      <Icon size={18} />
+                    </div>
+                    <h3 className="text-base font-bold text-text-primary">{c.title}</h3>
+                    {c.desc && (
+                      <p className="mt-2 text-sm text-text-secondary font-medium leading-relaxed">{c.desc}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Personal details */}
+        {personalDetails.length > 0 && (
+          <section className="pt-8">
+            <h2 className="text-2xl md:text-3xl font-luxury font-bold text-text-primary">Personal details</h2>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {personalDetails.map((d) => (
+                <div key={d.id} className="bg-surface border border-border rounded-2xl p-5">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
+                    {d.label}
+                  </span>
+                  <span className="mt-1.5 text-sm font-bold text-text-primary block break-words">{d.value}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Education */}
+        {education.length > 0 && (
+          <section className="pt-8">
+            <h2 className="text-2xl md:text-3xl font-luxury font-bold text-text-primary">Education</h2>
+            <div className="mt-6 relative border-l border-border pl-6 md:pl-8 space-y-8">
+              {education.map((edu) => (
+                <div key={edu.id} className="relative">
+                  <span className="absolute -left-[31px] md:-left-[39px] top-0 w-8 h-8 rounded-full bg-accent/10 border border-accent/20 text-accent flex items-center justify-center">
+                    <GraduationCap size={14} />
+                  </span>
+                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+                    <h3 className="text-base font-luxury font-bold text-text-primary">{edu.qualification}</h3>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary shrink-0">
+                      {edu.period}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm text-text-secondary font-medium leading-relaxed">{edu.institution}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* CTA */}
+        <div className="mt-6 bg-surface border border-border rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <span className="text-[9px] font-bold text-accent uppercase tracking-[0.3em] block">LET'S CONNECT</span>
+            <h4 className="text-lg font-luxury font-bold text-text-primary">Have a role or project in mind?</h4>
+            <p className="text-xs text-text-secondary font-medium leading-relaxed max-w-lg">
+              I'm {settings.availability?.toLowerCase() || "open to new opportunities"} — reach out anytime.
+            </p>
+          </div>
+          <button
+            onClick={() => handleNavClick("contact")}
+            className="px-6 py-3 bg-text-primary hover:bg-accent text-background hover:text-accent-foreground text-[11px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer shrink-0"
+          >
+            Get in Touch
+          </button>
+        </div>
+
+      </div>
+    </div>
   );
 };
+
+export default AboutPage;

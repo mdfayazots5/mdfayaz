@@ -6,8 +6,8 @@ import { ProjectCard } from "./ProjectCard";
 import { ContactForm } from "./ContactForm";
 
 import { UsesPage } from "./UsesPage";
+import { HomePage } from "./HomePage";
 import { AboutPage } from "./AboutPage";
-import { AboutDetailsPage } from "./AboutDetailsPage";
 import { PrivacyPage } from "./PrivacyPage";
 import { FaqPage } from "./FaqPage";
 import { ProductsPage } from "./ProductsPage";
@@ -27,7 +27,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const { master } = data;
   const { applyAdminDefault } = useTheme();
 
-  const [activeTab, setActiveTab] = React.useState<"about" | "aboutme" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("about");
+  const [activeTab, setActiveTab] = React.useState<"home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("home");
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isThemePanelOpen, setIsThemePanelOpen] = React.useState(false);
   const [isWorkDropdownOpen, setIsWorkDropdownOpen] = React.useState(false);
@@ -84,7 +84,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     if (tab === "work") {
       titleSet = "Work | Mohammed Fayaz";
       descSet = "Healthcare, HRMS, and marketplace platform projects by Mohammed Fayaz.";
-    } else if (tab === "aboutme") {
+    } else if (tab === "about") {
       titleSet = "About | Mohammed Fayaz";
       descSet = "Learn more about Mohammed Fayaz — background, core skills, and professional experience as a .NET Full Stack Developer.";
     } else if (tab === "products") {
@@ -135,12 +135,12 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   React.useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase().replace("#", "");
-      if (hash === "" || hash === "about") {
+      if (hash === "" || hash === "home") {
+        setActiveTab("home");
+        updatePageMetadata("home");
+      } else if (hash === "about") {
         setActiveTab("about");
         updatePageMetadata("about");
-      } else if (hash === "aboutme") {
-        setActiveTab("aboutme");
-        updatePageMetadata("aboutme");
       } else if (hash === "work" || hash === "company") {
         setActiveTab("work");
         setWorkSubTab("company");
@@ -186,7 +186,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     };
   }, []);
 
-  const handleNavClick = (tab: "about" | "aboutme" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "personal" | "company", targetId?: string) => {
+  const handleNavClick = (tab: "home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "personal" | "company", targetId?: string) => {
     setIsDropdownOpen(false);
     setIsWorkDropdownOpen(false);
 
@@ -252,10 +252,10 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
           onClick={() => {
             setIsDropdownOpen(false);
             setIsWorkDropdownOpen(false);
-            handleNavClick("about");
+            handleNavClick("home");
           }}
         >
-          MF
+          Fayaz
         </span>
         <div className="flex gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
           <button
@@ -279,7 +279,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 setIsWorkDropdownOpen(false);
                 setIsDropdownOpen(!isDropdownOpen);
               }}
-              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["about", "aboutme", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
+              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["home", "about", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
               <span>Home</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
@@ -313,8 +313,8 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         exit={{ opacity: 0, y: -15 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        {activeTab === "about" && (
-          <AboutPage master={master} handleNavClick={handleNavClick} />
+        {activeTab === "home" && (
+          <HomePage master={master} handleNavClick={handleNavClick} />
         )}
 
         {activeTab === "work" && (
@@ -330,7 +330,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   C# / .NET / FULL-STACK
                 </span>
                 <h1 className="text-4xl lg:text-6xl font-luxury font-light tracking-tighter leading-tight text-text-primary">
-                  Shipped Systems
+                  Work &amp; Experience
                 </h1>
                 <p className="text-sm md:text-base text-text-secondary font-medium max-w-xl mx-auto leading-relaxed">
                   Clean, production-ready enterprise solutions and independent software packages made accessible with robust architecture and quick recruiter scanning.
@@ -375,7 +375,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <button
-                  onClick={() => handleNavClick("about")}
+                  onClick={() => handleNavClick("home")}
                   className="px-6 py-3 bg-surface border border-border text-text-primary hover:text-accent text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer"
                 >
                   Return to Profile Overview
@@ -391,7 +391,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
           </div>
         )}
 
-        {activeTab === "aboutme" && <AboutDetailsPage handleNavClick={handleNavClick} />}
+        {activeTab === "about" && <AboutPage handleNavClick={handleNavClick} />}
 
         {activeTab === "uses" && <UsesPage />}
 
@@ -399,7 +399,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
         {activeTab === "services" && <ServicesPage />}
 
-        {activeTab === "privacy" && <PrivacyPage onBack={() => handleNavClick("about")} />}
+        {activeTab === "privacy" && <PrivacyPage onBack={() => handleNavClick("home")} />}
 
         {activeTab === "faq" && <FaqPage />}
 
@@ -416,7 +416,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
-                onClick={() => handleNavClick("about")}
+                onClick={() => handleNavClick("home")}
                 className="px-6 py-2.5 bg-accent text-accent-foreground text-[10px] uppercase font-bold tracking-widest rounded-xl hover:bg-opacity-80 transition-all cursor-pointer"
               >
                 Return to profile
@@ -443,7 +443,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         )}
 
         {/* Contact Section */}
-        {activeTab === "about" && (
+        {activeTab === "home" && (
           <section id="contact" className="py-12 md:py-24 lg:py-36 px-5 md:px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
             <div className="md:hidden max-w-sm mx-auto space-y-5">
               <h2 className="text-2xl font-luxury font-semibold tracking-tight leading-tight text-text-primary">
@@ -527,7 +527,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Explore</span>
                 <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
                   {[
-                    { label: "Home", tab: "about" as const },
+                    { label: "Home", tab: "home" as const },
                     { label: "Experience", tab: "company" as const },
                     { label: "Projects", tab: "products" as const },
                     { label: "Services", tab: "services" as const },
@@ -624,7 +624,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  handleNavClick("about");
+                  handleNavClick("home");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
@@ -640,7 +640,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  handleNavClick("aboutme");
+                  handleNavClick("about");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
