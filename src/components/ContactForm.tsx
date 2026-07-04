@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Send, CheckCircle, AlertCircle, Loader2, Building2, User2, Mail, MessageSquare } from "lucide-react";
+import { Send, CheckCircle, AlertCircle, Loader2, Building2, User2, Mail, MessageSquare, Phone } from "lucide-react";
 
 interface ContactFormProps {
   candidateEmail: string;
@@ -10,9 +10,12 @@ interface FormState {
   name: string;
   email: string;
   company: string;
+  phone: string;
   inquiryType: string;
   roleInterest: string;
   message: string;
+  // Honeypot: real users never see or fill this. A non-empty value means a bot.
+  botcheck: string;
 }
 
 const INQUIRY_TYPES = [
@@ -29,14 +32,20 @@ const ROLE_INTERESTS = [
   { value: "not_specified", label: "Not Sure / General Recruitment" }
 ];
 
+/** Resolve a stored select value (e.g. "direct_hire") to its human label. */
+const labelFor = (options: { value: string; label: string }[], value: string): string =>
+  options.find((o) => o.value === value)?.label || value;
+
 export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
   const [formData, setFormData] = React.useState<FormState>({
     name: "",
     email: "",
     company: "",
+    phone: "",
     inquiryType: "direct_hire",
     roleInterest: "system_architect",
-    message: ""
+    message: "",
+    botcheck: ""
   });
 
   const [errors, setErrors] = React.useState<Partial<Record<keyof FormState, string>>>({});
@@ -83,9 +92,29 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
     }
   };
 
+  const resetForm = () =>
+    setFormData({
+      name: "",
+      email: "",
+      company: "",
+      phone: "",
+      inquiryType: "direct_hire",
+      roleInterest: "system_architect",
+      message: "",
+      botcheck: ""
+    });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+
+    // Honeypot: a filled hidden field means a bot. Silently accept and drop —
+    // showing the same success screen so the bot gets no signal to adapt.
+    if (formData.botcheck) {
+      setStatus("success");
+      resetForm();
+      return;
+    }
 
     // Web3Forms requires a valid access key. Without one, the request is
     // guaranteed to 400 — so fail fast with a clear message instead of
@@ -102,22 +131,36 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
     setStatus("submitting");
     setErrorMessage("");
 
+    const inquiryLabel = labelFor(INQUIRY_TYPES, formData.inquiryType);
+    const roleLabel = labelFor(ROLE_INTERESTS, formData.roleInterest);
+
     try {
       const payload = {
         access_key: web3FormsAccessKey,
-        subject: `[Portfolio Contact] From ${formData.name} (${formData.company || "No Company"})`,
+        // Web3Forms honeypot: its server drops the submission if this is truthy.
+        botcheck: false,
+        subject: `[Portfolio Contact] ${formData.name}${formData.company ? " · " + formData.company : ""} — ${inquiryLabel}`,
         from_name: formData.name,
         email: formData.email,
-        message: `
-Name: ${formData.name}
-Email: ${formData.email}
-Company/Agency: ${formData.company || "N/A"}
-Inquiry Type: ${formData.inquiryType}
-Desired Role: ${formData.roleInterest}
-
-Message:
-${formData.message}
-        `,
+        // Structured fields render as their own rows in the notification email
+        // and become filterable columns in the Web3Forms Submissions dashboard.
+        name: formData.name,
+        company: formData.company || "Not provided",
+        phone: formData.phone || "Not provided",
+        inquiry_type: inquiryLabel,
+        desired_role: roleLabel,
+        // Clean, trimmed body — no stray leading newline or trailing whitespace.
+        message: [
+          `Name: ${formData.name}`,
+          `Email: ${formData.email}`,
+          `Phone: ${formData.phone || "Not provided"}`,
+          `Company / Organization: ${formData.company || "Not provided"}`,
+          `Engagement Context: ${inquiryLabel}`,
+          `Target Role: ${roleLabel}`,
+          "",
+          "Message:",
+          formData.message.trim(),
+        ].join("\n"),
       };
 
       const response = await fetch("https://api.web3forms.com/submit", {
@@ -133,14 +176,17 @@ ${formData.message}
 
       if (response.ok && result.success) {
         setStatus("success");
-        setFormData({
-          name: "",
-          email: "",
-          company: "",
-          inquiryType: "direct_hire",
-          roleInterest: "system_architect",
-          message: ""
-        });
+        resetForm();
+        // Fire an optional analytics conversion event (no-op if no provider).
+        try {
+          (window as any).gtag?.("event", "contact_submitted", {
+            inquiry_type: formData.inquiryType,
+            desired_role: formData.roleInterest,
+          });
+          window.dispatchEvent(new CustomEvent("contact:submitted"));
+        } catch {
+          /* analytics is best-effort */
+        }
       } else {
         throw new Error(result.message || "Failed to submit form. Please try again.");
       }
@@ -175,9 +221,20 @@ ${formData.message}
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-2xl font-luxury font-bold text-text-primary">Message Shipped Successfully</h3>
+              <h3 className="text-2xl font-luxury font-bold text-text-primary">Message Received</h3>
               <p className="text-text-secondary max-w-md text-sm leading-relaxed">
-                Thank you for reaching out! Your strategic inquiry is valuable. Fayaz will review the systems requirements/role details and contact you via your email or phone shortly.
+                Thank you for reaching out — your inquiry has landed in Fayaz's inbox. He personally reviews every message and typically replies within <strong className="text-text-primary">24 hours</strong> via your email or phone.
+              </p>
+            </div>
+
+            {/* What happens next — sets expectations and offers a direct channel. */}
+            <div className="w-full max-w-md bg-background border border-border rounded-2xl p-5 text-left text-xs text-text-secondary space-y-2">
+              <p className="text-accent font-bold uppercase tracking-widest text-[10px]">What happens next</p>
+              <p className="leading-relaxed">
+                You'll get a personal reply within one business day. Prefer to move faster? Email directly at{" "}
+                <a href={`mailto:${candidateEmail}`} className="text-text-primary font-semibold border-b border-border hover:border-accent hover:text-accent transition-colors">
+                  {candidateEmail}
+                </a>.
               </p>
             </div>
 
@@ -265,7 +322,7 @@ ${formData.message}
               </div>
             </div>
 
-            {/* Grid for Company & Inquiry Type */}
+            {/* Grid for Company & Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Company / Agency */}
               <div className="space-y-2">
@@ -284,9 +341,29 @@ ${formData.message}
                 />
               </div>
 
+              {/* Phone (optional) */}
+              <div className="space-y-2">
+                <label htmlFor="phone" className="text-[10px] font-bold text-text-secondary uppercase tracking-widest flex items-center gap-1.5">
+                  <Phone size={12} className="text-text-secondary" />
+                  Phone <span className="text-text-secondary/50 normal-case tracking-normal font-medium">(optional)</span>
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="e.g. +1 555 018 2394"
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-text-primary placeholder-text-secondary/40 transition-all duration-200 outline-none focus:border-accent focus:ring-1 focus:ring-accent/20"
+                />
+              </div>
+            </div>
+
+            {/* Grid for Inquiry Type & Role */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Inquiry Type */}
               <div className="space-y-2">
-                <label htmlFor="inquiryType" className="text-[10px] font-bold text-text-secondary uppercase tracking-widest block font-bold">
+                <label htmlFor="inquiryType" className="text-[10px] font-bold text-text-secondary uppercase tracking-widest block">
                   Engagement Context
                 </label>
                 <select
@@ -303,26 +380,26 @@ ${formData.message}
                   ))}
                 </select>
               </div>
-            </div>
 
-            {/* Role Interest Select (for recruiters) */}
-            <div className="space-y-2">
-              <label htmlFor="roleInterest" className="text-[10px] font-bold text-text-secondary uppercase tracking-widest block font-bold">
-                Target Role Fit / Objective
-              </label>
-              <select
-                id="roleInterest"
-                name="roleInterest"
-                value={formData.roleInterest}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-text-primary transition-all duration-200 outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 cursor-pointer"
-              >
-                {ROLE_INTERESTS.map((role) => (
-                  <option key={role.value} value={role.value} className="bg-surface text-text-primary">
-                    {role.label}
-                  </option>
-                ))}
-              </select>
+              {/* Role Interest (for recruiters) */}
+              <div className="space-y-2">
+                <label htmlFor="roleInterest" className="text-[10px] font-bold text-text-secondary uppercase tracking-widest block">
+                  Target Role Fit / Objective
+                </label>
+                <select
+                  id="roleInterest"
+                  name="roleInterest"
+                  value={formData.roleInterest}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-text-primary transition-all duration-200 outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 cursor-pointer"
+                >
+                  {ROLE_INTERESTS.map((role) => (
+                    <option key={role.value} value={role.value} className="bg-surface text-text-primary">
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Message Box */}
@@ -354,6 +431,18 @@ ${formData.message}
               )}
             </div>
 
+            {/* Honeypot: hidden from humans; bots that auto-fill it are dropped. */}
+            <input
+              type="text"
+              name="botcheck"
+              value={formData.botcheck}
+              onChange={handleInputChange}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="hidden"
+            />
+
             {/* Error banner if general error occurs */}
             {errorMessage && (
               <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-rose-500 text-sm">
@@ -363,7 +452,7 @@ ${formData.message}
             )}
 
             {/* Submit Button */}
-            <div className="pt-2">
+            <div className="pt-2 space-y-3">
               <button
                 type="submit"
                 disabled={status === "submitting"}
@@ -372,7 +461,7 @@ ${formData.message}
                 {status === "submitting" ? (
                   <>
                     <Loader2 size={16} className="animate-spin text-text-secondary" />
-                    <span>Dispatching Security Packets...</span>
+                    <span>Sending your message…</span>
                   </>
                 ) : (
                   <>
@@ -381,6 +470,10 @@ ${formData.message}
                   </>
                 )}
               </button>
+              <p className="text-[10px] text-text-secondary/70 text-center leading-relaxed">
+                Your details are used only to respond to this inquiry. See the{" "}
+                <a href="#privacy" className="underline hover:text-accent transition-colors">privacy policy</a>.
+              </p>
             </div>
           </motion.form>
         )}
