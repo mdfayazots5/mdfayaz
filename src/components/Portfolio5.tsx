@@ -11,7 +11,7 @@ import { PrivacyPage } from "./PrivacyPage";
 import { FaqPage } from "./FaqPage";
 import { ProductsPage } from "./ProductsPage";
 import { ServicesPage } from "./ServicesPage";
-import { Github, Linkedin, BookOpen, User, Wrench, Mail, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Package, Palette } from "lucide-react";
+import { Github, Linkedin, BookOpen, User, Wrench, Mail, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Palette } from "lucide-react";
 import { ThemeSidebar } from "./ThemeSidebar";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./ThemeProvider";
@@ -85,8 +85,8 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       titleSet = "Work | Mohammed Fayaz";
       descSet = "Healthcare, HRMS, and marketplace platform projects by Mohammed Fayaz.";
     } else if (tab === "products") {
-      titleSet = "Products | Mohammed Fayaz";
-      descSet = "Curated showcase of side projects and self-hosted tools created by Mohammed Fayaz.";
+      titleSet = "Projects | Mohammed Fayaz";
+      descSet = "Curated showcase of personal projects and self-hosted tools built by Mohammed Fayaz.";
     } else if (tab === "services") {
       titleSet = "Services | Mohammed Fayaz";
       descSet = "Explore Mohammed Fayaz's technical software development services and areas of consulting expertise.";
@@ -274,7 +274,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               }}
               className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["about", "uses", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
-              <span>About</span>
+              <span>Home</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
@@ -514,63 +514,120 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         )}
 
         {/* Footer */}
-        <footer className="py-16 px-5 md:px-8 lg:px-24 border-t border-border bg-background select-none">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex flex-col items-center md:items-start gap-2">
+        <footer className="pt-16 pb-8 px-5 md:px-8 lg:px-24 border-t border-border bg-background select-none">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
+              {/* Brand block */}
+              <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
+                <span className="text-lg font-luxury font-bold tracking-tighter text-text-primary">
+                  {settings?.name || master.candidate.name}
+                </span>
+                <p className="text-[11px] text-text-secondary leading-relaxed max-w-xs font-medium">
+                  A .NET full-stack developer building scalable, production-ready systems from database to UI.
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <a
+                    href={settings?.socialLinks.linkedin || master.candidate.linkedin}
+                    target="_blank" rel="noreferrer" id="footer-linkedin-link" aria-label="LinkedIn"
+                    className="p-2 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
+                  >
+                    <Linkedin size={14} />
+                  </a>
+                  <a
+                    href={settings?.socialLinks.github || master.candidate.github}
+                    target="_blank" rel="noreferrer" id="footer-github-link" aria-label="GitHub"
+                    className="p-2 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
+                  >
+                    <Github size={14} />
+                  </a>
+                  {(settings?.blog || master.candidate.blog) && (
+                    <a
+                      href={settings?.blog || master.candidate.blog}
+                      target="_blank" rel="noreferrer" id="footer-blog-link" aria-label="Blog"
+                      className="p-2 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
+                    >
+                      <BookOpen size={14} />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* Explore column */}
+              <div className="flex flex-col gap-3">
+                <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Explore</span>
+                <div className="flex flex-col gap-2.5 text-[11px] font-semibold text-text-secondary">
+                  {[
+                    { label: "Home", tab: "about" as const },
+                    { label: "Experience", tab: "company" as const },
+                    { label: "Projects", tab: "products" as const },
+                    { label: "Services", tab: "services" as const },
+                  ].map((l) => (
+                    <button
+                      key={l.label}
+                      onClick={() => handleNavClick(l.tab)}
+                      className="text-left hover:text-accent transition-colors w-fit"
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Info column */}
+              <div className="flex flex-col gap-3">
+                <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Info</span>
+                <div className="flex flex-col gap-2.5 text-[11px] font-semibold text-text-secondary">
+                  {[
+                    { label: "Uses", tab: "uses" as const },
+                    { label: "FAQ", tab: "faq" as const },
+                    { label: "Privacy Policy", tab: "privacy" as const },
+                  ].map((l) => (
+                    <button
+                      key={l.label}
+                      onClick={() => handleNavClick(l.tab)}
+                      className="text-left hover:text-accent transition-colors w-fit"
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contact column */}
+              <div className="flex flex-col gap-3">
+                <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Contact</span>
+                <div className="flex flex-col gap-2.5 text-[11px] font-semibold text-text-secondary">
+                  <button onClick={() => handleNavClick("contact")} className="text-left hover:text-accent transition-colors w-fit">
+                    Start a conversation
+                  </button>
+                  <a href={`mailto:${settings?.contactEmail || master.candidate.email}`} className="hover:text-accent transition-colors break-all">
+                    {settings?.contactEmail || master.candidate.email}
+                  </a>
+                  <span className="text-text-secondary/80 uppercase tracking-[0.15em] text-[10px]">
+                    {(settings?.location || master.candidate.location)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom bar */}
+            <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="text-sm font-luxury font-bold tracking-tighter text-text-primary">MF.</span>
-                <span className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.25em]">© {new Date().getFullYear()}</span>
-                <a 
+                <span className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.2em]">
+                  © {new Date().getFullYear()} {settings?.name || master.candidate.name}. All rights reserved.
+                </span>
+                <a
                   id="admin-login-lock-btn"
-                  href="#admin/login" 
-                  className="text-text-secondary hover:text-accent p-1.5 rounded-lg hover:bg-surface/65 transition-colors cursor-pointer"
-                  title="Administrative Gateway Client"
+                  href="#admin/login"
+                  className="text-text-secondary/70 hover:text-accent p-1 rounded-md hover:bg-surface/65 transition-colors cursor-pointer"
+                  title="Admin"
                 >
                   <Lock size={11} />
                 </a>
               </div>
-              <p className="text-[9px] font-bold text-text-secondary uppercase tracking-widest">{settings?.name || master.candidate.name}</p>
-            </div>
-
-            <div className="text-[9px] font-bold text-text-secondary uppercase tracking-[0.3em] font-sans text-center">
-              {(settings?.location || master.candidate.location).toUpperCase()}
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-[11px] font-semibold text-text-secondary">
-              <a 
-                href={settings?.socialLinks.linkedin || master.candidate.linkedin} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface text-text-secondary hover:text-accent transition-all duration-300 ease-out"
-                id="footer-linkedin-link"
-              >
-                <Linkedin size={13} className="text-text-secondary group-hover:text-accent transition-colors duration-300" />
-                <span className="font-bold uppercase tracking-[0.2em] text-[10px]">LinkedIn</span>
-              </a>
-
-              <a 
-                href={settings?.socialLinks.github || master.candidate.github} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface text-text-secondary hover:text-accent transition-all duration-300 ease-out"
-                id="footer-github-link"
-              >
-                <Github size={13} className="text-text-secondary group-hover:text-accent transition-colors duration-300" />
-                <span className="font-bold uppercase tracking-[0.2em] text-[10px]">GitHub</span>
-              </a>
-
-              {(settings?.blog || master.candidate.blog) && (
-                <a
-                  href={settings?.blog || master.candidate.blog}
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface text-text-secondary hover:text-accent transition-all duration-300 ease-out"
-                  id="footer-blog-link"
-                >
-                  <BookOpen size={13} className="text-text-secondary group-hover:text-accent transition-colors duration-300" />
-                  <span className="font-bold uppercase tracking-[0.2em] text-[10px]">Technical Blog</span>
-                </a>
-              )}
+              <span className="text-[10px] font-bold text-text-secondary/80 uppercase tracking-[0.2em]">
+                Built with React, Tailwind &amp; .NET
+              </span>
             </div>
           </div>
         </footer>
@@ -605,8 +662,8 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   <User size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">About</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Learn about Fayaz and his mission</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Home</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Profile overview, skills, and experience</p>
                 </div>
               </button>
 
@@ -731,16 +788,16 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               <button
                 onClick={() => {
                   setIsWorkDropdownOpen(false);
-                  handleNavClick("personal");
+                  handleNavClick("company");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Wrench size={15} />
+                  <Briefcase size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Projects</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Custom tools and priority boards</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Experience</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Companies I've worked with and shipped for</p>
                 </div>
               </button>
 
@@ -752,11 +809,11 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Package size={15} />
+                  <Wrench size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Products</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Our ready-to-deploy software packages</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Projects</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Personal builds and side projects I own</p>
                 </div>
               </button>
 

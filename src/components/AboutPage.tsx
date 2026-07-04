@@ -105,6 +105,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
   const displayName = settings.name || master.candidate.name;
   const nameParts = displayName.split(" ");
   const yearsExperience = settings.yearsExperience || master.stats.years;
+  // Show a clean "3+" instead of a precise "3.3" — reads better as a hiring signal.
+  const yearsDisplay = (() => {
+    const n = parseFloat(yearsExperience);
+    return Number.isFinite(n) ? `${Math.floor(n)}+` : yearsExperience;
+  })();
 
   // Admin-managed media (R2 URLs). Mobile falls back to desktop; empty = keep the default look.
   const heroDesktop = settings.heroBackground?.desktop || "";
@@ -118,7 +123,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
   return (
     <>
       {/* Hero Section */}
-      <header className="min-h-[78vh] lg:min-h-screen flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden bg-background animate-fadeIn">
+      <header className="min-h-[58vh] lg:min-h-screen flex flex-col items-center justify-center px-6 py-12 lg:py-16 relative overflow-hidden bg-background animate-fadeIn">
         {/* Admin-managed hero background (responsive: mobile variant under md, desktop at md+). A
             theme-aware scrim keeps the name/subtitle legible over any photo in light & dark. */}
         {hasHero && (
@@ -159,16 +164,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
             <div className="w-px h-10 lg:h-16 bg-gradient-to-b from-accent to-transparent mt-4" />
           </div>
         </motion.div>
-        
-        {/* Background Initials */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-[40vw] font-luxury font-black text-text-secondary/15 select-none animate-pulse">MF</span>
-        </div>
       </header>
 
       {/* About Section */}
-      <section id="about" className="py-24 lg:py-36 px-5 md:px-8 lg:px-24 bg-surface/30">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-24 items-center">
+      <section id="about" className="py-14 lg:py-28 px-5 md:px-8 lg:px-24 bg-surface/30">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-14 lg:gap-24 items-center">
           <div className="lg:w-1/3 w-full relative flex justify-center">
             <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-full border border-border flex items-center justify-center relative bg-background/50 backdrop-blur-sm overflow-hidden">
               {hasProfile ? (
@@ -189,7 +189,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
               )}
             </div>
             <div className="absolute -bottom-4 lg:right-6 bg-background p-6 rounded-2xl shadow-xl shadow-text-secondary/10 border border-border select-none">
-              <p className="text-3xl font-luxury font-bold text-text-primary mb-1">{yearsExperience}</p>
+              <p className="text-3xl font-luxury font-bold text-text-primary mb-1">{yearsDisplay}</p>
               <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Years Experience</p>
             </div>
           </div>
@@ -272,8 +272,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
       </section>
 
       {/* Skills & Experience Summary */}
-      <section className="py-24 lg:py-36 px-5 md:px-8 lg:px-24">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24">
+      <section className="py-14 lg:py-28 px-5 md:px-8 lg:px-24">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24">
           <div>
             <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-12 block">SKILLS</span>
             <div className="space-y-12">
@@ -315,7 +315,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
       </section>
 
       {/* Shipped Work Teaser Banner */}
-      <section className="py-24 px-5 md:px-8 lg:px-24 bg-surface flex flex-col items-center text-center border-t border-border">
+      <section className="py-14 lg:py-24 px-5 md:px-8 lg:px-24 bg-surface flex flex-col items-center text-center border-t border-border">
         <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-4 block">SHIPPED BLUEPRINTS</span>
         <h3 className="text-3xl lg:text-5xl font-luxury font-medium mb-6 text-text-primary">Case Studies & Architectures</h3>
         <p className="text-base text-text-secondary font-medium max-w-xl mb-10 leading-relaxed">
