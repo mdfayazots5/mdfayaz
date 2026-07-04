@@ -6,7 +6,7 @@ import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
 import { jsonResponse, errorResponse, notFoundResponse, PUBLIC_CACHE } from '../response';
 
-const EDITABLE_FAQ_FIELDS: readonly (keyof FaqItem)[] = ['question', 'answer', 'category'];
+const EDITABLE_FAQ_FIELDS: readonly (keyof FaqItem)[] = ['question', 'answer', 'category', 'published'];
 
 export async function handleGetFaq(request: Request, env: Env): Promise<Response> {
   try {

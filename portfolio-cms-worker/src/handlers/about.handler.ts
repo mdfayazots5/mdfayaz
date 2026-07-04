@@ -10,6 +10,8 @@ const DEFAULT_ABOUT: AboutProfile = {
   developerBio: '',
   skills: [],
   experienceTimeline: [],
+  personalDetails: [],
+  education: [],
 };
 
 export async function handleGetAbout(request: Request, env: Env): Promise<Response> {

@@ -46,30 +46,60 @@ async function fetchList<T>(path: string): Promise<T[]> {
 }
 
 async function postJson<T>(path: string, data: unknown): Promise<T> {
-  return fetchJson<T>(path, {
+  const res = await fetchJson<T>(path, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(data),
   });
+  invalidateReadCache();
+  return res;
 }
 
 async function putJson<T>(path: string, data: unknown): Promise<T> {
-  return fetchJson<T>(path, {
+  const res = await fetchJson<T>(path, {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(data),
   });
+  invalidateReadCache();
+  return res;
 }
 
 async function deleteJson<T>(path: string): Promise<T> {
-  return fetchJson<T>(path, {
+  const res = await fetchJson<T>(path, {
     method: "DELETE",
     headers: authHeaders(),
   });
+  invalidateReadCache();
+  return res;
+}
+
+/**
+ * Read-through cache for public GET endpoints. Multiple components (Portfolio5,
+ * AboutPage, usePortfolioData, …) request the same settings/about/entries payloads,
+ * and React StrictMode double-invokes effects in dev — this collapses all of that
+ * into a single network request per resource. Any mutation clears the cache so the
+ * admin sees fresh data after editing.
+ */
+const readCache = new Map<string, Promise<unknown>>();
+
+function cachedGet<T>(key: string, loader: () => Promise<T>): Promise<T> {
+  const hit = readCache.get(key);
+  if (hit) return hit as Promise<T>;
+  const pending = loader().catch((err) => {
+    readCache.delete(key); // never cache a failed read
+    throw err;
+  });
+  readCache.set(key, pending);
+  return pending as Promise<T>;
+}
+
+export function invalidateReadCache(): void {
+  readCache.clear();
 }
 
 export async function getEntries(): Promise<Entry[]> {
-  return fetchList<Entry>("/entries");
+  return cachedGet("/entries", () => fetchList<Entry>("/entries"));
 }
 
 export async function login(username: string, password: string): Promise<boolean> {
@@ -114,7 +144,7 @@ export async function deleteEntry(id: number | string): Promise<boolean> {
 }
 
 export async function getAboutProfile(): Promise<AboutProfile> {
-  return fetchJson<AboutProfile>("/about");
+  return cachedGet("/about", () => fetchJson<AboutProfile>("/about"));
 }
 
 export async function updateAboutProfile(data: AboutProfile): Promise<boolean> {
@@ -123,7 +153,7 @@ export async function updateAboutProfile(data: AboutProfile): Promise<boolean> {
 }
 
 export async function getFaqItems(): Promise<FaqItem[]> {
-  return fetchList<FaqItem>("/faq");
+  return cachedGet("/faq", () => fetchList<FaqItem>("/faq"));
 }
 
 export async function createFaqItem(data: Partial<FaqItem>): Promise<FaqItem> {
@@ -140,7 +170,7 @@ export async function deleteFaqItem(id: number | string): Promise<boolean> {
 }
 
 export async function getUsesCategories(): Promise<UsesCategory[]> {
-  return fetchList<UsesCategory>("/uses");
+  return cachedGet("/uses", () => fetchList<UsesCategory>("/uses"));
 }
 
 export async function createUsesCategory(data: Partial<UsesCategory>): Promise<UsesCategory> {
@@ -170,7 +200,7 @@ export async function deleteUsesItem(categoryId: string, itemId: string): Promis
 }
 
 export async function getPrivacySections(): Promise<PrivacySection[]> {
-  return fetchList<PrivacySection>("/privacy");
+  return cachedGet("/privacy", () => fetchList<PrivacySection>("/privacy"));
 }
 
 export async function createPrivacySection(data: Partial<PrivacySection>): Promise<PrivacySection> {
@@ -192,7 +222,7 @@ export async function reorderPrivacySections(orderedIds: string[]): Promise<bool
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  return fetchJson<SiteSettings>("/settings");
+  return cachedGet("/settings", () => fetchJson<SiteSettings>("/settings"));
 }
 
 export async function updateSiteSettings(data: SiteSettings): Promise<boolean> {
@@ -201,7 +231,7 @@ export async function updateSiteSettings(data: SiteSettings): Promise<boolean> {
 }
 
 export async function getServices(): Promise<Service[]> {
-  return fetchList<Service>("/services");
+  return cachedGet("/services", () => fetchList<Service>("/services"));
 }
 
 export async function createService(data: Partial<Service>): Promise<Service> {

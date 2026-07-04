@@ -6,7 +6,7 @@ import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
 import { jsonResponse, errorResponse, notFoundResponse, PUBLIC_CACHE } from '../response';
 
-const EDITABLE_PRIVACY_FIELDS: readonly (keyof PrivacySection)[] = ['title', 'body'];
+const EDITABLE_PRIVACY_FIELDS: readonly (keyof PrivacySection)[] = ['title', 'body', 'published'];
 
 export async function handleGetPrivacy(request: Request, env: Env): Promise<Response> {
   try {

@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { getEntries, deleteEntry } from "../../services/api";
+import { getEntries, deleteEntry, updateEntry } from "../../services/api";
 import { Entry } from "../../models/portfolio.model";
-import { Plus, Edit2, Trash2, Calendar, Briefcase, RefreshCw, Layers, Search, Code, CheckCircle, HelpCircle } from "lucide-react";
+import { Plus, Edit2, Trash2, Calendar, Briefcase, Layers, Code, CheckCircle, HelpCircle } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { PublishToggle } from "./PublishToggle";
 
 export const AdminEntriesPage: React.FC = () => {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"company" | "personal">("company");
-  const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deletingProgress, setDeletingProgress] = useState(false);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const fetchEntries = async () => {
@@ -60,21 +61,30 @@ export const AdminEntriesPage: React.FC = () => {
     }
   };
 
+  const handleTogglePublish = async (entry: Entry) => {
+    const next = entry.published === false; // currently draft → publish, else → draft
+    setTogglingId(entry.id);
+    setMessage(null);
+    try {
+      await updateEntry(entry.id, { ...entry, published: next });
+      setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, published: next } : e)));
+      setMessage({
+        text: next ? "Entry published — now visible on the portal." : "Entry unpublished — hidden from the portal.",
+        type: "success",
+      });
+    } catch (err) {
+      setMessage({ text: "Failed to update publish state.", type: "error" });
+    } finally {
+      setTogglingId(null);
+      setTimeout(() => setMessage(null), 4000);
+    }
+  };
+
   if (loading) {
     return <LoadingScreen />;
   }
 
-  // Segment Filtered Entries
-  const filteredEntries = entries.filter((entry) => {
-    const isMatchedType = entry.type === activeTab;
-    const matchesQuery = 
-      entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (entry.companyName && entry.companyName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      entry.tech.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    return isMatchedType && matchesQuery;
-  });
+  const filteredEntries = entries.filter((entry) => entry.type === activeTab);
 
   return (
     <div id="admin-entries-root" className="space-y-8 animate-fade-in text-left">
@@ -89,14 +99,6 @@ export const AdminEntriesPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 self-stretch sm:self-auto justify-between sm:justify-start">
-          <button
-            onClick={fetchEntries}
-            className="p-3 border border-border hover:border-accent bg-surface hover:text-accent rounded-xl cursor-pointer transition-colors"
-            title="Refresh Registry"
-          >
-            <RefreshCw size={14} />
-          </button>
-          
           <a
             id="admin-new-entry-btn"
             href="#admin/entries/new"
@@ -121,14 +123,11 @@ export const AdminEntriesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Dual Segment Switcher & Search Bar */}
+      {/* Essential segment switcher */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-surface border border-border p-3.5 rounded-2xl">
         <div className="flex bg-background p-1 rounded-xl border border-border/60 select-none w-full md:w-auto" id="admin-segment-selector">
           <button
-            onClick={() => {
-              setActiveTab("company");
-              setSearchQuery("");
-            }}
+            onClick={() => setActiveTab("company")}
             className={`flex-1 md:flex-none px-4 py-2.5 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 ${
               activeTab === "company"
                 ? "bg-surface text-text-primary shadow-sm border border-border/45"
@@ -138,10 +137,7 @@ export const AdminEntriesPage: React.FC = () => {
             🏢 Company Work
           </button>
           <button
-            onClick={() => {
-              setActiveTab("personal");
-              setSearchQuery("");
-            }}
+            onClick={() => setActiveTab("personal")}
             className={`flex-1 md:flex-none px-4 py-2.5 rounded-lg text-xs font-bold tracking-wider uppercase transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 ${
               activeTab === "personal"
                 ? "bg-surface text-text-primary shadow-sm border border-border/45"
@@ -152,16 +148,8 @@ export const AdminEntriesPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Search controls */}
-        <div className="relative w-full md:w-72">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={`Search ${activeTab === 'company' ? 'corporate jobs...' : 'side projects...'}`}
-            className="w-full bg-background border border-border focus:border-accent rounded-xl text-xs font-medium pl-10 pr-4 py-3 focus:outline-none transition-colors"
-          />
+        <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary px-3">
+          Showing {filteredEntries.length} {activeTab === "company" ? "experience" : "project"} entries
         </div>
       </div>
 
@@ -173,7 +161,7 @@ export const AdminEntriesPage: React.FC = () => {
           <div className="space-y-1">
             <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">No Entries Found</h3>
             <p className="text-xs text-text-secondary max-w-sm mx-auto">
-              No portfolio nodes match your search criteria. Hit the "Add Entry" button to register one now.
+              No entries are available in this section yet. Add one when you are ready to publish it.
             </p>
           </div>
         </div>
@@ -312,6 +300,11 @@ export const AdminEntriesPage: React.FC = () => {
                           </div>
                         ) : (
                           <div className="flex items-center justify-end gap-2.5">
+                            <PublishToggle
+                              published={entry.published !== false}
+                              busy={togglingId === entry.id}
+                              onToggle={() => handleTogglePublish(entry)}
+                            />
                             <a
                               id={`edit-entry-${entry.id}`}
                               href={`#admin/entries/${entry.id}/edit`}
@@ -413,6 +406,11 @@ export const AdminEntriesPage: React.FC = () => {
                       </div>
                     ) : (
                       <>
+                        <PublishToggle
+                          published={entry.published !== false}
+                          busy={togglingId === entry.id}
+                          onToggle={() => handleTogglePublish(entry)}
+                        />
                         <a
                           href={`#admin/entries/${entry.id}/edit`}
                           className="flex-1 py-2.5 border border-border hover:border-accent bg-background text-text-primary text-center hover:text-accent font-bold text-[10px] uppercase tracking-wider rounded-xl cursor-pointer"

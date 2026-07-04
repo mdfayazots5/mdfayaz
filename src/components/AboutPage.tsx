@@ -1,55 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { PortfolioData, AboutProfile, SiteSettings } from "../models/portfolio.model";
-import { Wrench } from "lucide-react";
+import { Briefcase, Package, Wrench } from "lucide-react";
 import { getAboutProfile, getSiteSettings } from "../services/api";
 import { LoadingScreen } from "./LoadingScreen";
 import { SectionError } from "./SectionState";
 
-type Perspective = "architect" | "lead" | "developer";
-
-interface PerspectiveContent {
-  heroRole: string;
-  badge: string;
-  headline: string;
-  tagline: string;
-  philosophyTitle: string;
-  philosophyText: string;
-  focusTitle: string;
-  focusText: string;
-}
-
-const PERSPECTIVES: Record<Perspective, PerspectiveContent> = {
-  architect: {
-    heroRole: "System Architect & .NET Engineer",
-    badge: "THE ARCHITECT",
-    headline: "Building scalable digital ecosystems with precision and purpose.",
-    tagline: "Building robust enterprise systems that scale from database to UI — designed for resilience, modularity, and long-term maintainability.",
-    philosophyTitle: "Architectural Focus",
-    philosophyText: "Strict adherence to clean code, modular design, layered architecture, repository patterns, and granular access controls (RBAC) to support software health.",
-    focusTitle: "Systems & Optimization",
-    focusText: "Optimizing relational databases (Index tuning, Query plan analysis), microservice API contracts, and Azure cloud integration.",
-  },
-  lead: {
-    heroRole: "Team Lead & Senior .NET Developer",
-    badge: "THE TEAM LEAD",
-    headline: "Translating complex business requirements into high-impact delivery.",
-    tagline: "Led delivery of key Enterprise SaaS modules (HCM, HRMS) directing 5-developer agile teams and delivering zero-collision scheduling models.",
-    philosophyTitle: "Agile Leadership",
-    philosophyText: "Empowering developers through constructive code reviews, structured task allocation, and active collaboration to meet tight timelines.",
-    focusTitle: "Business Integration",
-    focusText: "Full-lifecycle ownership, workflow automation (including automated onboarding pipeline validation), and streamlined executive stakeholder reporting.",
-  },
-  developer: {
-    heroRole: "Full-Stack .NET & Angular Developer",
-    badge: "THE FULL STACK DEVELOPER",
-    headline: "Writing robust, high-performance production code from backend to frontend.",
-    tagline: "Focused on shipping fast C# backend microservices, optimized SQL Server queries, and clean Angular user interfaces.",
-    philosophyTitle: "Development Standard",
-    philosophyText: "Pragmatic, dry, and highly performant code designed for immediate productivity. Resolves business issues without added visual or technical noise.",
-    focusTitle: "Technology Focus",
-    focusText: "Deep expertise in C#, ASP.NET Core, SQL Server (Stored Procedures), Web APIs, responsive web interfaces, and Firebase notifications.",
-  },
+// One clear, recruiter-first identity — no persona switching. Grounded in the real
+// track record: 3+ years, ASP.NET Core + SQL Server, and end-to-end team-led delivery.
+const IDENTITY = {
+  badge: "WHO I AM",
+  headline: "Building enterprise systems that scale from database to UI.",
+  philosophyTitle: "How I Work",
+  philosophyText: "Clean, modular, layered architecture with a focus on long-term maintainability — from SQL Server schema design and stored-procedure optimization to secure JWT-protected APIs and responsive front-ends.",
+  focusTitle: "What I Bring",
+  focusText: "3+ years shipping production healthcare (HMS) and HR (HRMS) platforms with ASP.NET Core, C#, and SQL Server — including leading a 4-member team through full end-to-end delivery.",
 };
 
 interface AboutPageProps {
@@ -91,9 +56,6 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
   const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.1], [1, 0.95]);
 
-  const [perspective, setPerspective] = React.useState<Perspective>("architect");
-  const activeContent = PERSPECTIVES[perspective];
-
   if (error) {
     return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="100vh" />;
   }
@@ -118,6 +80,20 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
   const profileDesktop = settings.profileImage?.desktop || "";
   const profileMobile = settings.profileImage?.mobile || profileDesktop;
   const hasProfile = !!profileDesktop;
+  const workActions = [
+    {
+      label: "Experience",
+      description: "Company work, delivery ownership, timelines, and impact.",
+      icon: Briefcase,
+      tab: "company",
+    },
+    {
+      label: "Projects",
+      description: "Personal products, side builds, links, and technology choices.",
+      icon: Package,
+      tab: "products",
+    },
+  ];
 
 
   return (
@@ -149,18 +125,15 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
             {nameParts.slice(1).join(" ")}
           </h1>
           <div className="flex flex-col items-center gap-6">
-            <motion.span 
-              key={perspective + "-hero-role"}
+            <motion.span
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               className="text-xs lg:text-sm font-bold text-accent uppercase tracking-[0.3em] lg:tracking-[0.6em] text-center"
             >
-              {activeContent.heroRole}
+              {settings.role || master.candidate.role}
             </motion.span>
 
-            {/* Perspective switching lives in the About section below, next to the
-                content it changes — kept out of the hero to keep the entry clean. */}
             <div className="w-px h-10 lg:h-16 bg-gradient-to-b from-accent to-transparent mt-4" />
           </div>
         </motion.div>
@@ -188,63 +161,40 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
                 </>
               )}
             </div>
-            <div className="absolute -bottom-4 lg:right-6 bg-background p-6 rounded-2xl shadow-xl shadow-text-secondary/10 border border-border select-none">
-              <p className="text-3xl font-luxury font-bold text-text-primary mb-1">{yearsDisplay}</p>
-              <p className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Years Experience</p>
+            <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:-right-3 flex items-center gap-3 bg-background pl-4 pr-5 py-3 rounded-2xl shadow-xl shadow-text-secondary/10 border border-border select-none">
+              <span className="text-4xl font-luxury font-bold text-accent leading-none">{yearsDisplay}</span>
+              <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest leading-tight max-w-[4.5rem]">
+                Years Experience
+              </span>
             </div>
           </div>
           <div className="lg:w-2/3 w-full">
-            {/* Perspective Sub-Header Selector */}
-            <div className="mb-10 p-1 bg-surface border border-border rounded-xl inline-flex flex-wrap gap-1 text-xs font-semibold backdrop-blur-xs select-none">
-              {(["architect", "lead", "developer"] as const).map((p) => (
-                <button
-                  key={p + "-about-btn"}
-                  onClick={() => setPerspective(p)}
-                  className={`px-4 py-2 rounded-lg transition-all duration-300 uppercase tracking-widest text-[9px] font-bold cursor-pointer ${
-                    perspective === p 
-                      ? "bg-text-primary text-background shadow-md" 
-                      : "text-text-secondary hover:text-text-primary hover:bg-surface/50"
-                  }`}
-                >
-                  {p === "architect" && "📐 The Architect"}
-                  {p === "lead" && "👥 The Tech Lead"}
-                  {p === "developer" && "💻 The Developer"}
-                </button>
-              ))}
-            </div>
-
-            <motion.div
-              key={perspective}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
-            >
-              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] block min-h-[1.5rem]">
-                {activeContent.badge}
+            <div className="space-y-8">
+              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] block">
+                {IDENTITY.badge}
               </span>
               <h2 className="text-4xl lg:text-5xl font-luxury font-medium leading-tight text-text-primary">
-                {activeContent.headline}
+                {IDENTITY.headline}
               </h2>
               <p className="text-lg text-text-secondary font-medium leading-relaxed max-w-2xl">
-                {activeContent.tagline} {profile.tagline}
+                {profile.tagline}
               </p>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 pt-4">
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold text-text-primary uppercase tracking-widest border-b border-border pb-2">
-                    {activeContent.philosophyTitle}
+                    {IDENTITY.philosophyTitle}
                   </h4>
                   <p className="text-sm text-text-secondary font-medium leading-relaxed">
-                    {activeContent.philosophyText}
+                    {IDENTITY.philosophyText}
                   </p>
                 </div>
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold text-text-primary uppercase tracking-widest border-b border-border pb-2">
-                    {activeContent.focusTitle}
+                    {IDENTITY.focusTitle}
                   </h4>
                   <p className="text-sm text-text-secondary font-medium leading-relaxed">
-                    {activeContent.focusText}
+                    {IDENTITY.focusText}
                   </p>
                 </div>
               </div>
@@ -266,67 +216,55 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
                   <Wrench size={10} className="group-hover:scale-110 transition-transform" />
                 </button>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Skills & Experience Summary */}
+      {/* Work Preview */}
       <section className="py-14 lg:py-28 px-5 md:px-8 lg:px-24">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24">
-          <div>
-            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-12 block">SKILLS</span>
-            <div className="space-y-12">
-              {profile.skills && profile.skills.map((skill: any) => (
-                <div key={skill.category} className="flex gap-12">
-                  <h4 className="w-1/3 text-xs font-bold text-accent italic uppercase tracking-widest">{skill.category}</h4>
-                  <div className="w-2/3 flex flex-wrap gap-x-6 gap-y-2">
-                    {skill.items && skill.items.map((item: string) => (
-                      <span key={item} className="text-sm font-medium text-text-secondary">{item}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] block">WORK OVERVIEW</span>
+              <h3 className="text-3xl lg:text-5xl font-luxury font-medium text-text-primary leading-tight">
+                Start with the right section.
+              </h3>
+              <p className="text-sm text-text-secondary font-medium leading-relaxed">
+                The home page keeps the story short. Full experience and project details each have a dedicated page for deeper review.
+              </p>
             </div>
+            <button
+              onClick={() => handleNavClick("company")}
+              className="px-5 py-3 bg-text-primary hover:bg-accent text-background hover:text-accent-foreground text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer shrink-0"
+            >
+              View Full Experience
+            </button>
           </div>
-          <div>
-            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-12 block">EXPERIENCE</span>
-            <div className="space-y-12">
-              {profile.experienceTimeline && profile.experienceTimeline.map((exp: any, index: number) => (
-                <div key={index} className="space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 border-b border-border pb-8">
-                    <div>
-                      <h4 className="text-xl font-luxury font-bold text-text-primary mb-1">{exp.company}</h4>
-                      <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">{exp.role}</p>
-                    </div>
-                    <p className="text-xs font-bold text-accent uppercase tracking-widest shrink-0">{exp.period.toUpperCase()}</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {workActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={action.label}
+                  onClick={() => handleNavClick(action.tab)}
+                  className="p-5 bg-surface border border-border hover:border-accent/50 rounded-2xl text-left transition-all duration-300 cursor-pointer group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center mb-5">
+                    <Icon size={17} />
                   </div>
-                  <div className="pt-2">
-                    <h4 className="text-xs font-bold text-text-primary uppercase tracking-widest mb-4">Recognition</h4>
-                    <p className="text-sm text-text-secondary font-medium italic leading-relaxed">
-                      "{exp.description}"
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  <h4 className="text-sm font-bold text-text-primary uppercase tracking-wider group-hover:text-accent transition-colors">
+                    {action.label}
+                  </h4>
+                  <p className="text-xs text-text-secondary font-medium leading-relaxed mt-2">
+                    {action.description}
+                  </p>
+                </button>
+              );
+            })}
           </div>
         </div>
-      </section>
-
-      {/* Shipped Work Teaser Banner */}
-      <section className="py-14 lg:py-24 px-5 md:px-8 lg:px-24 bg-surface flex flex-col items-center text-center border-t border-border">
-        <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-4 block">SHIPPED BLUEPRINTS</span>
-        <h3 className="text-3xl lg:text-5xl font-luxury font-medium mb-6 text-text-primary">Case Studies & Architectures</h3>
-        <p className="text-base text-text-secondary font-medium max-w-xl mb-10 leading-relaxed">
-          Explore in-depth technical breakdowns of Healthcare ERP systems, candidate onboarding engines, and live vehicle marketplace networks built under enterprise repository patterns.
-        </p>
-        <button 
-          onClick={() => handleNavClick("work")}
-          className="px-8 py-4 bg-text-primary hover:bg-accent hover:text-accent-foreground text-background text-xs font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer shadow-lg"
-        >
-          Go to Dedicated Work Tab
-        </button>
       </section>
     </>
   );

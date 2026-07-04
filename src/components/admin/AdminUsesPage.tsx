@@ -14,7 +14,6 @@ import {
   Edit2, 
   Trash2, 
   Wrench, 
-  RefreshCw, 
   ChevronUp, 
   ChevronDown, 
   X, 
@@ -25,6 +24,7 @@ import {
   Tag
 } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { PublishToggle } from "./PublishToggle";
 
 export const AdminUsesPage: React.FC = () => {
   const [categories, setCategories] = useState<UsesCategory[]>([]);
@@ -50,6 +50,7 @@ export const AdminUsesPage: React.FC = () => {
 
   // Deletion locks
   const [purgatoryCatId, setPurgatoryCatId] = useState<string | null>(null);
+  const [togglingCatId, setTogglingCatId] = useState<string | null>(null);
   const [purgatoryItemId, setPurgatoryItemId] = useState<{ catId: string; itemID: string } | null>(null);
 
   const fetchCategories = async () => {
@@ -154,6 +155,22 @@ export const AdminUsesPage: React.FC = () => {
       showToast("Error deleting category.", "error");
     } finally {
       setPurgatoryCatId(null);
+    }
+  };
+
+  const handleToggleCatPublish = async (cat: UsesCategory) => {
+    const next = cat.published === false;
+    setTogglingCatId(cat.id);
+    try {
+      await updateUsesCategory(cat.id, { ...cat, published: next });
+      await persistCategoriesState(
+        categories.map((c) => (c.id === cat.id ? { ...c, published: next } : c))
+      );
+      showToast(next ? "Category published to the portal." : "Category unpublished — hidden from the portal.");
+    } catch (err) {
+      showToast("Failed to update publish state.", "error");
+    } finally {
+      setTogglingCatId(null);
     }
   };
 
@@ -314,14 +331,6 @@ export const AdminUsesPage: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={fetchCategories}
-            className="p-3 border border-border bg-surface hover:border-accent hover:text-accent rounded-xl cursor-pointer transition-colors"
-            title="Refresh workbench"
-          >
-            <RefreshCw size={14} />
-          </button>
-          
-          <button
             id="admin-new-category-btn"
             onClick={handleOpenCreateCat}
             className="inline-flex items-center gap-2 px-5 py-3 bg-text-primary text-background hover:bg-accent hover:text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all duration-300 shadow-md cursor-pointer"
@@ -414,6 +423,12 @@ export const AdminUsesPage: React.FC = () => {
                         <ChevronDown size={13} />
                       </button>
                     </div>
+
+                    <PublishToggle
+                      published={cat.published !== false}
+                      busy={togglingCatId === cat.id}
+                      onToggle={() => handleToggleCatPublish(cat)}
+                    />
 
                     <button
                       id={`add-item-btn-${cat.id}`}

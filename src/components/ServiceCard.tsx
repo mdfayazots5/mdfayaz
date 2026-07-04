@@ -4,11 +4,11 @@ import { Service } from "../models/portfolio.model";
 
 interface ServiceCardProps {
   service: Service;
-  onViewDetails: (service: Service) => void;
 }
 
-export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onViewDetails }) => {
-  // Safe dynamic lucide-react icon rendering
+export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
+  const [expanded, setExpanded] = React.useState(false);
+
   const renderIcon = (iconName: string) => {
     const IconComponent = (Icons as any)[iconName];
     if (IconComponent) {
@@ -20,19 +20,27 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onViewDetails
   const isActive = service.status === "Active";
 
   return (
-    <div
+    <article
       id={`service-card-${service.id}`}
-      className={`flex flex-col justify-between h-full bg-surface border border-border rounded-3xl p-6 md:p-8 hover:border-accent/55 hover:shadow-lg transition-all duration-300 text-left relative ${
+      tabIndex={0}
+      aria-expanded={expanded}
+      onClick={() => setExpanded((value) => !value)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          setExpanded((value) => !value);
+        }
+      }}
+      className={`flex flex-col h-full bg-surface border border-border rounded-xl p-4 md:p-5 hover:border-accent/55 focus:border-accent/55 hover:shadow-md focus:shadow-md outline-none transition-all duration-300 text-left cursor-pointer ${
         !isActive ? "opacity-75 hover:opacity-100" : ""
       }`}
     >
-      <div className="space-y-5">
-        {/* Top Header Row with Icon and Status pill */}
-        <div className="flex items-center justify-between">
-          <div className="p-3 bg-background border border-border rounded-2xl shadow-sm flex items-center justify-center">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="p-2.5 bg-background border border-border rounded-lg shadow-sm flex items-center justify-center">
             {renderIcon(service.icon)}
           </div>
-          
+
           <span
             className={`px-2.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded-lg border ${
               isActive
@@ -44,29 +52,41 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onViewDetails
           </span>
         </div>
 
-        {/* Headings */}
-        <div className="space-y-1.5">
-          <h3 className="text-lg md:text-xl font-bold text-text-primary tracking-tight font-luxury">
+        <div className="space-y-2">
+          <h3 className="text-lg md:text-xl font-bold text-text-primary tracking-tight font-luxury leading-tight">
             {service.name}
           </h3>
+          <p className="text-sm text-text-secondary leading-relaxed font-normal">
+            {service.tagline}
+          </p>
+          <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary">
+            <span>Click for scope</span>
+            <Icons.ChevronDown
+              size={13}
+              className={`transition-transform duration-300 ${expanded ? "rotate-180 text-accent" : ""}`}
+            />
+          </div>
         </div>
-
-        {/* Tagline */}
-        <p className="text-sm text-text-secondary leading-relaxed font-normal">
-          {service.tagline}
-        </p>
       </div>
 
-      {/* View Details Action Trigger */}
-      <div className="mt-6 pt-4 border-t border-border/40 flex items-center justify-between">
-        <button
-          onClick={() => onViewDetails(service)}
-          className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-accent hover:text-accent/80 transition-colors uppercase tracking-widest cursor-pointer"
-        >
-          <Icons.Info size={13} />
-          <span>View Details</span>
-        </button>
+      <div className={`grid transition-all duration-300 ease-out ${expanded ? "grid-rows-[1fr] opacity-100 mt-5" : "grid-rows-[0fr] opacity-0"}`}>
+        <div className="overflow-hidden space-y-4 border-t border-border pt-4">
+          <p className="text-xs md:text-sm text-text-secondary leading-relaxed font-medium">
+            {service.description}
+          </p>
+
+          {service.highlights && service.highlights.length > 0 && (
+            <ul className="space-y-2">
+              {service.highlights.slice(0, 4).map((highlight, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-xs text-text-secondary font-medium leading-relaxed">
+                  <Icons.CheckCircle size={13} className="text-accent shrink-0 mt-0.5" />
+                  <span>{highlight}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   );
 };

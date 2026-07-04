@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Shield } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowLeft, ChevronDown, Shield } from "lucide-react";
 import { PrivacySection } from "../models/portfolio.model";
 import { getPrivacySections } from "../services/api";
 import { SectionLoader, SectionError } from "./SectionState";
@@ -13,6 +14,7 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -20,7 +22,8 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
     setError(false);
     getPrivacySections()
       .then((data) => {
-        if (isMounted) setSections(data || []);
+        // Only published sections reach the portal (absent flag = published).
+        if (isMounted) setSections((data || []).filter((s) => s.published !== false));
       })
       .catch(() => {
         if (isMounted) setError(true);
@@ -52,7 +55,7 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
 
   return (
     <div id="privacy-page-root" className="bg-background min-h-screen pt-36 pb-24 text-left select-none text-text-primary">
-      <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-24">
         {/* Main 2-column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-start">
           
@@ -95,7 +98,7 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
 
           {/* Right Column - Policy Content Card */}
           <div className="lg:col-span-7">
-            <div className="bg-surface p-8 sm:p-12 rounded-[2rem] border border-border shadow-xl shadow-text-secondary/5 space-y-10">
+            <div className="bg-surface p-3 sm:p-6 rounded-2xl border border-border shadow-xl shadow-text-secondary/5 space-y-3">
 
               {sections.length === 0 && (
                 <p className="text-sm text-text-secondary font-medium italic leading-relaxed">
@@ -103,20 +106,51 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
                 </p>
               )}
 
-              {sections.map((sec) => (
-                <div key={sec.id} className="space-y-3" id={sec.id}>
-                  <h3 className="text-lg font-luxury font-bold text-text-primary">
-                    {sec.title}
-                  </h3>
-                  <div className="space-y-2">
-                    {sec.body.split("\n\n").map((para, idx) => (
-                      <p key={idx} className="text-sm text-text-secondary font-medium leading-relaxed">
-                        {para}
-                      </p>
-                    ))}
-                  </div>
+              {sections.map((sec) => {
+                const isOpen = expandedId === sec.id;
+                return (
+                <div
+                  key={sec.id}
+                  id={sec.id}
+                  className={`border rounded-xl overflow-hidden transition-all ${
+                    isOpen ? "border-accent/40 bg-background/30" : "border-border bg-surface hover:border-text-secondary/30"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(isOpen ? null : sec.id)}
+                    className="w-full px-4 sm:px-5 py-4 flex items-center justify-between gap-4 text-left cursor-pointer"
+                  >
+                    <h3 className="text-base sm:text-lg font-luxury font-bold text-text-primary leading-tight">
+                      {sec.title}
+                    </h3>
+                    <ChevronDown
+                      size={15}
+                      className={`text-text-secondary transition-transform duration-300 shrink-0 ${isOpen ? "rotate-180 text-accent" : ""}`}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                      >
+                        <div className="px-4 sm:px-5 pb-5 pt-1 space-y-2 border-t border-border">
+                          {sec.body.split("\n\n").map((para, idx) => (
+                            <p key={idx} className="text-sm text-text-secondary font-medium leading-relaxed">
+                              {para}
+                            </p>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              ))}
+                );
+              })}
 
             </div>
           </div>

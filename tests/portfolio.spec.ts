@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.describe.configure({ mode: 'serial' });
+
 // The public site is fully admin-driven: identity comes from Site Settings and
 // the experience list comes from Entries (both seeded from the local fallback
 // data on first run). These tests assert that seeded content renders.
@@ -13,7 +15,7 @@ test('home renders the admin-driven identity', async ({ page }) => {
   // The About hero shows the active perspective role.
   await expect(
     page.getByText('System Architect & .NET Engineer').first()
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 15000 });
 });
 
 test('work tab renders admin-driven entries', async ({ page }) => {

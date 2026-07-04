@@ -6,7 +6,7 @@ import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
 import { jsonResponse, errorResponse, notFoundResponse, PUBLIC_CACHE } from '../response';
 
-const EDITABLE_CATEGORY_FIELDS: readonly (keyof UsesCategory)[] = ['name', 'subtitle'];
+const EDITABLE_CATEGORY_FIELDS: readonly (keyof UsesCategory)[] = ['name', 'subtitle', 'published'];
 const EDITABLE_ITEM_FIELDS: readonly (keyof UsesItem)[] = ['name', 'description', 'tag'];
 
 export async function handleGetUses(request: Request, env: Env): Promise<Response> {

@@ -19,10 +19,12 @@ export const UsesPage: React.FC = () => {
     getUsesCategories()
       .then((data) => {
         if (isMounted) {
-          setCategories(data || []);
+          // Only published categories reach the portal (absent flag = published).
+          const visible = (data || []).filter((cat) => cat.published !== false);
+          setCategories(visible);
           const initialOpen: Record<string, boolean> = {};
-          (data || []).forEach((cat) => {
-            initialOpen[cat.id] = true;
+          visible.forEach((cat, index) => {
+            initialOpen[cat.id] = index === 0;
           });
           setOpenSections(initialOpen);
         }
@@ -65,30 +67,38 @@ export const UsesPage: React.FC = () => {
   }
 
   return (
-    <div id="uses-page-root" className="bg-background min-h-screen pt-36 pb-24 text-left select-none text-text-primary">
-      <div className="max-w-4xl mx-auto px-6 md:px-8">
+    <div id="uses-page-root" className="bg-background min-h-screen pt-32 md:pt-36 pb-24 text-left select-none text-text-primary">
+      <div className="max-w-5xl mx-auto px-4 md:px-8">
         
         {/* Breadcrumb Setup Icon */}
         <div className="flex items-center gap-2 text-text-secondary font-mono text-[10px] font-bold uppercase tracking-widest">
           <Wrench size={11} className="text-accent" />
-          <span>My Setup</span>
+          <span>Daily Setup</span>
         </div>
 
         {/* Header Title Section */}
-        <div className="mt-4 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-10">
-          <div>
-            <h1 className="text-5xl md:text-6xl font-mono font-bold tracking-tight text-text-primary">
-              Uses
+        <div className="mt-4 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8 md:pb-10">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl md:text-6xl font-luxury font-bold tracking-tight text-text-primary">
+              Daily Stack
             </h1>
             <p className="text-sm md:text-base text-text-secondary font-medium mt-3 leading-relaxed">
-              The tools, gear, and software I reach for every day.
+              A practical snapshot of the hardware, software, frameworks, and utilities I rely on to build, debug, and ship production work.
             </p>
+            <div className="flex flex-wrap gap-2 mt-5">
+              <span className="px-3 py-1 rounded-lg border border-border bg-surface text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                {categories.length} categories
+              </span>
+              <span className="px-3 py-1 rounded-lg border border-border bg-surface text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                {categories.reduce((sum, cat) => sum + cat.items.length, 0)} tools
+              </span>
+            </div>
           </div>
 
           {/* Collapse/Expand Toggle controller */}
           <button
             onClick={toggleAll}
-            className="text-[10px] font-bold tracking-[0.2em] text-text-secondary hover:text-accent transition-colors uppercase cursor-pointer py-1 block self-start md:self-end"
+            className="px-3 py-2 rounded-lg border border-border bg-surface text-[10px] font-bold tracking-[0.2em] text-text-secondary hover:text-accent hover:border-accent/40 transition-colors uppercase cursor-pointer self-start md:self-end"
           >
             {allCollapsed ? "EXPAND ALL" : "COLLAPSE ALL"}
           </button>
@@ -102,15 +112,21 @@ export const UsesPage: React.FC = () => {
             <p className="text-xs text-text-secondary leading-relaxed">No setup categories have been published yet. Check back soon.</p>
           </div>
         ) : (
-        <div className="divide-y divide-border">
+        <div className="mt-8 space-y-3">
           {categories.map((category) => {
             const isOpen = !!openSections[category.id];
             return (
-              <div key={category.id} className="py-8 first:pt-4" id={`uses-section-${category.id}`}>
+              <div
+                key={category.id}
+                className={`rounded-2xl border transition-all overflow-hidden ${
+                  isOpen ? "bg-surface border-accent/35 shadow-sm" : "bg-surface/70 border-border hover:border-text-secondary/30"
+                }`}
+                id={`uses-section-${category.id}`}
+              >
                 {/* Category Header Bar */}
                 <button
                   onClick={() => toggleSection(category.id)}
-                  className="w-full flex items-center justify-between text-left cursor-pointer group focus:outline-none"
+                  className="w-full flex items-center justify-between text-left cursor-pointer group focus:outline-none px-4 md:px-5 py-4"
                 >
                   <div className="space-y-0.5">
                     <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-text-primary group-hover:text-accent transition-colors">
@@ -135,11 +151,11 @@ export const UsesPage: React.FC = () => {
                       transition={{ duration: 0.25, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <div className="space-y-6 pt-6 pl-1 pr-1 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 md:px-4 pb-4">
                         {category.items.map((item, index) => (
                           <div 
                             key={index} 
-                            className="group/item flex justify-between items-start p-4 hover:bg-surface/80 rounded-2xl transition-all duration-350 border border-transparent hover:border-border"
+                            className="group/item flex justify-between items-start p-3 bg-background/45 hover:bg-background rounded-xl transition-all duration-300 border border-border/60"
                           >
                             <div className="space-y-1.5 text-left">
                               <div className="flex items-center gap-2">

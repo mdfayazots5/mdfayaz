@@ -16,7 +16,9 @@ import {
   CheckCircle, 
   Sliders,
   AlertTriangle,
-  Tag
+  Tag,
+  GraduationCap,
+  IdCard
 } from "lucide-react";
 
 export const AdminAboutPage: React.FC = () => {
@@ -34,7 +36,12 @@ export const AdminAboutPage: React.FC = () => {
     const fetchProfile = async () => {
       try {
         const data = await getAboutProfile();
-        setProfile(data);
+        // Normalize arrays that may be absent on profiles stored before these fields existed.
+        setProfile({
+          ...data,
+          personalDetails: data.personalDetails ?? [],
+          education: data.education ?? [],
+        });
       } catch (err) {
         console.error("Failed to load about profile:", err);
         showToast("Error loading about profile.", "error");
@@ -181,6 +188,66 @@ export const AdminAboutPage: React.FC = () => {
     setProfile({ ...profile, experienceTimeline: updatedTimeline });
   };
 
+  // Personal Details operations (string-keyed: "pd_" + Date.now() per ID convention)
+  const handleAddPersonalDetail = () => {
+    if (!profile) return;
+    const newDetail = { id: `pd_${Date.now()}`, label: "New Detail", value: "" };
+    setProfile({ ...profile, personalDetails: [...(profile.personalDetails ?? []), newDetail] });
+    showToast("Added new personal detail.");
+  };
+
+  const handleUpdatePersonalDetail = (index: number, field: "label" | "value", val: string) => {
+    if (!profile) return;
+    const updated = [...(profile.personalDetails ?? [])];
+    updated[index] = { ...updated[index], [field]: val };
+    setProfile({ ...profile, personalDetails: updated });
+  };
+
+  const handleDeletePersonalDetail = (index: number) => {
+    if (!profile) return;
+    const updated = (profile.personalDetails ?? []).filter((_, i) => i !== index);
+    setProfile({ ...profile, personalDetails: updated });
+    showToast("Personal detail removed.");
+  };
+
+  // Education operations (string-keyed: "edu_" + Date.now())
+  const handleAddEducation = () => {
+    if (!profile) return;
+    const newEdu = {
+      id: `edu_${Date.now()}`,
+      qualification: "New Qualification",
+      institution: "Institution name",
+      period: "2020 – 2024",
+    };
+    setProfile({ ...profile, education: [...(profile.education ?? []), newEdu] });
+    showToast("Added new education entry.");
+  };
+
+  const handleUpdateEducation = (index: number, field: "qualification" | "institution" | "period", val: string) => {
+    if (!profile) return;
+    const updated = [...(profile.education ?? [])];
+    updated[index] = { ...updated[index], [field]: val };
+    setProfile({ ...profile, education: updated });
+  };
+
+  const handleDeleteEducation = (index: number) => {
+    if (!profile) return;
+    const updated = (profile.education ?? []).filter((_, i) => i !== index);
+    setProfile({ ...profile, education: updated });
+    showToast("Education entry removed.");
+  };
+
+  const handleSortEducation = (index: number, direction: "up" | "down") => {
+    if (!profile) return;
+    const list = [...(profile.education ?? [])];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= list.length) return;
+    const temp = list[index];
+    list[index] = list[targetIndex];
+    list[targetIndex] = temp;
+    setProfile({ ...profile, education: list });
+  };
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -216,7 +283,7 @@ export const AdminAboutPage: React.FC = () => {
         <div>
           <h2 className="text-xl font-luxury font-bold tracking-tight uppercase">About Profile Settings</h2>
           <p className="text-xs text-text-secondary mt-1">
-            Modify developer persona tagline, tri-perspective bios, skill cards, and the career roadmap
+            Modify tagline, tri-perspective bios, skill cards, career roadmap, personal details, and education
           </p>
         </div>
       </div>
@@ -592,7 +659,189 @@ export const AdminAboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. Command Save Trigger Bar */}
+      {/* 5. Personal Details Section */}
+      <section className="space-y-6">
+        <div className="flex border-b border-border pb-3 justify-between items-center">
+          <div className="flex items-center gap-2">
+            <IdCard className="text-accent" size={16} />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
+              Personal Details
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddPersonalDetail}
+            className="flex items-center gap-1.5 px-4 py-2 border border-border bg-surface hover:border-accent/40 text-text-primary hover:text-accent rounded-xl text-[10px] font-mono font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-sm"
+          >
+            <Plus size={12} />
+            <span>Add Detail</span>
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {(profile.personalDetails ?? []).length === 0 ? (
+            <div className="bg-surface p-8 text-center rounded-2xl border border-border">
+              <p className="text-xs text-text-secondary italic">No personal details configured. Add labels like Location, Languages, or Email.</p>
+            </div>
+          ) : (
+            (profile.personalDetails ?? []).map((detail, index) => (
+              <div
+                key={detail.id}
+                className="bg-surface border border-border rounded-2xl p-4 flex flex-col md:flex-row md:items-end gap-3 shadow-sm"
+              >
+                <div className="flex-1 space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                    Label
+                  </label>
+                  <input
+                    type="text"
+                    value={detail.label}
+                    onChange={(e) => handleUpdatePersonalDetail(index, "label", e.target.value)}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                    placeholder="e.g. Location"
+                  />
+                </div>
+                <div className="flex-[2] space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                    Value
+                  </label>
+                  <input
+                    type="text"
+                    value={detail.value}
+                    onChange={(e) => handleUpdatePersonalDetail(index, "value", e.target.value)}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                    placeholder="e.g. Hyderabad, Telangana, India"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleDeletePersonalDetail(index)}
+                  className="p-2 border border-red-500/10 bg-red-500/5 text-red-500 hover:bg-red-500/10 rounded-xl cursor-pointer shrink-0 self-end"
+                  title="Delete Detail"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* 6. Education Section */}
+      <section className="space-y-6">
+        <div className="flex border-b border-border pb-3 justify-between items-center">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="text-accent" size={16} />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">
+              Education
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddEducation}
+            className="flex items-center gap-1.5 px-4 py-2 border border-border bg-surface hover:border-accent/40 text-text-primary hover:text-accent rounded-xl text-[10px] font-mono font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-sm"
+          >
+            <Plus size={12} />
+            <span>Add Education</span>
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {(profile.education ?? []).length === 0 ? (
+            <div className="bg-surface p-8 text-center rounded-2xl border border-border">
+              <p className="text-xs text-text-secondary italic">No education entries configured.</p>
+            </div>
+          ) : (
+            (profile.education ?? []).map((edu, index) => (
+              <div
+                key={edu.id}
+                className="bg-surface border border-border rounded-2xl p-6 space-y-4 shadow-sm"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-border/60 pb-3 gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 bg-accent/10 border border-accent/20 rounded-lg flex items-center justify-center text-[10px] font-mono font-bold text-accent">
+                      {index + 1}
+                    </span>
+                    <span className="text-xs font-mono font-semibold text-text-secondary uppercase">
+                      Education Entry
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => handleSortEducation(index, "up")}
+                      className="p-1.5 border border-border bg-background rounded-lg hover:text-accent disabled:opacity-40 disabled:hover:text-text-secondary cursor-pointer"
+                      title="Move up"
+                    >
+                      <ArrowUp size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === (profile.education ?? []).length - 1}
+                      onClick={() => handleSortEducation(index, "down")}
+                      className="p-1.5 border border-border bg-background rounded-lg hover:text-accent disabled:opacity-40 disabled:hover:text-text-secondary cursor-pointer"
+                      title="Move down"
+                    >
+                      <ArrowDown size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteEducation(index)}
+                      className="p-1.5 border border-red-500/10 bg-red-500/5 text-red-500 hover:bg-red-500/10 rounded-lg cursor-pointer"
+                      title="Delete Entry"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5 md:col-span-2">
+                    <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                      Qualification / Course
+                    </label>
+                    <input
+                      type="text"
+                      value={edu.qualification}
+                      onChange={(e) => handleUpdateEducation(index, "qualification", e.target.value)}
+                      className="w-full px-3 py-2 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                      placeholder="e.g. Bachelor of Arts"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                      Period
+                    </label>
+                    <input
+                      type="text"
+                      value={edu.period}
+                      onChange={(e) => handleUpdateEducation(index, "period", e.target.value)}
+                      className="w-full px-3 py-2 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                      placeholder="e.g. Jun 2019 – Jul 2022"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                    Institution / University
+                  </label>
+                  <input
+                    type="text"
+                    value={edu.institution}
+                    onChange={(e) => handleUpdateEducation(index, "institution", e.target.value)}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                    placeholder="e.g. Palamuru University, Telangana"
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* 7. Command Save Trigger Bar */}
       <div className="pt-6 border-t border-border flex justify-end">
         <button
           type="button"

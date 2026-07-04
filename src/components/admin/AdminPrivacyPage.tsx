@@ -7,8 +7,9 @@ import {
   reorderPrivacySections
 } from "../../services/api";
 import { PrivacySection } from "../../models/portfolio.model";
-import { Plus, Edit2, Trash2, Shield, RefreshCw, ChevronUp, ChevronDown, X } from "lucide-react";
+import { Plus, Edit2, Trash2, Shield, ChevronUp, ChevronDown, X } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { PublishToggle } from "./PublishToggle";
 
 export const AdminPrivacyPage: React.FC = () => {
   const [sections, setSections] = useState<PrivacySection[]>([]);
@@ -24,6 +25,7 @@ export const AdminPrivacyPage: React.FC = () => {
 
   // Deletion purgatory lock
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const fetchSections = async () => {
     setLoading(true);
@@ -92,6 +94,20 @@ export const AdminPrivacyPage: React.FC = () => {
     }
   };
 
+  const handleTogglePublish = async (sec: PrivacySection) => {
+    const next = sec.published === false;
+    setTogglingId(sec.id);
+    try {
+      await updatePrivacySection(sec.id, { ...sec, published: next });
+      setSections((prev) => prev.map((s) => (s.id === sec.id ? { ...s, published: next } : s)));
+      showToast(next ? "Section published to the portal." : "Section unpublished — hidden from the portal.");
+    } catch (err) {
+      showToast("Failed to update publish state.", "error");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const handleConfirmDelete = async (id: string) => {
     try {
       const success = await deletePrivacySection(id);
@@ -152,14 +168,6 @@ export const AdminPrivacyPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={fetchSections}
-            className="p-3 border border-border bg-surface hover:text-accent rounded-xl cursor-pointer hover:border-accent"
-            title="Refresh database"
-          >
-            <RefreshCw size={14} />
-          </button>
-          
           <button
             id="admin-new-privacy-btn"
             onClick={handleOpenCreateModal}
@@ -241,6 +249,12 @@ export const AdminPrivacyPage: React.FC = () => {
                       <ChevronDown size={13} />
                     </button>
                   </div>
+
+                  <PublishToggle
+                    published={sec.published !== false}
+                    busy={togglingId === sec.id}
+                    onToggle={() => handleTogglePublish(sec)}
+                  />
 
                   <button
                     id={`edit-priv-${sec.id}`}

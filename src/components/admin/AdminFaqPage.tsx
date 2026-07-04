@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { getFaqItems, createFaqItem, updateFaqItem, deleteFaqItem } from "../../services/api";
 import { FaqItem } from "../../models/portfolio.model";
-import { Plus, Edit2, Trash2, HelpCircle, RefreshCw, X, FolderMinus, AlertCircle } from "lucide-react";
+import { Plus, Edit2, Trash2, HelpCircle, X } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { PublishToggle } from "./PublishToggle";
 
 export const AdminFaqPage: React.FC = () => {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deletingProgress, setDeletingProgress] = useState(false);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   
   // Modal state
@@ -126,6 +127,25 @@ export const AdminFaqPage: React.FC = () => {
     }
   };
 
+  const handleTogglePublish = async (faq: FaqItem) => {
+    const next = faq.published === false;
+    setTogglingId(faq.id);
+    setMessage(null);
+    try {
+      await updateFaqItem(faq.id, { ...faq, published: next });
+      setFaqs((prev) => prev.map((f) => (f.id === faq.id ? { ...f, published: next } : f)));
+      setMessage({
+        text: next ? "FAQ published — now visible on the portal." : "FAQ unpublished — hidden from the portal.",
+        type: "success",
+      });
+    } catch (err) {
+      setMessage({ text: "Failed to update publish state.", type: "error" });
+    } finally {
+      setTogglingId(null);
+      setTimeout(() => setMessage(null), 4000);
+    }
+  };
+
   const handleTriggerDelete = (id: number) => {
     setDeletingId(id);
     setMessage(null);
@@ -155,10 +175,7 @@ export const AdminFaqPage: React.FC = () => {
     }
   };
 
-  const filteredFaqs = faqs.filter(faq => {
-    if (selectedCategory === "all") return true;
-    return faq.category === selectedCategory;
-  });
+  const filteredFaqs = faqs;
 
   if (loading) {
     return <LoadingScreen />;
@@ -177,14 +194,6 @@ export const AdminFaqPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={fetchFaqs}
-            className="p-3 border border-border hover:border-accent bg-surface hover:text-accent rounded-xl cursor-pointer transition-colors"
-            title="Refresh database"
-          >
-            <RefreshCw size={14} />
-          </button>
-          
           <button
             id="admin-new-faq-btn"
             onClick={handleOpenCreateModal}
@@ -208,33 +217,6 @@ export const AdminFaqPage: React.FC = () => {
           {message.text}
         </div>
       )}
-
-      {/* Category Pills Filters */}
-      <div className="flex flex-wrap gap-2 pb-2 border-b border-border">
-        <button
-          onClick={() => setSelectedCategory("all")}
-          className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-            selectedCategory === "all"
-              ? "bg-text-primary text-background"
-              : "bg-surface border border-border text-text-secondary hover:text-text-primary hover:border-accent/40"
-          }`}
-        >
-          Viewing: All
-        </button>
-        {uniqueCategories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-              selectedCategory === cat
-                ? "bg-text-primary text-background"
-                : "bg-surface border border-border text-text-secondary hover:text-text-primary hover:border-accent/40"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
 
       {/* FAQ list Grid / Blocks */}
       {filteredFaqs.length === 0 ? (
@@ -275,6 +257,11 @@ export const AdminFaqPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0 self-end md:self-start">
+                  <PublishToggle
+                    published={faq.published !== false}
+                    busy={togglingId === faq.id}
+                    onToggle={() => handleTogglePublish(faq)}
+                  />
                   <button
                     id={`edit-faq-${faq.id}`}
                     onClick={() => handleOpenEditModal(faq)}

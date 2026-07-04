@@ -19,9 +19,11 @@ export const usePortfolioData = (portfolioType: number) => {
   useEffect(() => {
     let isMounted = true;
     Promise.all([getEntries(), getSiteSettings(), getAboutProfile()])
-      .then(([entries, settings, about]) => {
+      .then(([allEntries, settings, about]) => {
         if (isMounted) {
           const timeline = about.experienceTimeline?.[0];
+          // Only published entries reach the public portal (absent flag = published).
+          const entries = allEntries.filter((entry) => entry.published !== false);
           const companyEntries = entries.filter((entry) => entry.type === "company");
           const personalEntries = entries.filter((entry) => entry.type === "personal");
           const domainCount = new Set(entries.map((entry) => entry.categoryTag).filter(Boolean)).size;

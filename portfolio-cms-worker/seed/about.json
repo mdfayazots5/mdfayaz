@@ -73,5 +73,24 @@
       "period": "Feb 2023 — May 2026",
       "description": "Recognized with the AI Marathon Award for pioneering AI-driven development workflows and delivering high-impact modular systems."
     }
+  ],
+  "personalDetails": [
+    { "id": "pd_location", "label": "Location", "value": "Hyderabad, Telangana, India" },
+    { "id": "pd_email", "label": "Email", "value": "mdfayazots5@gmail.com" },
+    { "id": "pd_phone", "label": "Phone", "value": "+91 70954 41960" }
+  ],
+  "education": [
+    {
+      "id": "edu_ba",
+      "qualification": "Bachelor of Arts",
+      "institution": "Govt. Model Degree College, Kalwakurthy — Palamuru University, Telangana",
+      "period": "Jun 2019 – Jul 2022"
+    },
+    {
+      "id": "edu_dotnet",
+      "qualification": ".NET Full Stack Developer (Course)",
+      "institution": "Sathya Technologies, Ameerpet, Hyderabad",
+      "period": "Aug 2022 – Jan 2023"
+    }
   ]
 }

@@ -7,11 +7,12 @@ import { ContactForm } from "./ContactForm";
 
 import { UsesPage } from "./UsesPage";
 import { AboutPage } from "./AboutPage";
+import { AboutDetailsPage } from "./AboutDetailsPage";
 import { PrivacyPage } from "./PrivacyPage";
 import { FaqPage } from "./FaqPage";
 import { ProductsPage } from "./ProductsPage";
 import { ServicesPage } from "./ServicesPage";
-import { Github, Linkedin, BookOpen, User, Wrench, Mail, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Palette } from "lucide-react";
+import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Palette, FileText } from "lucide-react";
 import { ThemeSidebar } from "./ThemeSidebar";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./ThemeProvider";
@@ -26,12 +27,11 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const { master } = data;
   const { applyAdminDefault } = useTheme();
 
-  const [activeTab, setActiveTab] = React.useState<"about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("about");
+  const [activeTab, setActiveTab] = React.useState<"about" | "aboutme" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("about");
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isThemePanelOpen, setIsThemePanelOpen] = React.useState(false);
   const [isWorkDropdownOpen, setIsWorkDropdownOpen] = React.useState(false);
   const [workSubTab, setWorkSubTab] = React.useState<"company" | "personal" | "products" | "services">("personal");
-  const [selectedCategoryTag, setSelectedCategoryTag] = React.useState<string>("All");
   const [settings, setSettings] = React.useState<SiteSettings | null>(null);
   const [scrolled, setScrolled] = React.useState(false);
   const hoverTimeout = React.useRef<number | null>(null);
@@ -84,6 +84,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     if (tab === "work") {
       titleSet = "Work | Mohammed Fayaz";
       descSet = "Healthcare, HRMS, and marketplace platform projects by Mohammed Fayaz.";
+    } else if (tab === "aboutme") {
+      titleSet = "About | Mohammed Fayaz";
+      descSet = "Learn more about Mohammed Fayaz — background, core skills, and professional experience as a .NET Full Stack Developer.";
     } else if (tab === "products") {
       titleSet = "Projects | Mohammed Fayaz";
       descSet = "Curated showcase of personal projects and self-hosted tools built by Mohammed Fayaz.";
@@ -135,6 +138,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       if (hash === "" || hash === "about") {
         setActiveTab("about");
         updatePageMetadata("about");
+      } else if (hash === "aboutme") {
+        setActiveTab("aboutme");
+        updatePageMetadata("aboutme");
       } else if (hash === "work" || hash === "company") {
         setActiveTab("work");
         setWorkSubTab("company");
@@ -180,7 +186,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     };
   }, []);
 
-  const handleNavClick = (tab: "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "personal" | "company", targetId?: string) => {
+  const handleNavClick = (tab: "about" | "aboutme" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "personal" | "company", targetId?: string) => {
     setIsDropdownOpen(false);
     setIsWorkDropdownOpen(false);
 
@@ -257,9 +263,10 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
             onClick={() => setIsThemePanelOpen(true)}
             aria-label="Open appearance settings"
             title="Appearance — theme & mode"
-            className="cursor-pointer transition-colors hover:text-accent flex items-center"
+            className="cursor-pointer transition-colors hover:text-accent flex items-center gap-1.5"
           >
-            <Palette size={14} />
+            <Palette size={13} />
+            <span className="hidden sm:inline">Theme</span>
           </button>
           <div
             className="relative"
@@ -272,7 +279,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 setIsWorkDropdownOpen(false);
                 setIsDropdownOpen(!isDropdownOpen);
               }}
-              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["about", "uses", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
+              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["about", "aboutme", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
               <span>Home</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
@@ -289,22 +296,12 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 setIsDropdownOpen(false);
                 setIsWorkDropdownOpen(!isWorkDropdownOpen);
               }}
-              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || activeTab === "work" ? "text-accent" : "hover:text-accent"}`}
+              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || ["work", "uses"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
               <span>Work</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
-          <button
-            onClick={() => {
-              setIsDropdownOpen(false);
-              setIsWorkDropdownOpen(false);
-              handleNavClick("contact");
-            }}
-            className={`cursor-pointer transition-colors ${activeTab === "contact" ? "text-accent" : "hover:text-accent"}`}
-          >
-            Contact
-          </button>
         </div>
       </nav>
 
@@ -342,9 +339,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
             </header>
 
             {/* Under-header Content Page Container */}
-            <div className="max-w-5xl mx-auto px-6 md:px-8 pt-8">
+            <div className="max-w-5xl mx-auto px-4 md:px-8 pt-8">
 
-              {/* Sub-filtering pills / Segmented Page Embeds */}
+              {/* Segmented Page Embeds */}
               {(() => {
                 if (workSubTab === "products") {
                   return <ProductsPage showOnlyGrid={true} />;
@@ -356,47 +353,11 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 const activeEntries = (master.projects || []).filter(
                   (p: any) => p.type === workSubTab || p.category === workSubTab
                 );
-                const availableTags = [
-                  "All",
-                  ...Array.from(
-                    new Set(
-                      activeEntries
-                        .map((p: any) => p.categoryTag || p.domain)
-                        .filter(Boolean)
-                    )
-                  )
-                ];
-                const filteredEntries =
-                  selectedCategoryTag === "All"
-                    ? activeEntries
-                    : activeEntries.filter(
-                        (p: any) =>
-                          (p.categoryTag || p.domain) === selectedCategoryTag
-                      );
-
                 return (
                   <>
-                    {availableTags.length > 2 && (
-                      <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-2xl mx-auto px-4">
-                        {availableTags.map((tag: any) => (
-                          <button
-                            key={tag}
-                            onClick={() => setSelectedCategoryTag(tag)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
-                              selectedCategoryTag === tag
-                                ? "bg-accent text-accent-foreground shadow-sm"
-                                : "bg-surface text-text-secondary hover:text-text-primary border border-border"
-                            }`}
-                          >
-                            {tag}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
                     {/* Recruiter-First Simple/Professional Projects List */}
-                    <div className="space-y-10 py-12">
-                      {filteredEntries.map((project: any, idx: number) => (
+                    <div className="space-y-5 py-10">
+                      {activeEntries.map((project: any, idx: number) => (
                         <ProjectCard key={project.id} project={project} index={idx} />
                       ))}
                     </div>
@@ -429,6 +390,8 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
             </section>
           </div>
         )}
+
+        {activeTab === "aboutme" && <AboutDetailsPage handleNavClick={handleNavClick} />}
 
         {activeTab === "uses" && <UsesPage />}
 
@@ -480,9 +443,21 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         )}
 
         {/* Contact Section */}
-        {(activeTab === "about" || activeTab === "work") && (
-          <section id="contact" className="py-24 lg:py-36 px-5 md:px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
-            <div className="max-w-4xl mx-auto space-y-16">
+        {activeTab === "about" && (
+          <section id="contact" className="py-12 md:py-24 lg:py-36 px-5 md:px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
+            <div className="md:hidden max-w-sm mx-auto space-y-5">
+              <h2 className="text-2xl font-luxury font-semibold tracking-tight leading-tight text-text-primary">
+                Ready to talk about a role or project?
+              </h2>
+              <button
+                onClick={() => handleNavClick("contact")}
+                className="w-full px-5 py-3 bg-text-primary hover:bg-accent text-background hover:text-accent-foreground text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer"
+              >
+                Open Contact Form
+              </button>
+            </div>
+
+            <div className="hidden md:block max-w-4xl mx-auto space-y-16">
               <div className="space-y-6">
                 <span className="text-[10px] font-bold text-accent uppercase tracking-[0.6em] block">SECURE CONTACT</span>
                 <h2 className="text-4xl lg:text-6xl font-luxury font-light tracking-tighter leading-none text-text-primary">
@@ -496,17 +471,12 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               {/* Embedded Contact Form Component */}
               <ContactForm candidateEmail={settings?.contactEmail || master.candidate.email} />
 
-              <div className="pt-8 flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16 border-t border-border max-w-2xl mx-auto text-text-primary">
-                <div className="text-center md:text-left">
+              <div className="pt-8 flex justify-center items-center border-t border-border max-w-2xl mx-auto text-text-primary">
+                <div className="text-center">
                   <span className="text-[9px] font-bold text-text-secondary uppercase tracking-widest block mb-1">Direct Correspondence</span>
                   <a href={`mailto:${settings?.contactEmail || master.candidate.email}`} className="text-lg font-luxury font-medium text-text-primary hover:text-accent transition-colors border-b border-border hover:border-accent pb-0.5">
                     {settings?.contactEmail || master.candidate.email}
                   </a>
-                </div>
-                <div className="h-px w-8 md:h-10 md:w-px bg-border" />
-                <div className="text-center md:text-left">
-                  <span className="text-[9px] font-bold text-text-secondary uppercase tracking-widest block mb-1">Secure Telephone Link</span>
-                  <p className="text-lg font-luxury font-medium text-text-primary tracking-wider font-sans select-all">{settings?.socialLinks.mobile || master.candidate.phone}</p>
                 </div>
               </div>
             </div>
@@ -516,7 +486,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         {/* Footer */}
         <footer className="pt-16 pb-8 px-5 md:px-8 lg:px-24 border-t border-border bg-background select-none">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8 md:gap-6">
               {/* Brand block */}
               <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
                 <span className="text-lg font-luxury font-bold tracking-tighter text-text-primary">
@@ -553,9 +523,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               </div>
 
               {/* Explore column */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Explore</span>
-                <div className="flex flex-col gap-2.5 text-[11px] font-semibold text-text-secondary">
+                <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
                   {[
                     { label: "Home", tab: "about" as const },
                     { label: "Experience", tab: "company" as const },
@@ -574,9 +544,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               </div>
 
               {/* Info column */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Info</span>
-                <div className="flex flex-col gap-2.5 text-[11px] font-semibold text-text-secondary">
+                <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
                   {[
                     { label: "Uses", tab: "uses" as const },
                     { label: "FAQ", tab: "faq" as const },
@@ -594,9 +564,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               </div>
 
               {/* Contact column */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Contact</span>
-                <div className="flex flex-col gap-2.5 text-[11px] font-semibold text-text-secondary">
+                <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
                   <button onClick={() => handleNavClick("contact")} className="text-left hover:text-accent transition-colors w-fit">
                     Start a conversation
                   </button>
@@ -670,48 +640,16 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  handleNavClick("uses");
+                  handleNavClick("aboutme");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Wrench size={15} />
+                  <FileText size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Uses</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Tools, gear, and software I use daily</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  handleNavClick("services");
-                }}
-                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
-              >
-                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Sparkles size={15} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Services</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">My technical expertise and offerings</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  handleNavClick("contact");
-                }}
-                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
-              >
-                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Mail size={15} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Contact</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Get in touch with Fayaz</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">About</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Background, skills, and experience details</p>
                 </div>
               </button>
 
@@ -830,6 +768,22 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 <div>
                   <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Services</h4>
                   <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">SaaS design and specialized consulting</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsWorkDropdownOpen(false);
+                  handleNavClick("uses");
+                }}
+                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
+              >
+                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
+                  <Wrench size={15} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Uses</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Tools, gear, and software I use daily</p>
                 </div>
               </button>
             </div>

@@ -79,6 +79,19 @@ export interface PortfolioData {
   master: MasterData;
 }
 
+export interface EducationItem {
+  id: string;
+  qualification: string;
+  institution: string;
+  period: string;
+}
+
+export interface PersonalDetail {
+  id: string;
+  label: string;
+  value: string;
+}
+
 export interface AboutProfile {
   tagline: string;
   architectBio: string;
@@ -91,6 +104,8 @@ export interface AboutProfile {
     period: string;
     description: string;
   }[];
+  personalDetails: PersonalDetail[];
+  education: EducationItem[];
 }
 
 export interface FaqItem {
@@ -98,6 +113,7 @@ export interface FaqItem {
   question: string;
   answer: string;
   category: string;
+  published?: boolean;   // absent/true = live on portal; false = hidden draft
 }
 
 export interface UsesItem {
@@ -112,12 +128,14 @@ export interface UsesCategory {
   name: string;
   subtitle?: string;
   items: UsesItem[];
+  published?: boolean;   // absent/true = live on portal; false = hidden draft
 }
 
 export interface PrivacySection {
   id: string;
   title: string;
   body: string;
+  published?: boolean;   // absent/true = live on portal; false = hidden draft
 }
 
 export interface SiteSettings {
@@ -212,6 +230,7 @@ export interface Entry {
 
   featured: boolean;
   displayOrder: number;
+  published?: boolean;   // absent/true = live on portal; false = hidden draft
 }
 
 export interface Service {

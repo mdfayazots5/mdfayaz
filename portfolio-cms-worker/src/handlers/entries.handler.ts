@@ -11,7 +11,7 @@ const EDITABLE_ENTRY_FIELDS: readonly (keyof Entry)[] = [
   'type', 'title', 'tagline', 'categoryTag', 'description', 'features', 'tech',
   'achievements', 'companyName', 'role', 'teamSize', 'startDate', 'endDate',
   'status', 'audience', 'liveUrl', 'repoUrl', 'caseStudyUrl', 'videoUrl',
-  'coverImage', 'icon', 'color', 'featured', 'displayOrder',
+  'coverImage', 'icon', 'color', 'featured', 'displayOrder', 'published',
 ];
 
 export async function handleGetEntries(request: Request, env: Env): Promise<Response> {

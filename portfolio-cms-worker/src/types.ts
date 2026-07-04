@@ -35,6 +35,7 @@ export interface Entry {
   color: string;
   featured: boolean;
   displayOrder: number;
+  published?: boolean;
 }
 
 export interface Service {
@@ -53,7 +54,11 @@ export interface FaqItem {
   question: string;
   answer: string;
   category: string;
+  published?: boolean;
 }
+
+export interface EducationItem { id: string; qualification: string; institution: string; period: string; }
+export interface PersonalDetail { id: string; label: string; value: string; }
 
 export interface AboutProfile {
   tagline: string;
@@ -62,12 +67,14 @@ export interface AboutProfile {
   developerBio: string;
   skills: { category: string; items: string[] }[];
   experienceTimeline: { company: string; role: string; period: string; description: string }[];
+  personalDetails: PersonalDetail[];
+  education: EducationItem[];
 }
 
 export interface UsesItem { id: string; name: string; description: string; tag?: string; }
-export interface UsesCategory { id: string; name: string; subtitle?: string; items: UsesItem[]; }
+export interface UsesCategory { id: string; name: string; subtitle?: string; items: UsesItem[]; published?: boolean; }
 
-export interface PrivacySection { id: string; title: string; body: string; }
+export interface PrivacySection { id: string; title: string; body: string; published?: boolean; }
 
 export interface SiteSettings {
   name: string;

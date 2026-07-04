@@ -55,11 +55,16 @@ export const ThemeSidebar: React.FC<ThemeSidebarProps> = ({ open, onClose }) => 
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <Palette size={15} className="text-accent" />
-                <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-primary">
-                  Appearance
-                </h2>
+              <div className="flex items-center gap-2.5">
+                <span className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center shrink-0">
+                  <Palette size={15} />
+                </span>
+                <div className="space-y-0.5">
+                  <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-primary leading-none">
+                    Appearance
+                  </h2>
+                  <p className="text-[10px] text-text-secondary leading-none">Theme &amp; brightness</p>
+                </div>
               </div>
               <button
                 onClick={onClose}
@@ -74,8 +79,8 @@ export const ThemeSidebar: React.FC<ThemeSidebarProps> = ({ open, onClose }) => 
               {/* Mode */}
               <div>
                 <h3 className="text-[11px] font-bold uppercase tracking-wider text-text-primary mb-1">Mode</h3>
-                <p className="text-[10px] text-text-secondary mb-2.5">Controls overall brightness</p>
-                <div className="grid grid-cols-2 gap-1.5 p-1 rounded-btn border border-border">
+                <p className="text-[10px] text-text-secondary mb-3">Controls overall brightness</p>
+                <div className="grid grid-cols-2 gap-3">
                   {modes.map(({ id, label, Icon }) => {
                     const active = theme === id;
                     return (
@@ -86,14 +91,20 @@ export const ThemeSidebar: React.FC<ThemeSidebarProps> = ({ open, onClose }) => 
                         onClick={() => {
                           if (theme !== id) toggleTheme();
                         }}
-                        className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                        className={`flex flex-col items-center justify-center gap-2 rounded-2xl border px-3 py-5 transition-colors cursor-pointer ${
                           active
-                            ? "bg-accent text-accent-foreground"
-                            : "text-text-secondary hover:text-text-primary hover:bg-current/5"
+                            ? "border-accent bg-accent/5 text-accent"
+                            : "border-border text-text-secondary hover:border-accent/40 hover:text-text-primary"
                         }`}
                       >
-                        <Icon size={13} />
-                        {label}
+                        <span
+                          className={`flex h-9 w-9 items-center justify-center rounded-full border ${
+                            active ? "border-accent/30 bg-accent/10" : "border-border bg-background"
+                          }`}
+                        >
+                          <Icon size={16} />
+                        </span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider">{label}</span>
                       </button>
                     );
                   })}
