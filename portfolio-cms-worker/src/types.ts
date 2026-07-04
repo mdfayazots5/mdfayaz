@@ -84,6 +84,8 @@ export interface SiteSettings {
   // Admin-managed media (R2 public URLs). Optional; `mobile` falls back to `desktop`.
   profileImage?: { desktop?: string; mobile?: string };
   heroBackground?: { desktop?: string; mobile?: string };
+  // Admin-selected default palette for first-time visitors. Optional; absence = "slate-classic".
+  themeSet?: string;
 }
 
 export interface LoginRequest { username: string; password: string; }

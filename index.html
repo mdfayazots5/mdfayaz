@@ -31,6 +31,27 @@
         "sameAs": []
       }
     </script>
+    <!-- Theme bootstrap: apply mode + palette before first paint to avoid a flash
+         of the wrong theme. Mirrors ThemeProvider (localStorage keys + defaults). -->
+    <script>
+      (function () {
+        try {
+          var root = document.documentElement;
+          if (localStorage.getItem("portfolio-theme") === "dark") {
+            root.classList.add("dark");
+          }
+          var sets = [
+            "slate-classic",
+            "ivory-teal",
+            "copper-soft-paper",
+            "dusty-lilac-receipt",
+            "soft-sage-receipt",
+          ];
+          var ts = localStorage.getItem("portfolio-theme-set");
+          root.setAttribute("data-theme-set", sets.indexOf(ts) !== -1 ? ts : "slate-classic");
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

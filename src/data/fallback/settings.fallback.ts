@@ -18,5 +18,6 @@ export const SETTINGS_FALLBACK: SiteSettings = {
   resumeUrl: "#",
   tagline: "I build enterprise systems that scale from database to UI — production-ready.",
   profileImage: { desktop: "", mobile: "" },
-  heroBackground: { desktop: "", mobile: "" }
+  heroBackground: { desktop: "", mobile: "" },
+  themeSet: "slate-classic"
 };

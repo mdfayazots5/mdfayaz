@@ -17,6 +17,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   tagline: '',
   profileImage: { desktop: '', mobile: '' },
   heroBackground: { desktop: '', mobile: '' },
+  themeSet: 'slate-classic',
 };
 
 export async function handleGetSettings(request: Request, env: Env): Promise<Response> {

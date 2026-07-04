@@ -142,7 +142,24 @@ export interface SiteSettings {
   // If `mobile` is absent, the UI falls back to `desktop`.
   profileImage?: { desktop?: string; mobile?: string };
   heroBackground?: { desktop?: string; mobile?: string };
+
+  // Admin-selected default palette for first-time visitors. Optional — absence means
+  // "slate-classic". A returning visitor's local preference (localStorage) overrides this.
+  themeSet?: ThemeSet;
 }
+
+/**
+ * Curated visual palette variants. `mode` (light/dark) controls brightness;
+ * `ThemeSet` controls palette personality. Rendered purely via CSS variables —
+ * see `data-theme-set` in `ThemeProvider` and the palette blocks in `src/index.css`.
+ * Metadata (labels, descriptions, swatches) lives in `src/config/theme-sets.ts`.
+ */
+export type ThemeSet =
+  | "slate-classic"
+  | "ivory-teal"
+  | "copper-soft-paper"
+  | "dusty-lilac-receipt"
+  | "soft-sage-receipt";
 
 export interface Product {
   id: number;

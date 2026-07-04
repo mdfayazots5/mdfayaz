@@ -1,7 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap');
 @import "tailwindcss";
 
-:root {
+/* =========================================================================
+   Theme Sets — palette variants rendered purely via CSS variables.
+   `data-theme-set` (set by ThemeProvider) selects the palette personality;
+   `.dark` selects brightness. Components never touch these directly — they
+   consume the Tailwind tokens mapped in @theme below.
+
+   SPECIFICITY NOTE: `:root[data-theme-set="x"]` and `.dark[data-theme-set="x"]`
+   have EQUAL specificity (0,2,0). Source order therefore decides the winner, so
+   every `.dark[...]` block MUST appear AFTER its `:root[...]` counterpart.
+   Keep all LIGHT blocks in the first group and all DARK blocks in the second.
+   ========================================================================= */
+
+/* Slate Classic is the baseline: the bare `:root` / `.dark` blocks render it,
+   so the app is correct even before `data-theme-set` is applied (no FOUC gap). */
+:root,
+:root[data-theme-set="slate-classic"] {
   --color-bg: #F0F9FF;
   --color-surface: #FFFFFF;
   --color-border: #BAE6FD;
@@ -12,7 +27,53 @@
   --color-accent-foreground: #FFFFFF;
 }
 
-.dark {
+:root[data-theme-set="ivory-teal"] {
+  --color-bg: #F7F4EC;
+  --color-surface: #FFFDF8;
+  --color-border: #E4DECF;
+  --color-text-primary: #1C2B2A;
+  --color-text-secondary: #5C6B68;
+  --color-accent: #0F766E;
+  --color-accent-hover: #0B5A54;
+  --color-accent-foreground: #FFFFFF;
+}
+
+:root[data-theme-set="copper-soft-paper"] {
+  --color-bg: #F5F3EF;
+  --color-surface: #FFFFFF;
+  --color-border: #E2DCD3;
+  --color-text-primary: #262220;
+  --color-text-secondary: #6B635C;
+  --color-accent: #B4703A;
+  --color-accent-hover: #97592B;
+  --color-accent-foreground: #FFFFFF;
+}
+
+:root[data-theme-set="dusty-lilac-receipt"] {
+  --color-bg: #F4F0F5;
+  --color-surface: #FBF8FC;
+  --color-border: #E3D9E8;
+  --color-text-primary: #2E2233;
+  --color-text-secondary: #6E6274;
+  --color-accent: #7C5A9E;
+  --color-accent-hover: #654783;
+  --color-accent-foreground: #FFFFFF;
+}
+
+:root[data-theme-set="soft-sage-receipt"] {
+  --color-bg: #F2F3EC;
+  --color-surface: #FBFCF6;
+  --color-border: #DEE1D2;
+  --color-text-primary: #262A1E;
+  --color-text-secondary: #62685A;
+  --color-accent: #5F7A4E;
+  --color-accent-hover: #4C6540;
+  --color-accent-foreground: #FFFFFF;
+}
+
+/* --- DARK blocks (must follow the light blocks above; see SPECIFICITY NOTE) --- */
+.dark,
+.dark[data-theme-set="slate-classic"] {
   --color-bg: #0B1220;
   --color-surface: #15233A;
   --color-border: #1E3A5F;
@@ -21,6 +82,50 @@
   --color-accent: #38BDF8;
   --color-accent-hover: #7DD3FC;
   --color-accent-foreground: #0B1220;
+}
+
+.dark[data-theme-set="ivory-teal"] {
+  --color-bg: #10201E;
+  --color-surface: #17302D;
+  --color-border: #274A45;
+  --color-text-primary: #F1EFE6;
+  --color-text-secondary: #A7B5B1;
+  --color-accent: #2DD4BF;
+  --color-accent-hover: #5EEAD4;
+  --color-accent-foreground: #08201C;
+}
+
+.dark[data-theme-set="copper-soft-paper"] {
+  --color-bg: #1A1613;
+  --color-surface: #26201B;
+  --color-border: #3A2F27;
+  --color-text-primary: #F0EBE4;
+  --color-text-secondary: #B0A79D;
+  --color-accent: #D98E5A;
+  --color-accent-hover: #E6A878;
+  --color-accent-foreground: #1A1210;
+}
+
+.dark[data-theme-set="dusty-lilac-receipt"] {
+  --color-bg: #17131A;
+  --color-surface: #221C27;
+  --color-border: #362C3D;
+  --color-text-primary: #EEE7F0;
+  --color-text-secondary: #ADA1B3;
+  --color-accent: #B490D6;
+  --color-accent-hover: #C6A9E2;
+  --color-accent-foreground: #170F1C;
+}
+
+.dark[data-theme-set="soft-sage-receipt"] {
+  --color-bg: #14160F;
+  --color-surface: #1F2318;
+  --color-border: #333927;
+  --color-text-primary: #EBEEE2;
+  --color-text-secondary: #A6AC98;
+  --color-accent: #9CB884;
+  --color-accent-hover: #B3CC9E;
+  --color-accent-foreground: #121509;
 }
 
 @theme {

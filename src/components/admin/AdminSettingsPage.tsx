@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { getSiteSettings, updateSiteSettings } from "../../services/api";
-import { SiteSettings } from "../../models/portfolio.model";
+import { SiteSettings, ThemeSet } from "../../models/portfolio.model";
+import { normalizeThemeSet } from "../../config/theme-sets";
+import { ThemeSetPicker } from "../ThemeSetPicker";
+import { useTheme } from "../ThemeProvider";
 import { LoadingScreen } from "../LoadingScreen";
 import { 
   Save,
@@ -19,12 +22,17 @@ import {
   Briefcase,
   Calendar,
   Plane,
-  BookOpen
+  BookOpen,
+  Palette
 } from "lucide-react";
 
 export const AdminSettingsPage: React.FC = () => {
+  const { setThemeSet: applyThemeSet } = useTheme();
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Site-wide default palette for first-time visitors (persisted to R2).
+  const [defaultThemeSet, setDefaultThemeSet] = useState<ThemeSet>("slate-classic");
   
   // Flat state fields
   const [name, setName] = useState("");
@@ -60,7 +68,8 @@ export const AdminSettingsPage: React.FC = () => {
           setContactEmail(data.contactEmail || "");
           setResumeUrl(data.resumeUrl || "");
           setTagline(data.tagline || "");
-          
+          setDefaultThemeSet(normalizeThemeSet(data.themeSet));
+
           // Map object to list of pairs
           const pairsList = Object.entries(data.socialLinks || {}).map(([key, value]) => ({
             platform: key.charAt(0).toUpperCase() + key.slice(1),
@@ -140,7 +149,8 @@ export const AdminSettingsPage: React.FC = () => {
         // SiteSettings object, so carrying these through prevents a settings save from wiping
         // an uploaded profile image / hero background.
         profileImage: settings.profileImage,
-        heroBackground: settings.heroBackground
+        heroBackground: settings.heroBackground,
+        themeSet: defaultThemeSet
       };
 
       const success = await updateSiteSettings(updatedPayload);
@@ -312,6 +322,27 @@ export const AdminSettingsPage: React.FC = () => {
               Open to Relocation
             </span>
           </label>
+        </section>
+
+        {/* Theme Set — site-wide default palette for first-time visitors */}
+        <section className="bg-surface p-6 rounded-2xl border border-border space-y-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-border/60">
+            <Palette className="text-accent" size={16} />
+            <h3 className="text-sm font-bold uppercase tracking-wider">Default Theme Set</h3>
+          </div>
+          <p className="text-[11px] text-text-secondary -mt-2">
+            The palette first-time visitors see. Returning visitors keep their own chosen theme.
+            Selecting one here previews it live and saves it as the site default.
+          </p>
+          <ThemeSetPicker
+            value={defaultThemeSet}
+            onChange={(ts) => {
+              setDefaultThemeSet(ts);
+              applyThemeSet(ts); // live preview for the admin
+            }}
+            showHeader={false}
+            className="max-w-md"
+          />
         </section>
 
         {/* Core Parameters Section */}

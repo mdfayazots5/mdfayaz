@@ -13,6 +13,8 @@ import { ProductsPage } from "./ProductsPage";
 import { ServicesPage } from "./ServicesPage";
 import { Github, Linkedin, BookOpen, User, Wrench, Mail, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Package } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { ThemeSetPicker } from "./ThemeSetPicker";
+import { useTheme } from "./ThemeProvider";
 import { SiteSettings } from "../models/portfolio.model";
 import { getSiteSettings } from "../services/api";
 
@@ -22,6 +24,7 @@ interface Portfolio5Props {
 
 export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const { master } = data;
+  const { themeSet, setThemeSet, applyAdminDefault } = useTheme();
 
   const [activeTab, setActiveTab] = React.useState<"about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("about");
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -115,6 +118,8 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     getSiteSettings().then((result) => {
       if (isMounted) {
         setSettings(result);
+        // First-time visitors inherit the admin-selected default palette.
+        applyAdminDefault(result?.themeSet);
       }
     });
     return () => {
@@ -674,11 +679,15 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 </div>
               </button>
 
+              <div className="border-t border-border mt-2 pt-2.5 px-2.5">
+                <ThemeSetPicker value={themeSet} onChange={setThemeSet} />
+              </div>
+
               <div className="border-t border-border mt-2 pt-2.5 px-2.5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <a 
+                  <a
                     id="admin-dropdown-lock-btn"
-                    href="#admin/login" 
+                    href="#admin/login"
                     onClick={() => setIsDropdownOpen(false)}
                     className="inline-flex items-center gap-1.5 text-[9px] font-bold text-text-secondary hover:text-accent uppercase tracking-wider transition-colors cursor-pointer"
                   >
