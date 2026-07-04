@@ -11,9 +11,9 @@ import { PrivacyPage } from "./PrivacyPage";
 import { FaqPage } from "./FaqPage";
 import { ProductsPage } from "./ProductsPage";
 import { ServicesPage } from "./ServicesPage";
-import { Github, Linkedin, BookOpen, User, Wrench, Mail, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Package } from "lucide-react";
+import { Github, Linkedin, BookOpen, User, Wrench, Mail, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Package, Palette } from "lucide-react";
+import { ThemeSidebar } from "./ThemeSidebar";
 import { ThemeToggle } from "./ThemeToggle";
-import { ThemeSetPicker } from "./ThemeSetPicker";
 import { useTheme } from "./ThemeProvider";
 import { SiteSettings } from "../models/portfolio.model";
 import { getSiteSettings } from "../services/api";
@@ -24,10 +24,11 @@ interface Portfolio5Props {
 
 export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const { master } = data;
-  const { themeSet, setThemeSet, applyAdminDefault } = useTheme();
+  const { applyAdminDefault } = useTheme();
 
   const [activeTab, setActiveTab] = React.useState<"about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("about");
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [isThemePanelOpen, setIsThemePanelOpen] = React.useState(false);
   const [isWorkDropdownOpen, setIsWorkDropdownOpen] = React.useState(false);
   const [workSubTab, setWorkSubTab] = React.useState<"company" | "personal" | "products" | "services">("personal");
   const [selectedCategoryTag, setSelectedCategoryTag] = React.useState<string>("All");
@@ -229,7 +230,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-primary selection:bg-accent selection:text-accent-foreground">
+    <div className="app-canvas min-h-screen text-text-primary selection:bg-accent selection:text-accent-foreground">
+      <ThemeSidebar open={isThemePanelOpen} onClose={() => setIsThemePanelOpen(false)} />
+
       {/* Minimal Navigation — transparent (blend) at top, solid blurred bar once scrolled (#1) */}
       <nav
         className={`fixed top-0 left-0 right-0 z-[100] px-5 md:px-8 py-5 md:py-7 flex justify-between items-center select-none transition-colors duration-300 ${
@@ -249,7 +252,15 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
           MF
         </span>
         <div className="flex gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
-          <ThemeToggle />
+          <button
+            id="appearance-trigger-btn"
+            onClick={() => setIsThemePanelOpen(true)}
+            aria-label="Open appearance settings"
+            title="Appearance — theme & mode"
+            className="cursor-pointer transition-colors hover:text-accent flex items-center"
+          >
+            <Palette size={14} />
+          </button>
           <div
             className="relative"
             onMouseEnter={() => openMenuOnHover("about")}
@@ -678,10 +689,6 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Common questions and answers</p>
                 </div>
               </button>
-
-              <div className="border-t border-border mt-2 pt-2.5 px-2.5">
-                <ThemeSetPicker value={themeSet} onChange={setThemeSet} />
-              </div>
 
               <div className="border-t border-border mt-2 pt-2.5 px-2.5 flex items-center justify-between">
                 <div className="flex items-center gap-3">

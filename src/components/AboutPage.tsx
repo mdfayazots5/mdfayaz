@@ -153,26 +153,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
             >
               {activeContent.heroRole}
             </motion.span>
- 
-            {/* Quick Perspective Switcher inside Hero */}
-            <div className="flex flex-wrap gap-2 justify-center items-center mt-2 px-4 select-none">
-              {(["architect", "lead", "developer"] as const).map((p) => (
-                <button
-                  key={p + "-btn"}
-                  onClick={() => setPerspective(p)}
-                  className={`text-[9px] font-bold tracking-[0.15em] px-3.5 py-1.5 rounded-full border border-border uppercase transition-all duration-355 cursor-pointer ${
-                    perspective === p 
-                      ? "bg-accent text-accent-foreground border-accent shadow-sm" 
-                      : "bg-surface/60 text-text-secondary hover:text-accent hover:bg-surface"
-                  }`}
-                >
-                  {p === "architect" && "📐 Architect"}
-                  {p === "lead" && "👥 Lead"}
-                  {p === "developer" && "💻 Developer"}
-                </button>
-              ))}
-            </div>
- 
+
+            {/* Perspective switching lives in the About section below, next to the
+                content it changes — kept out of the hero to keep the entry clean. */}
             <div className="w-px h-10 lg:h-16 bg-gradient-to-b from-accent to-transparent mt-4" />
           </div>
         </motion.div>
@@ -272,7 +255,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
                   <span className="text-[9px] font-bold text-accent uppercase tracking-[0.3em] block">WORKSTATION & TOOLS</span>
                   <h5 className="text-base font-luxury font-bold text-text-primary">Want to inspect my enterprise setup & workstation?</h5>
                   <p className="text-xs text-text-secondary font-medium leading-relaxed max-w-lg">
-                    Discover the languages, editor packages, audio gear, and operating systems I leverage daily to develop high-performance software.
+                    The languages, editor, gear, and OS I ship with every day.
                   </p>
                 </div>
                 <button
