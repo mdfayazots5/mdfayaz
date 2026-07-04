@@ -87,15 +87,24 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
     e.preventDefault();
     if (!validate()) return;
 
+    // Web3Forms requires a valid access key. Without one, the request is
+    // guaranteed to 400 — so fail fast with a clear message instead of
+    // dispatching a doomed submission.
+    if (!web3FormsAccessKey) {
+      setStatus("error");
+      setErrorMessage(
+        "Contact form is not fully configured yet. Please email me directly at " +
+          candidateEmail + "."
+      );
+      return;
+    }
+
     setStatus("submitting");
     setErrorMessage("");
 
     try {
-      // Direct Web3Forms Submission if custom API key is supplied,
-      // otherwise, we showcase a highly polished submission experience 
-      // with real network dispatch guidelines.
       const payload = {
-        access_key: web3FormsAccessKey || "685c2c4d-b9cf-4ef8-b118-86d6ebcb6825", // Demo key fallback
+        access_key: web3FormsAccessKey,
         subject: `[Portfolio Contact] From ${formData.name} (${formData.company || "No Company"})`,
         from_name: formData.name,
         email: formData.email,
@@ -133,16 +142,17 @@ ${formData.message}
           message: ""
         });
       } else {
-        // Fall back gracefully with clear message
-        throw new Error(result.message || "Failed to submit form through web-service.");
+        throw new Error(result.message || "Failed to submit form. Please try again.");
       }
     } catch (err: any) {
-      console.warn("API Service fallback: Mocking success response for simulation.", err);
-      // Let's allow simulated success in development so the reviewer of this design sees the gorgeous completion screen
-      // but clearly indicating the live email setup.
-      setTimeout(() => {
-        setStatus("success");
-      }, 1000);
+      // Surface the real failure instead of faking success — otherwise a
+      // recruiter sees "sent" while the message never reaches the inbox.
+      console.error("Contact form submission failed:", err);
+      setStatus("error");
+      setErrorMessage(
+        (err?.message || "Something went wrong while sending your message.") +
+          ` You can also reach me directly at ${candidateEmail}.`
+      );
     }
   };
 
