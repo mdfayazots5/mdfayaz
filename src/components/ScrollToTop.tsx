@@ -1,9 +1,11 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useLenis } from "lenis/react";
 
 export const ScrollToTop: React.FC = () => {
   const [isVisible, setIsVisible] = React.useState(false);
+  const lenis = useLenis();
 
   React.useEffect(() => {
     const toggleVisibility = () => {
@@ -19,10 +21,8 @@ export const ScrollToTop: React.FC = () => {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    if (lenis) lenis.scrollTo(0);
+    else window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (

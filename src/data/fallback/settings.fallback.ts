@@ -7,11 +7,11 @@ export const SETTINGS_FALLBACK: SiteSettings = {
   availability: "Immediate",
   openToRelocation: true,
   yearsExperience: "3.3",
-  blog: "https://dev.to/mdfayaz",
+  blog: "https://dev.to/fayaz_md",
   contactEmail: "mdfayazots5@gmail.com",
   socialLinks: {
-    github: "https://github.com/mdfayaz",
-    linkedin: "https://linkedin.com/in/mdfayaz",
+    github: "https://github.com/mdfayazots5",
+    linkedin: "https://www.linkedin.com/in/mohammed-fayaz-03a085254/",
     dob: "26 August 2002",
     mobile: "+91 70954 41960"
   },

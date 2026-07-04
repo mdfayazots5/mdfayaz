@@ -93,7 +93,7 @@ export const FaqPage: React.FC = () => {
   return (
     <div id="faq-page-container" className="pt-24 lg:pt-36 bg-background select-none text-text-primary text-left">
       {/* Header element */}
-      <header className="px-8 lg:px-24 py-16 text-center border-b border-border relative overflow-hidden bg-surface/40">
+      <header className="px-5 md:px-8 lg:px-24 py-16 text-center border-b border-border relative overflow-hidden bg-surface/40">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
           <span className="text-[30vw] font-luxury font-black text-text-secondary select-none">Q&A</span>
         </div>
@@ -111,7 +111,7 @@ export const FaqPage: React.FC = () => {
       </header>
 
       {/* Main core FAQ dynamic interface */}
-      <div className="max-w-4xl mx-auto px-8 py-12 lg:py-20 space-y-8">
+      <div className="max-w-4xl mx-auto px-5 md:px-8 py-12 lg:py-20 space-y-8">
         
         {/* Search and Filters Hub */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-surface p-4 rounded-2xl border border-border shadow-xs">

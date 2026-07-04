@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
+import { useLenis } from "lenis/react";
 import { PortfolioData } from "../models/portfolio.model";
 import { ProjectCard } from "./ProjectCard";
 import { ContactForm } from "./ContactForm";
@@ -28,6 +29,48 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const [workSubTab, setWorkSubTab] = React.useState<"company" | "personal" | "products" | "services">("personal");
   const [selectedCategoryTag, setSelectedCategoryTag] = React.useState<string>("All");
   const [settings, setSettings] = React.useState<SiteSettings | null>(null);
+  const [scrolled, setScrolled] = React.useState(false);
+  const hoverTimeout = React.useRef<number | null>(null);
+  const lenis = useLenis();
+
+  // Jump to top on tab switches (pushState doesn't fire hashchange, so we do it here).
+  const scrollTopInstant = () => {
+    if (lenis) lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  };
+
+  // #1 — track scroll so the fixed header can swap from blend-mode transparency to a
+  // solid, always-legible blurred bar once the user leaves the very top.
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // #4 — pointer-capable desktop devices auto-open the nav menus on hover.
+  const canHover = () =>
+    typeof window !== "undefined" && window.matchMedia("(hover: hover) and (min-width: 768px)").matches;
+
+  const openMenuOnHover = (which: "about" | "work") => {
+    if (!canHover()) return;
+    if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+    setIsDropdownOpen(which === "about");
+    setIsWorkDropdownOpen(which === "work");
+  };
+
+  const scheduleHoverClose = () => {
+    if (!canHover()) return;
+    if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = window.setTimeout(() => {
+      setIsDropdownOpen(false);
+      setIsWorkDropdownOpen(false);
+    }, 180);
+  };
+
+  const cancelHoverClose = () => {
+    if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+  };
 
   // Dynamic Metadata Sync Helper
   const updatePageMetadata = (tab: string) => {
@@ -139,25 +182,25 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       setActiveTab("work");
       setWorkSubTab("products");
       window.history.pushState(null, "", "#products");
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata("products");
     } else if (tab === "services") {
       setActiveTab("work");
       setWorkSubTab("services");
       window.history.pushState(null, "", "#services");
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata("services");
     } else if (tab === "personal") {
       setActiveTab("work");
       setWorkSubTab("personal");
       window.history.pushState(null, "", "#personal");
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata("work");
     } else if (tab === "company") {
       setActiveTab("work");
       setWorkSubTab("company");
       window.history.pushState(null, "", "#work");
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata("work");
     } else {
       setActiveTab(tab as any);
@@ -165,7 +208,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         setWorkSubTab("company");
       }
       window.history.pushState(null, "", `#${tab}`);
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata(tab as any);
     }
 
@@ -173,7 +216,8 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       setTimeout(() => {
         const el = document.getElementById(targetId);
         if (el) {
-          el.scrollIntoView({ behavior: "smooth" });
+          if (lenis) lenis.scrollTo(el, { offset: -80 });
+          else el.scrollIntoView({ behavior: "smooth" });
         }
       }, 100);
     }
@@ -181,9 +225,15 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
   return (
     <div className="min-h-screen bg-background text-text-primary selection:bg-accent selection:text-accent-foreground">
-      {/* Minimal Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-8 py-8 flex justify-between items-center mix-blend-difference text-white select-none">
-        <span 
+      {/* Minimal Navigation — transparent (blend) at top, solid blurred bar once scrolled (#1) */}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-[100] px-5 md:px-8 py-5 md:py-7 flex justify-between items-center select-none transition-colors duration-300 ${
+          scrolled
+            ? "bg-background/80 backdrop-blur-md border-b border-border text-text-primary"
+            : "mix-blend-difference text-white"
+        }`}
+      >
+        <span
           className="text-lg font-luxury font-bold tracking-tighter cursor-pointer"
           onClick={() => {
             setIsDropdownOpen(false);
@@ -191,42 +241,50 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
             handleNavClick("about");
           }}
         >
-          MF.
+          MF
         </span>
-        <div className="flex gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
+        <div className="flex gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
           <ThemeToggle />
-          <div className="relative">
-            <button 
+          <div
+            className="relative"
+            onMouseEnter={() => openMenuOnHover("about")}
+            onMouseLeave={scheduleHoverClose}
+          >
+            <button
               id="nav-about-dropdown-btn"
               onClick={() => {
                 setIsWorkDropdownOpen(false);
                 setIsDropdownOpen(!isDropdownOpen);
-              }} 
+              }}
               className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["about", "uses", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
               <span>About</span>
-              <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 text-white/50"}`} />
+              <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
-          <div className="relative">
-            <button 
+          <div
+            className="relative"
+            onMouseEnter={() => openMenuOnHover("work")}
+            onMouseLeave={scheduleHoverClose}
+          >
+            <button
               id="nav-work-dropdown-btn"
               onClick={() => {
                 setIsDropdownOpen(false);
                 setIsWorkDropdownOpen(!isWorkDropdownOpen);
-              }} 
+              }}
               className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || activeTab === "work" ? "text-accent" : "hover:text-accent"}`}
             >
               <span>Work</span>
-              <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 text-white/50"}`} />
+              <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
-          <button 
+          <button
             onClick={() => {
               setIsDropdownOpen(false);
               setIsWorkDropdownOpen(false);
               handleNavClick("contact");
-            }} 
+            }}
             className={`cursor-pointer transition-colors ${activeTab === "contact" ? "text-accent" : "hover:text-accent"}`}
           >
             Contact
@@ -250,7 +308,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
           /* Work / Projects Tab View with Sub Tabs */
           <div className="bg-background min-h-screen">
             {/* Dedicated Work Header */}
-            <header className="py-24 lg:py-32 px-8 lg:px-24 bg-surface/40 text-center relative overflow-hidden flex flex-col items-center border-b border-border">
+            <header className="py-24 lg:py-32 px-5 md:px-8 lg:px-24 bg-surface/40 text-center relative overflow-hidden flex flex-col items-center border-b border-border">
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
                 <span className="text-[25vw] font-luxury font-black text-text-secondary/15 select-none">WORK</span>
               </div>
@@ -332,7 +390,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
             </div>
 
             {/* Resume Call To Action Bar */}
-            <section className="py-16 px-8 lg:px-24 bg-surface/70 text-center rounded-3xl max-w-5xl mx-auto mb-24 border border-border shadow-sm space-y-6">
+            <section className="py-16 px-5 md:px-8 lg:px-24 bg-surface/70 text-center rounded-3xl max-w-5xl mx-auto mb-24 border border-border shadow-sm space-y-6">
               <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] block">HAVE A VACANCY?</span>
               <h3 className="text-2xl md:text-3xl font-luxury font-medium leading-snug">Let's connect to review enterprise solution needs</h3>
               <p className="text-xs md:text-sm text-text-secondary max-w-md mx-auto leading-relaxed">
@@ -390,7 +448,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
         {activeTab === "contact" && (
           <div className="bg-background min-h-[90vh] pt-36 pb-16">
-            <div className="max-w-4xl mx-auto space-y-16 px-8 select-none">
+            <div className="max-w-4xl mx-auto space-y-16 px-5 md:px-8 select-none">
               <div className="space-y-6 text-center">
                 <span className="text-[10px] font-bold text-accent uppercase tracking-[0.6em] block">SECURE CONTACT HUB</span>
                 <h2 className="text-4xl lg:text-5xl font-luxury font-light tracking-tighter leading-none text-text-primary">
@@ -407,7 +465,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
         {/* Contact Section */}
         {(activeTab === "about" || activeTab === "work") && (
-          <section id="contact" className="py-24 lg:py-36 px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
+          <section id="contact" className="py-24 lg:py-36 px-5 md:px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
             <div className="max-w-4xl mx-auto space-y-16">
               <div className="space-y-6">
                 <span className="text-[10px] font-bold text-accent uppercase tracking-[0.6em] block">SECURE CONTACT</span>
@@ -440,7 +498,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         )}
 
         {/* Footer */}
-        <footer className="py-16 px-8 lg:px-24 border-t border-border bg-background select-none">
+        <footer className="py-16 px-5 md:px-8 lg:px-24 border-t border-border bg-background select-none">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex flex-col items-center md:items-start gap-2">
               <div className="flex items-center gap-3">
@@ -505,14 +563,18 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       {/* Dropdown Overlay for About navigation tab */}
       {isDropdownOpen && (
         <>
-          {/* Invisible backdrop to capture click outsides */}
-          <div 
+          {/* Invisible backdrop to capture outside clicks. z BELOW the nav (#3) so the nav
+              buttons stay clickable while a menu is open — previously it sat above the nav and
+              swallowed the first tap on Work. */}
+          <div
             id="nav-dropdown-backdrop"
-            className="fixed inset-0 z-[140] bg-transparent" 
-            onClick={() => setIsDropdownOpen(false)} 
+            className="fixed inset-0 z-[90] bg-transparent"
+            onClick={() => setIsDropdownOpen(false)}
           />
-          <div 
+          <div
             id="nav-about-dropdown"
+            onMouseEnter={cancelHoverClose}
+            onMouseLeave={scheduleHoverClose}
             className="fixed top-20 right-4 md:right-16 lg:right-24 z-[150] w-[290px] md:w-[320px] bg-surface border border-border rounded-[28px] shadow-2xl p-4 text-left select-none text-text-primary"
           >
             <div className="flex flex-col gap-1">
@@ -637,14 +699,16 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       {/* Dropdown Overlay for Work navigation tab */}
       {isWorkDropdownOpen && (
         <>
-          {/* Invisible backdrop to capture click outsides */}
-          <div 
+          {/* Invisible backdrop — z below nav so nav stays clickable while open (#3). */}
+          <div
             id="nav-work-dropdown-backdrop"
-            className="fixed inset-0 z-[140] bg-transparent" 
-            onClick={() => setIsWorkDropdownOpen(false)} 
+            className="fixed inset-0 z-[90] bg-transparent"
+            onClick={() => setIsWorkDropdownOpen(false)}
           />
-          <div 
+          <div
             id="nav-work-dropdown"
+            onMouseEnter={cancelHoverClose}
+            onMouseLeave={scheduleHoverClose}
             className="fixed top-20 right-4 md:right-10 lg:right-16 z-[150] w-[290px] md:w-[320px] bg-surface border border-border rounded-[28px] shadow-2xl p-4 text-left select-none text-text-primary"
           >
             <div className="flex flex-col gap-1">

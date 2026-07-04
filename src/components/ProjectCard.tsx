@@ -50,7 +50,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
   return (
     <div 
       id={`project-card-${project.id}`}
-      className="p-8 md:p-10 bg-surface border border-border rounded-3xl hover:border-accent/60 hover:shadow-lg transition-all duration-300 space-y-6 text-left"
+      className="p-5 md:p-10 bg-surface border border-border rounded-3xl hover:border-accent/60 hover:shadow-lg transition-all duration-300 space-y-6 text-left"
     >
       {/* Top Header of Card */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">

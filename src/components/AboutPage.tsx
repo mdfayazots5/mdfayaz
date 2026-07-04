@@ -150,7 +150,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
       </header>
 
       {/* About Section */}
-      <section id="about" className="py-24 lg:py-36 px-8 lg:px-24 bg-surface/30">
+      <section id="about" className="py-24 lg:py-36 px-5 md:px-8 lg:px-24 bg-surface/30">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-24 items-center">
           <div className="lg:w-1/3 w-full relative flex justify-center">
             <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-full border border-border flex items-center justify-center relative bg-background/50 backdrop-blur-sm">
@@ -241,7 +241,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
       </section>
 
       {/* Skills & Experience Summary */}
-      <section className="py-24 lg:py-36 px-8 lg:px-24">
+      <section className="py-24 lg:py-36 px-5 md:px-8 lg:px-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24">
           <div>
             <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-12 block">SKILLS</span>
@@ -284,7 +284,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
       </section>
 
       {/* Shipped Work Teaser Banner */}
-      <section className="py-24 px-8 lg:px-24 bg-surface flex flex-col items-center text-center border-t border-border">
+      <section className="py-24 px-5 md:px-8 lg:px-24 bg-surface flex flex-col items-center text-center border-t border-border">
         <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] mb-4 block">SHIPPED BLUEPRINTS</span>
         <h3 className="text-3xl lg:text-5xl font-luxury font-medium mb-6 text-text-primary">Case Studies & Architectures</h3>
         <p className="text-base text-text-secondary font-medium max-w-xl mb-10 leading-relaxed">

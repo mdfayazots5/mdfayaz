@@ -82,7 +82,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
   return (
     <div id="products-section" className="bg-background min-h-screen pb-24">
       {/* Products Header Section */}
-      <header className="relative py-24 lg:py-32 px-8 lg:px-24 bg-surface/40 border-b border-border text-center overflow-hidden flex flex-col items-center">
+      <header className="relative py-24 lg:py-32 px-5 md:px-8 lg:px-24 bg-surface/40 border-b border-border text-center overflow-hidden flex flex-col items-center">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
           <span className="text-[22vw] font-luxury font-black text-text-secondary/15 select-none">DESIGNS</span>
         </div>
