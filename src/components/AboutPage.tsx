@@ -4,6 +4,7 @@ import { PortfolioData, AboutProfile, SiteSettings } from "../models/portfolio.m
 import { Wrench } from "lucide-react";
 import { getAboutProfile, getSiteSettings } from "../services/api";
 import { LoadingScreen } from "./LoadingScreen";
+import { SectionError } from "./SectionState";
 
 type Perspective = "architect" | "lead" | "developer";
 
@@ -60,9 +61,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
   const [profile, setProfile] = useState<AboutProfile | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
+    setLoading(true);
+    setError(false);
     Promise.all([getAboutProfile(), getSiteSettings()])
       .then(([profileData, settingsData]) => {
         if (isMounted) {
@@ -73,13 +78,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
       })
       .catch(() => {
         if (isMounted) {
+          setError(true);
           setLoading(false);
         }
       });
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
@@ -87,6 +93,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
 
   const [perspective, setPerspective] = React.useState<Perspective>("architect");
   const activeContent = PERSPECTIVES[perspective];
+
+  if (error) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="100vh" />;
+  }
 
   if (loading || !profile || !settings) {
     return <LoadingScreen />;
@@ -96,12 +106,36 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
   const nameParts = displayName.split(" ");
   const yearsExperience = settings.yearsExperience || master.stats.years;
 
+  // Admin-managed media (R2 URLs). Mobile falls back to desktop; empty = keep the default look.
+  const heroDesktop = settings.heroBackground?.desktop || "";
+  const heroMobile = settings.heroBackground?.mobile || heroDesktop;
+  const hasHero = !!heroDesktop;
+  const profileDesktop = settings.profileImage?.desktop || "";
+  const profileMobile = settings.profileImage?.mobile || profileDesktop;
+  const hasProfile = !!profileDesktop;
+
 
   return (
     <>
       {/* Hero Section */}
       <header className="min-h-[78vh] lg:min-h-screen flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden bg-background animate-fadeIn">
-        <motion.div 
+        {/* Admin-managed hero background (responsive: mobile variant under md, desktop at md+). A
+            theme-aware scrim keeps the name/subtitle legible over any photo in light & dark. */}
+        {hasHero && (
+          <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
+            <picture>
+              {heroMobile && <source media="(max-width: 767px)" srcSet={heroMobile} />}
+              <img
+                src={heroDesktop}
+                alt=""
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover max-w-full"
+              />
+            </picture>
+            <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/60 to-background/90" />
+          </div>
+        )}
+        <motion.div
           style={{ opacity, scale }}
           className="text-center z-10 flex flex-col items-center"
         >
@@ -153,9 +187,23 @@ export const AboutPage: React.FC<AboutPageProps> = ({ master, handleNavClick }) 
       <section id="about" className="py-24 lg:py-36 px-5 md:px-8 lg:px-24 bg-surface/30">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-24 items-center">
           <div className="lg:w-1/3 w-full relative flex justify-center">
-            <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-full border border-border flex items-center justify-center relative bg-background/50 backdrop-blur-sm">
-              <div className="absolute inset-4 rounded-full border border-accent/25" />
-              <span className="text-7xl lg:text-9xl font-luxury font-light text-accent select-none">MF</span>
+            <div className="w-64 h-64 lg:w-80 lg:h-80 rounded-full border border-border flex items-center justify-center relative bg-background/50 backdrop-blur-sm overflow-hidden">
+              {hasProfile ? (
+                <picture>
+                  {profileMobile && <source media="(max-width: 767px)" srcSet={profileMobile} />}
+                  <img
+                    src={profileDesktop}
+                    alt={displayName}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover max-w-full rounded-full"
+                  />
+                </picture>
+              ) : (
+                <>
+                  <div className="absolute inset-4 rounded-full border border-accent/25" />
+                  <span className="text-7xl lg:text-9xl font-luxury font-light text-accent select-none">MF</span>
+                </>
+              )}
             </div>
             <div className="absolute -bottom-4 lg:right-6 bg-background p-6 rounded-2xl shadow-xl shadow-text-secondary/10 border border-border select-none">
               <p className="text-3xl font-luxury font-bold text-text-primary mb-1">{yearsExperience}</p>

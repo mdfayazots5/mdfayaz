@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Search, ChevronDown, HelpCircle, Code2, Users, Calendar, Sparkles } from "lucide-react";
 import { FaqItem } from "../models/portfolio.model";
 import { getFaqItems } from "../services/api";
-import { LoadingScreen } from "./LoadingScreen";
+import { SectionLoader, SectionError } from "./SectionState";
 
 interface FAQItem {
   q: string;
@@ -52,31 +52,39 @@ const FAQS: FAQItem[] = [
 export const FaqPage: React.FC = () => {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
   const [filterCategory, setFilterCategory] = useState<string>("all");
 
   useEffect(() => {
     let isMounted = true;
+    setLoading(true);
+    setError(false);
     getFaqItems()
       .then((items) => {
         if (isMounted) {
           setFaqs(items || []);
-          setLoading(false);
         }
       })
       .catch(() => {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setError(true);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
       });
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   if (loading) {
-    return <LoadingScreen />;
+    return <SectionLoader label="Loading questions..." minHeight="70vh" />;
+  }
+
+  if (error) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="70vh" />;
   }
 
   const filteredFaqs = faqs.filter((faq) => {

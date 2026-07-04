@@ -4,6 +4,7 @@ import { Activity, Code, Layers } from "lucide-react";
 import { Entry } from "../models/portfolio.model";
 import { getEntries } from "../services/api";
 import { ProductCard } from "./ProductCard";
+import { SectionLoader, SectionError } from "./SectionState";
 
 interface ProductsPageProps {
   showOnlyGrid?: boolean;
@@ -12,9 +13,13 @@ interface ProductsPageProps {
 export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false }) => {
   const [products, setProducts] = React.useState<Entry[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(false);
+  const [reloadKey, setReloadKey] = React.useState(0);
 
   React.useEffect(() => {
     let isMounted = true;
+    setLoading(true);
+    setError(false);
     getEntries()
       .then((data) => {
         if (isMounted) {
@@ -29,6 +34,9 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
           setProducts(sorted);
         }
       })
+      .catch(() => {
+        if (isMounted) setError(true);
+      })
       .finally(() => {
         if (isMounted) {
           setLoading(false);
@@ -38,17 +46,14 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   if (loading) {
-    return (
-      <div className="min-h-[40vh] flex items-center justify-center bg-background select-none">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-text-secondary">Sourcing dynamic products...</span>
-        </div>
-      </div>
-    );
+    return <SectionLoader label="Sourcing dynamic products..." />;
+  }
+
+  if (error) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} />;
   }
 
   // Calculate stats for the stat card

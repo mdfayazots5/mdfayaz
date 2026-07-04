@@ -137,6 +137,11 @@ export interface SiteSettings {
   };
   resumeUrl: string;
   tagline: string;
+
+  // Admin-managed media (R2 public URLs). Optional — absence means "no image / default look".
+  // If `mobile` is absent, the UI falls back to `desktop`.
+  profileImage?: { desktop?: string; mobile?: string };
+  heroBackground?: { desktop?: string; mobile?: string };
 }
 
 export interface Product {

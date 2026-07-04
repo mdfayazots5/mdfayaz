@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Shield } from "lucide-react";
 import { PrivacySection } from "../models/portfolio.model";
 import { getPrivacySections } from "../services/api";
-import { LoadingScreen } from "./LoadingScreen";
+import { SectionLoader, SectionError } from "./SectionState";
 
 interface PrivacyPageProps {
   onBack?: () => void;
@@ -11,19 +11,27 @@ interface PrivacyPageProps {
 export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
   const [sections, setSections] = useState<PrivacySection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
-    getPrivacySections().then((data) => {
-      if (isMounted) {
-        setSections(data || []);
-        setLoading(false);
-      }
-    });
+    setLoading(true);
+    setError(false);
+    getPrivacySections()
+      .then((data) => {
+        if (isMounted) setSections(data || []);
+      })
+      .catch(() => {
+        if (isMounted) setError(true);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   const handleBack = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -35,7 +43,11 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
   };
 
   if (loading) {
-    return <LoadingScreen />;
+    return <SectionLoader label="Loading policy..." minHeight="70vh" />;
+  }
+
+  if (error) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="70vh" />;
   }
 
   return (
@@ -84,7 +96,13 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
           {/* Right Column - Policy Content Card */}
           <div className="lg:col-span-7">
             <div className="bg-surface p-8 sm:p-12 rounded-[2rem] border border-border shadow-xl shadow-text-secondary/5 space-y-10">
-              
+
+              {sections.length === 0 && (
+                <p className="text-sm text-text-secondary font-medium italic leading-relaxed">
+                  The privacy policy has not been published yet. Please check back soon.
+                </p>
+              )}
+
               {sections.map((sec) => (
                 <div key={sec.id} className="space-y-3" id={sec.id}>
                   <h3 className="text-lg font-luxury font-bold text-text-primary">

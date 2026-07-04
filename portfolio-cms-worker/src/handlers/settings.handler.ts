@@ -15,6 +15,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
   socialLinks: { github: '', linkedin: '', dob: '', mobile: '' },
   resumeUrl: '',
   tagline: '',
+  profileImage: { desktop: '', mobile: '' },
+  heroBackground: { desktop: '', mobile: '' },
 };
 
 export async function handleGetSettings(request: Request, env: Env): Promise<Response> {

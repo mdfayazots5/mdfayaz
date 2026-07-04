@@ -21,6 +21,7 @@ import { AdminPrivacyPage } from "./components/admin/AdminPrivacyPage";
 import { AdminAboutPage } from "./components/admin/AdminAboutPage";
 import { AdminSettingsPage } from "./components/admin/AdminSettingsPage";
 import { AdminServicesPage } from "./components/admin/AdminServicesPage";
+import { AdminMediaPage } from "./components/admin/AdminMediaPage";
 
 const AdminPlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div className="bg-surface p-12 rounded-3xl border border-border text-center space-y-4 animate-fade-in text-left max-w-xl mx-auto my-12">
@@ -145,6 +146,9 @@ function PortfolioRouter() {
     } else if (normalized === "#admin/settings") {
       activeSub = "settings";
       componentToRender = <AdminSettingsPage />;
+    } else if (normalized === "#admin/media") {
+      activeSub = "media";
+      componentToRender = <AdminMediaPage />;
     } else {
       // Match query for edit ID parameter
       const editMatch = hash.match(/^#admin\/entries\/([^/]+)\/edit$/i);

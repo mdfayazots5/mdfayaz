@@ -16,6 +16,35 @@ function isEmtpyOrNull(obj: any): boolean {
   return false;
 }
 
+// When a backend is configured (VITE_API_BASE_URL set), it is the single source of truth:
+// a successful response binds exactly what the API returns (including an empty array/object),
+// and a network/HTTP error THROWS so the UI can show an error/retry state — we never silently
+// substitute *.fallback.ts (dummy/seed) content here. The fallback path is reserved for local
+// dev (empty VITE_API_BASE_URL); see each getter's `if (!API_BASE_URL)` short-circuit.
+async function fetchJson<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`);
+  if (!response.ok) {
+    throw new Error(`API responded with status ${response.status} for ${path}`);
+  }
+  return (await response.json()) as T;
+}
+
+// Read a collection from the API, coercing a null/non-array body to [] so consumers render an
+// empty state rather than crashing — an empty result is valid content, not an error.
+async function fetchList<T>(path: string): Promise<T[]> {
+  const data = await fetchJson<T[]>(path);
+  return Array.isArray(data) ? data : [];
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(blob);
+  });
+}
+
 function getLocalServices(): Service[] {
   const cached = localStorage.getItem("local_services");
   if (!cached) {
@@ -219,25 +248,10 @@ function saveLocalSettings(settings: SiteSettings): void {
 
 export async function getEntries(): Promise<Entry[]> {
   if (!API_BASE_URL) {
-    console.warn("VITE_API_BASE_URL is empty/undefined. Sourcing entries from localStorage / fallback data.");
+    console.info("VITE_API_BASE_URL is empty. Local-dev mode: sourcing entries from localStorage / fallback seed.");
     return getLocalEntries();
   }
-  try {
-    const response = await fetch(`${API_BASE_URL}/entries`);
-    if (!response.ok) {
-      console.warn(`API responded with status ${response.status} for /entries. Using fallback data.`);
-      return ENTRIES_FALLBACK;
-    }
-    const data = await response.json();
-    if (isEmtpyOrNull(data)) {
-      console.warn("API resolved to empty or null result for /entries. Using fallback data.");
-      return ENTRIES_FALLBACK;
-    }
-    return data as Entry[];
-  } catch (error) {
-    console.warn("Failed to fetch entries from API due to a network or CORS error. Using fallback data.", error);
-    return getLocalEntries();
-  }
+  return fetchList<Entry>("/entries");
 }
 
 export async function login(username: string, password: string): Promise<boolean> {
@@ -412,91 +426,31 @@ export async function getAboutProfile(): Promise<AboutProfile> {
   if (useLocal) {
     return getLocalAbout();
   }
-  try {
-    const response = await fetch(`${API_BASE_URL}/about`);
-    if (!response.ok) {
-      console.warn(`API responded with status ${response.status} for /about. Using local data fallback.`);
-      return getLocalAbout();
-    }
-    const data = await response.json();
-    if (isEmtpyOrNull(data)) {
-      console.warn("API resolved to empty or null result for /about. Using local data fallback.");
-      return getLocalAbout();
-    }
-    return data as AboutProfile;
-  } catch (error) {
-    console.warn("Failed to fetch about profile from API due to a network or CORS error. Using local data fallback.", error);
-    return getLocalAbout();
-  }
+  return fetchJson<AboutProfile>("/about");
 }
 
 export async function getFaqItems(): Promise<FaqItem[]> {
   if (!API_BASE_URL) {
-    console.warn("VITE_API_BASE_URL is empty/undefined. Sourcing FAQ items from localStorage / fallback data.");
+    console.info("VITE_API_BASE_URL is empty. Local-dev mode: sourcing FAQ items from localStorage / fallback seed.");
     return getLocalFaq();
   }
-  try {
-    const response = await fetch(`${API_BASE_URL}/faq`);
-    if (!response.ok) {
-      console.warn(`API responded with status ${response.status} for /faq. Using localStorage fallback.`);
-      return getLocalFaq();
-    }
-    const data = await response.json();
-    if (isEmtpyOrNull(data)) {
-      console.warn("API resolved to empty or null result for /faq. Using localStorage fallback.");
-      return getLocalFaq();
-    }
-    return data as FaqItem[];
-  } catch (error) {
-    console.warn("Failed to fetch FAQ items from API due to a network or CORS error. Using localStorage fallback.", error);
-    return getLocalFaq();
-  }
+  return fetchList<FaqItem>("/faq");
 }
 
 export async function getUsesCategories(): Promise<UsesCategory[]> {
   if (!API_BASE_URL) {
-    console.warn("VITE_API_BASE_URL is empty/undefined. Sourcing uses categories from localStorage / fallback data.");
+    console.info("VITE_API_BASE_URL is empty. Local-dev mode: sourcing uses categories from localStorage / fallback seed.");
     return getLocalUses();
   }
-  try {
-    const response = await fetch(`${API_BASE_URL}/uses`);
-    if (!response.ok) {
-      console.warn(`API responded with status ${response.status} for /uses. Using localStorage fallback.`);
-      return getLocalUses();
-    }
-    const data = await response.json();
-    if (isEmtpyOrNull(data)) {
-      console.warn("API resolved to empty or null result for /uses. Using localStorage fallback.");
-      return getLocalUses();
-    }
-    return data as UsesCategory[];
-  } catch (error) {
-    console.warn("Failed to fetch uses categories from API due to a network or CORS error. Using localStorage fallback.", error);
-    return getLocalUses();
-  }
+  return fetchList<UsesCategory>("/uses");
 }
 
 export async function getPrivacySections(): Promise<PrivacySection[]> {
   if (!API_BASE_URL) {
-    console.warn("VITE_API_BASE_URL is empty/undefined. Sourcing privacy sections from localStorage / fallback data.");
+    console.info("VITE_API_BASE_URL is empty. Local-dev mode: sourcing privacy sections from localStorage / fallback seed.");
     return getLocalPrivacy();
   }
-  try {
-    const response = await fetch(`${API_BASE_URL}/privacy`);
-    if (!response.ok) {
-      console.warn(`API responded with status ${response.status} for /privacy. Using localStorage fallback.`);
-      return getLocalPrivacy();
-    }
-    const data = await response.json();
-    if (isEmtpyOrNull(data)) {
-      console.warn("API resolved to empty or null result for /privacy. Using localStorage fallback.");
-      return getLocalPrivacy();
-    }
-    return data as PrivacySection[];
-  } catch (error) {
-    console.warn("Failed to fetch privacy sections from API due to a network or CORS error. Using localStorage fallback.", error);
-    return getLocalPrivacy();
-  }
+  return fetchList<PrivacySection>("/privacy");
 }
 
 // FAQ CRUD APIs
@@ -942,22 +896,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   if (useLocal) {
     return getLocalSettings();
   }
-  try {
-    const response = await fetch(`${API_BASE_URL}/settings`);
-    if (!response.ok) {
-      console.warn(`API responded with status ${response.status} for /settings. Using local data fallback.`);
-      return getLocalSettings();
-    }
-    const data = await response.json();
-    if (isEmtpyOrNull(data)) {
-      console.warn("API resolved to empty or null result for /settings. Using local data fallback.");
-      return getLocalSettings();
-    }
-    return data as SiteSettings;
-  } catch (error) {
-    console.warn("Failed to fetch site settings from API due to a network or CORS error. Using local data fallback.", error);
-    return getLocalSettings();
-  }
+  return fetchJson<SiteSettings>("/settings");
 }
 
 export async function updateAboutProfile(data: AboutProfile): Promise<boolean> {
@@ -1016,25 +955,10 @@ export async function updateSiteSettings(data: SiteSettings): Promise<boolean> {
 
 export async function getServices(): Promise<Service[]> {
   if (!API_BASE_URL) {
-    console.warn("VITE_API_BASE_URL is empty/undefined. Sourcing services from localStorage / fallback data.");
+    console.info("VITE_API_BASE_URL is empty. Local-dev mode: sourcing services from localStorage / fallback seed.");
     return getLocalServices();
   }
-  try {
-    const response = await fetch(`${API_BASE_URL}/services`);
-    if (!response.ok) {
-      console.warn(`API responded with status ${response.status} for /services. Using fallback data.`);
-      return SERVICES_FALLBACK;
-    }
-    const data = await response.json();
-    if (isEmtpyOrNull(data)) {
-      console.warn("API resolved to empty or null result for /services. Using fallback data.");
-      return SERVICES_FALLBACK;
-    }
-    return data as Service[];
-  } catch (error) {
-    console.warn("Failed to fetch services from API due to a network or CORS error. Using fallback data.", error);
-    return getLocalServices();
-  }
+  return fetchList<Service>("/services");
 }
 
 export async function createService(data: any): Promise<Service> {
@@ -1150,4 +1074,50 @@ export async function deleteService(id: number | string): Promise<boolean> {
   }
 }
 
+/**
+ * Upload a media blob (e.g. a cropped profile / hero image) and return its public URL.
+ *
+ * - With a configured backend and a real admin session, POSTs a multipart form to `/upload`
+ *   (Bearer auth) and returns the R2 public `{ url }`. Errors THROW so the admin UI can toast them.
+ * - In local-dev (empty VITE_API_BASE_URL) or under a "local" admin session, there is no bucket,
+ *   so the blob is inlined as a data: URL — the image still previews and persists inside the
+ *   localStorage-backed settings without a backend.
+ *
+ * Callers are responsible for size/type validation (mirroring the Worker's 5 MB image-only limit)
+ * before calling; this keeps the storage layer thin and the error messages user-facing.
+ */
+export async function uploadFile(blob: Blob, category: string, filename?: string): Promise<string> {
+  const session = localStorage.getItem("admin_session");
+  const useLocal = !API_BASE_URL || session === "local";
+
+  if (useLocal) {
+    return blobToDataUrl(blob);
+  }
+
+  const name = filename || (blob instanceof File ? blob.name : `${category}-${Date.now()}.webp`);
+  const form = new FormData();
+  form.append("file", blob, name);
+  form.append("category", category);
+
+  const response = await fetch(`${API_BASE_URL}/upload`, {
+    method: "POST",
+    headers: {
+      // NOTE: do not set Content-Type — the browser adds the multipart boundary automatically.
+      ...(session && session !== "local" ? { "Authorization": `Bearer ${session}` } : {})
+    },
+    body: form
+  });
+  if (!response.ok) {
+    let detail = response.statusText;
+    try {
+      const err = await response.json();
+      if (err && err.error) detail = err.error;
+    } catch {
+      // non-JSON error body — keep statusText
+    }
+    throw new Error(detail || `Upload failed with status ${response.status}`);
+  }
+  const data = await response.json();
+  return data.url as string;
+}
 

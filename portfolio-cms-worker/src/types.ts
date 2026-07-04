@@ -81,6 +81,9 @@ export interface SiteSettings {
   socialLinks: { github: string; linkedin: string; dob: string; mobile: string; };
   resumeUrl: string;
   tagline: string;
+  // Admin-managed media (R2 public URLs). Optional; `mobile` falls back to `desktop`.
+  profileImage?: { desktop?: string; mobile?: string };
+  heroBackground?: { desktop?: string; mobile?: string };
 }
 
 export interface LoginRequest { username: string; password: string; }

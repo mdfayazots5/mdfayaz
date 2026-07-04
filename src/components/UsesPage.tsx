@@ -3,30 +3,40 @@ import { motion, AnimatePresence } from "motion/react";
 import { Wrench, ChevronUp, ChevronDown, ArrowUpRight } from "lucide-react";
 import { UsesCategory } from "../models/portfolio.model";
 import { getUsesCategories } from "../services/api";
-import { LoadingScreen } from "./LoadingScreen";
+import { SectionLoader, SectionError } from "./SectionState";
 
 export const UsesPage: React.FC = () => {
   const [categories, setCategories] = useState<UsesCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let isMounted = true;
-    getUsesCategories().then((data) => {
-      if (isMounted) {
-        setCategories(data || []);
-        const initialOpen: Record<string, boolean> = {};
-        (data || []).forEach((cat) => {
-          initialOpen[cat.id] = true;
-        });
-        setOpenSections(initialOpen);
-        setLoading(false);
-      }
-    });
+    setLoading(true);
+    setError(false);
+    getUsesCategories()
+      .then((data) => {
+        if (isMounted) {
+          setCategories(data || []);
+          const initialOpen: Record<string, boolean> = {};
+          (data || []).forEach((cat) => {
+            initialOpen[cat.id] = true;
+          });
+          setOpenSections(initialOpen);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setError(true);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   const toggleSection = (id: string) => {
     setOpenSections((prev) => ({
@@ -47,7 +57,11 @@ export const UsesPage: React.FC = () => {
   };
 
   if (loading) {
-    return <LoadingScreen />;
+    return <SectionLoader label="Loading setup & gear..." minHeight="70vh" />;
+  }
+
+  if (error) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="70vh" />;
   }
 
   return (
@@ -81,6 +95,13 @@ export const UsesPage: React.FC = () => {
         </div>
 
         {/* Content categories list */}
+        {categories.length === 0 ? (
+          <div className="mt-10 p-16 text-center border border-dashed border-border rounded-3xl bg-surface/20 max-w-sm mx-auto space-y-4">
+            <Wrench className="w-8 h-8 text-text-secondary/50 mx-auto" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-text-primary">Nothing here yet</h3>
+            <p className="text-xs text-text-secondary leading-relaxed">No setup categories have been published yet. Check back soon.</p>
+          </div>
+        ) : (
         <div className="divide-y divide-border">
           {categories.map((category) => {
             const isOpen = !!openSections[category.id];
@@ -150,6 +171,7 @@ export const UsesPage: React.FC = () => {
             );
           })}
         </div>
+        )}
 
         {/* Footer Credit Tag inspired by uses.tech */}
         <div className="mt-16 text-center border-t border-border pt-10 select-none">

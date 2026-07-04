@@ -16,5 +16,7 @@ export const SETTINGS_FALLBACK: SiteSettings = {
     mobile: "+91 70954 41960"
   },
   resumeUrl: "#",
-  tagline: "I build enterprise systems that scale from database to UI — production-ready."
+  tagline: "I build enterprise systems that scale from database to UI — production-ready.",
+  profileImage: { desktop: "", mobile: "" },
+  heroBackground: { desktop: "", mobile: "" }
 };

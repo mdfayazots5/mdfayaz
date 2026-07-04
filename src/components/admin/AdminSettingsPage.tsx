@@ -196,7 +196,12 @@ export const AdminSettingsPage: React.FC = () => {
           dob: socialObj.dob || "",
           mobile: socialObj.mobile || "",
           ...socialObj
-        }
+        },
+        // Preserve admin-managed media (owned by the Media page). Both pages PUT the full
+        // SiteSettings object, so carrying these through prevents a settings save from wiping
+        // an uploaded profile image / hero background.
+        profileImage: settings.profileImage,
+        heroBackground: settings.heroBackground
       };
 
       const success = await updateSiteSettings(updatedPayload);

@@ -4,6 +4,7 @@ import { Service } from "../models/portfolio.model";
 import { getServices } from "../services/api";
 import { ServiceCard } from "./ServiceCard";
 import { ServiceDetailModal } from "./ServiceDetailModal";
+import { SectionLoader, SectionError } from "./SectionState";
 
 interface ServicesPageProps {
   showOnlyGrid?: boolean;
@@ -12,11 +13,15 @@ interface ServicesPageProps {
 export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false }) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
+    setLoading(true);
+    setError(false);
     getServices()
       .then((data) => {
         if (isMounted) {
@@ -31,6 +36,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false
       })
       .catch((err) => {
         console.error("Failed to fetch services in public page:", err);
+        if (isMounted) setError(true);
       })
       .finally(() => {
         if (isMounted) {
@@ -41,7 +47,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   const handleOpenDetails = (service: Service) => {
     setSelectedService(service);
@@ -54,14 +60,11 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false
   };
 
   if (loading) {
-    return (
-      <div className="min-h-[40vh] flex items-center justify-center bg-background select-none">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-text-secondary">Retrieving expertise nodes...</span>
-        </div>
-      </div>
-    );
+    return <SectionLoader label="Retrieving expertise nodes..." />;
+  }
+
+  if (error) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} />;
   }
 
   const activeCount = services.filter((s) => s.status === "Active").length;
