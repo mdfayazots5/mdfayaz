@@ -13,7 +13,12 @@
       "Built secure, high-throughput REST APIs and core business microservices in ASP.NET Core matching architectural repository patterns.",
       "Participated directly in agile ceremonies, allocating tasks to 5 developers, performing strict code reviews, and driving fast deployment cycles."
     ],
-    "tech": ["ASP.NET Core", "Web API", "SQL Server", "Web-based UI"],
+    "tech": [
+      "ASP.NET Core",
+      "Web API",
+      "SQL Server",
+      "Web-based UI"
+    ],
     "achievements": [],
     "companyName": "Revalsys Technologies",
     "role": "Team Lead + Dot Net Developer",
@@ -38,7 +43,11 @@
       "Designed custom checklist engines managing post-offer document validation, occupational health clearances, and IT onboarding triggers.",
       "Delivered scalable RESTful endpoints and highly indexed relational database structures in ASP.NET Core and SQL Server."
     ],
-    "tech": ["ASP.NET Core", "Web API", "SQL Server"],
+    "tech": [
+      "ASP.NET Core",
+      "Web API",
+      "SQL Server"
+    ],
     "achievements": [],
     "companyName": "Revalsys Technologies",
     "role": "Team Lead + Dot Net Developer",
@@ -63,7 +72,12 @@
       "Configured and integrated Firebase Cloud Messaging (FCM) system pipelines delivering transactional push notifications across Web, Android, and iOS channels.",
       "Crafted backend API pathways and optimized relational database queries, maintaining sub-120ms execution times under heavy traffic loads."
     ],
-    "tech": ["ASP.NET Core", "Web API", "SQL Server", "Firebase Cloud Messaging (FCM)"],
+    "tech": [
+      "ASP.NET Core",
+      "Web API",
+      "SQL Server",
+      "Firebase Cloud Messaging (FCM)"
+    ],
     "achievements": [],
     "companyName": "Revalsys Technologies",
     "role": "Dot Net Developer",
@@ -82,7 +96,11 @@
     "description": "PulseTrack is a self-hosted monitoring tool for tracking API and service uptime, with configurable health checks and real-time alerts. Built to give small teams visibility into their infrastructure without relying on expensive third-party monitoring platforms.",
     "status": "In Development",
     "categoryTag": "Monitoring Tool",
-    "tech": ["ASP.NET Core", "SQL Server", "SignalR"],
+    "tech": [
+      "ASP.NET Core",
+      "SQL Server",
+      "SignalR"
+    ],
     "features": [
       "HTTP and database health checks with custom intervals",
       "Real-time alerting via email and webhook",
@@ -103,7 +121,11 @@
     "description": "LinkFolio lets users build a personal landing page with custom links, themes, and click analytics. Designed for creators and freelancers who want a clean, branded hub for their online presence.",
     "status": "Live",
     "categoryTag": "Web App",
-    "tech": ["React", "ASP.NET Core", "SQL Server"],
+    "tech": [
+      "React",
+      "ASP.NET Core",
+      "SQL Server"
+    ],
     "features": [
       "Drag-and-drop link organization",
       "Click and visitor analytics",
@@ -124,7 +146,11 @@
     "description": "TaskRelay is a workflow automation tool that lets users chain together API calls, conditions, and scheduled jobs through a visual builder. Aimed at small businesses looking to automate routine processes without writing code.",
     "status": "Private Beta",
     "categoryTag": "Automation Platform",
-    "tech": ["ASP.NET Core", "Angular", "Hangfire"],
+    "tech": [
+      "ASP.NET Core",
+      "Angular",
+      "Hangfire"
+    ],
     "features": [
       "Drag-and-drop workflow builder",
       "Scheduled and event-triggered runs",
@@ -145,7 +171,11 @@
     "description": "NotesVault is a personal notes and code snippet manager with end-to-end encryption, tagging, and full-text search. Built for developers who want a private space to store reference material and reusable code.",
     "status": "Completed",
     "categoryTag": "Productivity Tool",
-    "tech": ["ASP.NET Core", "Angular", "SQL Server"],
+    "tech": [
+      "ASP.NET Core",
+      "Angular",
+      "SQL Server"
+    ],
     "features": [
       "End-to-end encrypted storage",
       "Syntax-highlighted code snippets",

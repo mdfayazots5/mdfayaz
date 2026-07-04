@@ -14,8 +14,6 @@ import {
   FileText,
   Link,
   MessageSquare,
-  Download,
-  Upload,
   User,
   MapPin,
   Briefcase,
@@ -45,65 +43,6 @@ export const AdminSettingsPage: React.FC = () => {
   
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Backup handlers
-  const handleExportBackup = () => {
-    const keys = ["local_projects", "local_faq", "local_uses", "local_privacy", "local_about", "local_settings"];
-    const backupData: Record<string, any> = {};
-    keys.forEach(key => {
-      const rawVal = localStorage.getItem(key);
-      backupData[key] = rawVal ? JSON.parse(rawVal) : null;
-    });
-    backupData["_backupTimestamp"] = new Date().toISOString();
-
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    const dateStr = new Date().toISOString().slice(0, 10);
-    downloadAnchor.setAttribute("download", `portfolio-data-backup-${dateStr}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    showToast("Backup JSON file downloaded successfully.");
-  };
-
-  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-        
-        // Validation check
-        const requiredKeys = ["local_projects", "local_faq", "local_uses", "local_privacy", "local_about", "local_settings"];
-        const missingKeys = requiredKeys.filter((key) => !(key in parsed));
-        
-        if (missingKeys.length > 0) {
-          throw new Error(`Missing required data modules: ${missingKeys.join(", ")}`);
-        }
-
-        // Write parsed values to localStorage
-        requiredKeys.forEach((key) => {
-          if (parsed[key]) {
-            localStorage.setItem(key, JSON.stringify(parsed[key]));
-          }
-        });
-
-        showToast("Data backup successfully restored! Reloading...");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
-      } catch (err: any) {
-        console.error(err);
-        showToast(`Restore rejected: ${err.message || "Invalid backup schema"}`, "error");
-      }
-    };
-    reader.readAsText(file);
-    // Reset file input target value so the same file can be uploaded again
-    e.target.value = "";
-  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -539,48 +478,6 @@ export const AdminSettingsPage: React.FC = () => {
         </div>
 
       </form>
-
-      {/* Backup & Restore Section */}
-      <section className="bg-surface p-6 rounded-2xl border border-border space-y-6 mt-8">
-        <div className="flex items-center gap-2 pb-3 border-b border-border/60">
-          <Download className="text-accent" size={16} />
-          <h3 className="text-sm font-bold uppercase tracking-wider">Backup & Restore</h3>
-        </div>
-
-        <p className="text-xs text-text-secondary leading-relaxed max-w-2xl font-sans text-left">
-          Export your entire portfolio CMS content (including all local project registries, FAQs, Uses, Privacy policies, About profiles, and general settings) as a single portable JSON file, or restore a previous snapshot instantly.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
-          {/* Export Action */}
-          <button
-            type="button"
-            onClick={handleExportBackup}
-            className="w-full sm:w-auto px-5 py-3 border border-border bg-background hover:bg-surface hover:border-accent/40 text-text-primary hover:text-accent rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-          >
-            <Download size={13} />
-            <span>Export Portfolio Backup</span>
-          </button>
-
-          {/* Import Action */}
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImportBackup}
-              id="import-backup-file-input"
-              className="hidden"
-            />
-            <label
-              htmlFor="import-backup-file-input"
-              className="w-full sm:w-auto px-5 py-3 border border-border bg-background hover:bg-surface hover:border-accent/40 text-text-primary hover:text-accent rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-colors"
-            >
-              <Upload size={13} />
-              <span>Import Restore File</span>
-            </label>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

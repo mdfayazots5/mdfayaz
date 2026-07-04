@@ -11,7 +11,9 @@
     "lint": "tsc --noEmit",
     "generate:og": "tsx scripts/generate-og-image.ts",
     "capture:screenshots": "tsx scripts/capture-screenshots.ts",
-    "generate:doc": "tsx scripts/generate-docx.ts"
+    "generate:doc": "tsx scripts/generate-docx.ts",
+    "r2:sync-content": "tsx scripts/sync-local-content-to-r2.ts",
+    "r2:test-upload": "tsx scripts/test-r2-upload.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

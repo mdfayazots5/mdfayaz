@@ -4,8 +4,8 @@ compatibility_date = "2024-12-01"
 account_id = "84ecd2ee1ee7671dc35a4ef3b56e16b0"
 
 [vars]
-ENVIRONMENT = "development"
-ADMIN_USERNAME = "admin"
+ENVIRONMENT = "production"
+ADMIN_USERNAME = "fayazmd"
 # CORS rejects any Origin not listed here. PROD must match the deployed Pages site exactly.
 ALLOWED_ORIGIN_PROD = "https://mdfayaz.pages.dev"
 ALLOWED_ORIGIN_DEV  = "http://localhost:3000"            # Vite dev server (NOT :4200)

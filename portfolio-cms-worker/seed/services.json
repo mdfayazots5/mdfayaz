@@ -4,7 +4,11 @@
     "name": "ASP.NET Core API Development",
     "tagline": "Designing and building secure, scalable REST APIs with ASP.NET Core and C#.",
     "description": "End-to-end REST API development using ASP.NET Core and C#, including JWT-based authentication, role-based access control, and integration with SQL Server via Entity Framework Core. Built for performance, maintainability, and clean separation of concerns.",
-    "highlights": ["JWT auth & role-based access control", "Entity Framework Core integration", "Swagger/OpenAPI documentation"],
+    "highlights": [
+      "JWT auth & role-based access control",
+      "Entity Framework Core integration",
+      "Swagger/OpenAPI documentation"
+    ],
     "icon": "Server",
     "status": "Active",
     "displayOrder": 1
@@ -14,7 +18,11 @@
     "name": "Clean Architecture & CQRS",
     "tagline": "Structuring applications with Clean Architecture, CQRS, and the Repository pattern for long-term maintainability.",
     "description": "Implementation of layered/Clean Architecture with CQRS and the Repository pattern, separating concerns across Domain, Application, Infrastructure, and API layers for testable, scalable codebases.",
-    "highlights": ["CQRS with MediatR", "Repository pattern", "Modular, testable architecture"],
+    "highlights": [
+      "CQRS with MediatR",
+      "Repository pattern",
+      "Modular, testable architecture"
+    ],
     "icon": "Layers",
     "status": "Active",
     "displayOrder": 2
@@ -24,7 +32,11 @@
     "name": "Angular Frontend Development",
     "tagline": "Responsive, component-based UIs built with Angular, HTML5, and CSS3.",
     "description": "Building responsive single-page applications with Angular, integrating with backend REST APIs, focused on clean component structure and usable interfaces.",
-    "highlights": ["Responsive UI design", "API-driven components", "Reusable component libraries"],
+    "highlights": [
+      "Responsive UI design",
+      "API-driven components",
+      "Reusable component libraries"
+    ],
     "icon": "MonitorSmartphone",
     "status": "Active",
     "displayOrder": 3
@@ -34,7 +46,11 @@
     "name": "SQL Server Database Design & Optimization",
     "tagline": "Schema design, indexing, and query tuning for SQL Server databases.",
     "description": "Database design including schema modeling, stored procedures, indexing strategies, and query optimization to improve performance at scale.",
-    "highlights": ["Schema & index design", "Query tuning", "Stored procedure development"],
+    "highlights": [
+      "Schema & index design",
+      "Query tuning",
+      "Stored procedure development"
+    ],
     "icon": "Database",
     "status": "Active",
     "displayOrder": 4
@@ -44,7 +60,11 @@
     "name": "Redis Caching & Performance Optimization",
     "tagline": "Improving application response times with Redis caching and performance tuning.",
     "description": "Implementing caching strategies with Redis to reduce database load and improve response times, alongside general performance profiling and tuning.",
-    "highlights": ["Redis cache implementation", "Performance profiling", "Reduced database load"],
+    "highlights": [
+      "Redis cache implementation",
+      "Performance profiling",
+      "Reduced database load"
+    ],
     "icon": "Zap",
     "status": "Active",
     "displayOrder": 5
@@ -54,7 +74,11 @@
     "name": "Healthcare & HRMS Domain Solutions",
     "tagline": "Building domain-specific solutions for healthcare and HR/recruitment platforms.",
     "description": "Experience delivering modules across healthcare management (appointments, prescriptions, hospital admin) and HRMS (recruitment, onboarding workflows), with a strong understanding of domain-specific requirements.",
-    "highlights": ["Healthcare management modules", "HRMS recruitment & onboarding", "Domain-driven module design"],
+    "highlights": [
+      "Healthcare management modules",
+      "HRMS recruitment & onboarding",
+      "Domain-driven module design"
+    ],
     "icon": "HeartPulse",
     "status": "Active",
     "displayOrder": 6
@@ -64,7 +88,11 @@
     "name": "AI-Assisted Development Workflows",
     "tagline": "Leveraging AI tools like GitHub Copilot and Claude to accelerate development without compromising quality.",
     "description": "Integrating AI-assisted development tools into daily workflows to improve productivity, code quality, and delivery speed — including code generation, review assistance, and documentation.",
-    "highlights": ["GitHub Copilot & Claude integration", "AI-assisted code review", "Productivity-focused workflows"],
+    "highlights": [
+      "GitHub Copilot & Claude integration",
+      "AI-assisted code review",
+      "Productivity-focused workflows"
+    ],
     "icon": "Sparkles",
     "status": "Active",
     "displayOrder": 7
@@ -74,7 +102,11 @@
     "name": "Production Support & Debugging",
     "tagline": "Root-cause analysis, debugging, and production support for live applications.",
     "description": "Hands-on production support including debugging, root cause analysis, and resolving live issues across deployed applications, with a focus on minimal downtime.",
-    "highlights": ["Root cause analysis", "Live issue resolution", "Deployment & environment troubleshooting"],
+    "highlights": [
+      "Root cause analysis",
+      "Live issue resolution",
+      "Deployment & environment troubleshooting"
+    ],
     "icon": "LifeBuoy",
     "status": "Active",
     "displayOrder": 8

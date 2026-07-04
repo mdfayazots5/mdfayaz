@@ -10,7 +10,7 @@ export const AdminDashboardPage: React.FC = () => {
   const [usesCount, setUsesCount] = useState<number | string>("—");
   const [servicesCount, setServicesCount] = useState<string>("—");
   const [loading, setLoading] = useState(true);
-  const [apiMode, setApiMode] = useState("Local Persistence Mode");
+  const [apiMode, setApiMode] = useState("Remote API Required");
   const [contactEmail, setContactEmail] = useState("fayaz@example.com");
 
   useEffect(() => {
@@ -46,11 +46,7 @@ export const AdminDashboardPage: React.FC = () => {
           }
 
           const apiBase = (import.meta as any).env.VITE_API_BASE_URL;
-          if (apiBase) {
-            setApiMode(`Connected to Remote API (${apiBase})`);
-          } else {
-            setApiMode("Local Sandbox (Local Storage Mode)");
-          }
+          setApiMode(apiBase ? `Connected to Remote API (${apiBase})` : "Remote API not configured");
         }
       } catch (err) {
         console.error("Dashboard failed to load specs:", err);
@@ -267,8 +263,8 @@ export const AdminDashboardPage: React.FC = () => {
               <span className="font-mono text-text-primary">Cloud Run</span>
             </li>
             <li className="flex justify-between items-center py-1.5 border-b border-border/50">
-              <span className="text-text-secondary font-semibold">Storage Sandbox</span>
-              <span className="font-semibold text-accent">Active (localStorage)</span>
+              <span className="text-text-secondary font-semibold">Storage Source</span>
+              <span className="font-semibold text-accent">Cloudflare R2 CMS</span>
             </li>
             <li className="flex justify-between items-center py-1.5">
               <span className="text-text-secondary font-semibold">Phase 3b Ready</span>

@@ -43,36 +43,30 @@ Keep these layers strictly isolated. A change to one layer should not force edit
 | Layer | Location | Responsibility |
 | --- | --- | --- |
 | **Model / Domain** | `src/models/portfolio.model.ts` | All TypeScript interfaces (`Entry`, `Service`, `Project`, `AboutProfile`, `SiteSettings`, …). Single source of type truth. |
-| **Fallback / Seed data** | `src/data/fallback/*.fallback.ts` | Default content seeded into `localStorage` on first run. |
-| **Mock data** | `src/mocks/portfolio.mock.ts` | `MASTER_DATA` — last-resort fallback for identity/stats when admin settings are unavailable. |
+| **Seed data** | `src/data/fallback/*.fallback.ts`, `portfolio-cms-worker/seed/*.json` | Source material for initial R2 migration/seeding only. Runtime content comes from the Worker/R2 API. |
 | **Service / API** | `src/services/api.ts` | All persistence. CRUD for entries, services, FAQ, uses, privacy, about, settings + auth. |
 | **Data hook** | `src/hooks/usePortfolioData.ts` | Bridges the API layer into React (`{ data, loading, error }`). |
 | **Presentation** | `src/components/*.tsx` | Pure rendering. Public site + `components/admin/*` CMS. One component = one concern (e.g. `ProjectCard`, `ServiceCard`). |
 | **Composition** | `src/PortfolioApp.tsx`, `Portfolio5.tsx` | Routing, section assembly, theme. |
 
 **Rule:** presentation components receive data via props/hooks — they do not call `fetch` or
-`localStorage` directly. All storage access flows through `src/services/api.ts`.
+content `localStorage` directly. All CMS storage access flows through `src/services/api.ts`.
 
 ---
 
 ## 4. Data & Persistence Model
 
-The app runs **backend-optional**. `src/services/api.ts` is the gatekeeper:
+The app is **R2-backed for CMS content**. `src/services/api.ts` is the gatekeeper:
 
-- If `VITE_API_BASE_URL` is set → talk to the ASP.NET Core + SQL Server backend (Bearer auth from
-  the stored `admin_session` token).
-- If it's empty, **or** the request fails (network/CORS/non-OK/empty body) → transparently fall back
-  to `localStorage`, seeded from `*.fallback.ts`.
-- Admin login also has a local fallback (`VITE_ADMIN_USERNAME` / `VITE_ADMIN_PASSWORD`, default
-  `admin` / `changeme`); a `"local"` session forces the local path.
+- `VITE_API_BASE_URL` is required for public content, admin CRUD, and media uploads.
+- All CMS reads and writes go through the Cloudflare Worker API backed by R2 JSON objects.
+- `localStorage` is allowed only for client-local state such as `admin_session` and theme preference.
+- `src/data/fallback/*.fallback.ts` and `portfolio-cms-worker/seed/*.json` are migration/seed sources, not runtime fallbacks.
 
 **Conventions when extending the API:**
-- Every mutating function follows the same shape: an inner `executeLocal…()` closure, a
-  `useLocal = !API_BASE_URL || session === "local"` short-circuit, then a `try/fetch` that falls
-  back to the local closure on error. Preserve this pattern for consistency.
+- Every API function should fail loudly on network/HTTP errors; do not silently substitute fallback data.
+- Mutating functions send JSON or multipart data to the Worker with `Authorization: Bearer <admin_session>`.
 - IDs: numeric entities use `max(id)+1`; string-keyed entities (uses/privacy) use `"prefix_" + Date.now()`.
-- The `local_entries` store has a one-time migration from legacy `local_projects` / `local_products`
-  (backed up to `*_backup`). Don't remove it.
 
 `Entry` is the unified project/product record (`type: 'company' | 'personal'`). Prefer it over the
 legacy `Project` / `Product` interfaces for new work.
@@ -93,8 +87,8 @@ npm run capture:screenshots # capture UI screenshots
 npm run generate:doc        # generate a .docx (docx lib)
 ```
 
-Environment: copy `.env.example` → `.env.local`. `GEMINI_API_KEY` for AI features; `VITE_API_BASE_URL`
-for the backend (leave empty to run fully local).
+Environment: copy `.env.example` → `.env.local`. `GEMINI_API_KEY` is for AI features; `VITE_API_BASE_URL`
+must point at the deployed or local Worker API for CMS content to load.
 
 ---
 
@@ -106,14 +100,14 @@ Follow this loop for every change:
    If a change seems to need edits across layers, reconsider — usually it means data and
    presentation are leaking into each other.
 2. **Model first.** New content shape → add/adjust the interface in `portfolio.model.ts`, then the
-   fallback seed, then the API function, then the component. Never the reverse.
-3. **Match existing idiom.** Copy the surrounding code's naming, the api.ts fallback pattern, the
+   R2 seed JSON/source seed, then the API function, then the component. Never the reverse.
+3. **Match existing idiom.** Copy the surrounding code's naming, the api.ts remote API pattern, the
    Tailwind token usage, and the hash-routing style. Do not introduce a new pattern for something
    the codebase already solves.
 4. **Design for the recruiter.** Keep the public UI scannable and minimal (§1). Favor structured
    grids, tech pills, and quantified metrics over long prose.
 5. **QA gate before done.** Run `npm run lint` (must be clean) and, for UI/flow changes, `npx
-   playwright test`. Confirm no component reaches into `localStorage`/`fetch` directly.
+   playwright test`. Confirm no component reaches into content `localStorage`/`fetch` directly.
 6. **Branding upkeep.** If name, title, or branding changes, run `npm run generate:og` so the OG
    image and social previews stay in sync. Keep `index.html` metadata, JSON-LD, `robots.txt`, and
    `sitemap.xml` accurate.

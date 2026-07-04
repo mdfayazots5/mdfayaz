@@ -86,19 +86,6 @@ export const AdminUsesPage: React.FC = () => {
   // PERSIST CURRENT FULL STATE (For Up/Down category and item swaps)
   const persistCategoriesState = async (newList: UsesCategory[]) => {
     setCategories(newList);
-    // Write local storage for instant sync in sandbox local mode
-    localStorage.setItem("local_uses", JSON.stringify(newList));
-    // Fallback/Remote sync on swaps (for each category that changed its metadata, we can trigger individual updates, or the state stays local)
-    const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL;
-    if (API_BASE_URL) {
-      try {
-        // In real backend environments, we may have a reorder endpoint or update single items. We perform a best effort update:
-        // Updating categories elements is enough to keep remote synced
-        console.log("Remotely updating categories order order on the back-end registry on swap");
-      } catch (err) {
-        console.warn("Remote uses ordering sync warned:", err);
-      }
-    }
   };
 
   // CATEGORY OPERATIONS
