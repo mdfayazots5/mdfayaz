@@ -7,10 +7,6 @@ import {
   Download,
   Github,
   Linkedin,
-  TrendingUp,
-  FolderGit2,
-  Layers,
-  Users,
   CheckCircle2,
   BookOpen,
 } from "lucide-react";
@@ -79,11 +75,6 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
   const profileMobile = settings.profileImage?.mobile || profileDesktop;
   const hasProfile = !!profileDesktop;
 
-  const yearsDisplay = (() => {
-    const n = parseFloat(settings.yearsExperience || master.stats.years || "");
-    return Number.isFinite(n) ? `${Math.floor(n)}+` : settings.yearsExperience || master.stats.years || "0";
-  })();
-
   const projects = (master.projects || []) as any[];
   const companyProjects = projects.filter((p) => p.type === "company");
   const personalProjects = projects.filter((p) => p.type === "personal");
@@ -97,13 +88,6 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
   const viewAllTab = leadsWithCompany ? "company" : "products";
   const viewAllLabel = leadsWithCompany ? "View all experience" : "View all projects";
   const featuredHeading = leadsWithCompany ? "Enterprise work & experience." : "Projects with real impact.";
-
-  const stats = [
-    { label: "Years Experience", value: yearsDisplay, icon: TrendingUp },
-    { label: "Production Projects", value: `${companyProjects.length || projects.length}`, icon: FolderGit2 },
-    master.stats.teamLed ? { label: "Team Size Led", value: `${master.stats.teamLed}`, icon: Users } : null,
-    { label: "Business Domains", value: `${master.stats.domains || 0}`, icon: Layers },
-  ].filter(Boolean) as { label: string; value: string; icon: any }[];
 
   const activeServices = services.filter((s) => s.status === "Active");
   const capabilities = activeServices.length
@@ -261,26 +245,6 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
           )}
         </motion.div>
       </header>
-
-      {/* ===== STATS ===== */}
-      <section className="px-5 md:px-8 lg:px-16 pt-14 pb-14">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {stats.map((s) => {
-            const Icon = s.icon;
-            return (
-              <div key={s.label} className="bg-surface border border-border rounded-2xl p-5">
-                <Icon size={16} className="text-accent mb-4" />
-                <div className="text-3xl md:text-4xl font-luxury font-bold text-text-primary leading-none">
-                  {s.value}
-                </div>
-                <div className="mt-2 text-[10px] font-bold uppercase tracking-widest text-text-secondary">
-                  {s.label}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
       {/* ===== FEATURED WORK ===== */}
       {featuredProjects.length > 0 && (

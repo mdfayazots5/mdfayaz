@@ -36,6 +36,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const [settings, setSettings] = React.useState<SiteSettings | null>(null);
   const [companies, setCompanies] = React.useState<CompanyProfile[]>([]);
   const [scrolled, setScrolled] = React.useState(false);
+  const [navHidden, setNavHidden] = React.useState(false);
   const hoverTimeout = React.useRef<number | null>(null);
   const brandClickRef = React.useRef({ count: 0, lastAt: 0 });
   const lenis = useLenis();
@@ -46,10 +47,19 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     else window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   };
 
-  // #1 — track scroll so the fixed header can swap from blend-mode transparency to a
-  // solid, always-legible blurred bar once the user leaves the very top.
+  // #1 — track scroll so the fixed header can (a) swap from blend-mode transparency to a
+  // solid, always-legible blurred bar once the user leaves the very top, and (b) hide when
+  // scrolling down and reappear when scrolling up, keeping content unobstructed while reading.
+  const lastScrollY = React.useRef(0);
   React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      // Only start hiding past a small threshold so the top of the page always shows the nav.
+      if (y > 120 && y > lastScrollY.current) setNavHidden(true);
+      else if (y < lastScrollY.current) setNavHidden(false);
+      lastScrollY.current = y;
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -273,18 +283,24 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     <div className="app-canvas min-h-screen text-text-primary selection:bg-accent selection:text-accent-foreground">
       {/* Minimal Navigation — transparent (blend) at top, solid blurred bar once scrolled (#1) */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-[100] px-5 md:px-8 py-5 md:py-7 flex justify-between items-center select-none transition-colors duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-[100] px-5 md:px-8 py-5 md:py-7 flex justify-between items-center select-none transition-[transform,background-color,color] duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+          navHidden && !isDropdownOpen && !isWorkDropdownOpen ? "-translate-y-full" : "translate-y-0"
+        } ${
           scrolled
             ? "bg-background/80 backdrop-blur-md border-b border-border text-text-primary"
             : "mix-blend-difference text-white"
         }`}
       >
-        <span
-          className="text-lg font-luxury font-bold tracking-tighter cursor-pointer"
+        <button
+          type="button"
+          className="group relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-current/50 font-mono text-sm font-bold tracking-tight overflow-hidden cursor-pointer transition-all duration-300 hover:border-accent hover:text-accent hover:-translate-y-0.5 hover:shadow-[0_6px_20px_-8px_rgba(0,0,0,0.4)]"
           onClick={handleBrandClick}
+          aria-label="Mohammed Fayaz — home"
         >
-          Fayaz
-        </span>
+          {/* accent sheen that sweeps across on hover */}
+          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-accent/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+          <span className="relative leading-none">MF</span>
+        </button>
         <div className="flex gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
           <div
             className="relative"
