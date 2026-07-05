@@ -84,6 +84,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSub })
             <ArrowLeft size={15} />
           </a>
           <button
+            type="button"
             onClick={toggleTheme}
             className="p-2 rounded-lg border border-border bg-background text-text-primary hover:text-accent cursor-pointer transition-all duration-300"
             aria-label="Toggle theme"
@@ -127,7 +128,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSub })
                       : "text-text-secondary hover:text-text-primary hover:bg-background"
                   }`}
                 >
-                  <Icon size={14} className={isActive ? "text-background" : "text-text-secondary"} />
+                  <Icon size={14} strokeWidth={2} className={isActive ? "text-background" : "text-text-secondary"} />
                   <span>{item.label}</span>
                 </a>
               );
@@ -209,7 +210,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSub })
                 isActive ? "text-accent" : "text-text-secondary"
               }`}
             >
-              <Icon size={18} />
+              <Icon size={18} strokeWidth={2} />
               <span className="truncate max-w-full">{item.id === "entries" ? "Nodes" : item.label}</span>
             </a>
           );

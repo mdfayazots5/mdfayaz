@@ -169,7 +169,7 @@ export const AdminEntriesPage: React.FC = () => {
         <>
           {/* Desktop Table View */}
           <div className="hidden lg:block bg-surface border border-border rounded-2xl overflow-hidden shadow-sm">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse [&_tbody_td]:align-middle [&_tbody_td]:py-6">
               <thead>
                 <tr className="border-b border-border bg-background/50 text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary select-none">
                   <th className="px-6 py-4.5">Project Information</th>
@@ -241,7 +241,7 @@ export const AdminEntriesPage: React.FC = () => {
                           </td>
 
                           {/* Active Timeline */}
-                          <td className="px-6 py-5 text-text-secondary pt-6">
+                          <td className="px-6 py-5 text-text-secondary">
                             <div className="inline-flex items-center gap-1.5 font-mono">
                               <Calendar size={12} className="text-text-secondary" />
                               <span>{entry.startDate} — {entry.endDate}</span>

@@ -292,9 +292,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-surface p-8 sm:p-10 rounded-3xl border border-border space-y-8">
+      <form onSubmit={handleSubmit} className="bg-surface p-5 sm:p-8 md:p-10 rounded-3xl border border-border space-y-8">
         {/* Core Settings Block */}
-        <div className="bg-background/40 p-6 rounded-2xl border border-border/60 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-background/40 p-4 sm:p-6 rounded-2xl border border-border/60 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1.5">
             <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--color-accent)] block">
               Entry Type *
@@ -418,7 +418,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
                     Company Name *
@@ -445,7 +445,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
                     Start Timeline *
@@ -491,8 +491,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
               🛠️ Creator / Niche Product Parameters
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1.5 col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1.5 sm:col-span-2">
                   <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
                     Target Audience / Segment
                   </label>
@@ -518,7 +518,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
                     Product Status *
@@ -755,8 +755,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
           </div>
         </div>
 
-        {/* Submit Actions Button Toolbar */}
-        <div className="pt-6 border-t border-border flex flex-col sm:flex-row gap-3 justify-end">
+        {/* Submit Actions Button Toolbar — flush inline footer on mobile (the layout reserves
+            space for the fixed tab bar), and a sticky footer on desktop for long-form reach. */}
+        <div className="md:sticky md:bottom-0 z-30 -mx-5 sm:-mx-8 md:-mx-10 -mb-5 sm:-mb-8 md:-mb-10 px-5 sm:px-8 md:px-10 py-5 mt-2 bg-surface/95 backdrop-blur-md border-t border-border rounded-b-3xl shadow-[0_-8px_24px_-14px_rgba(0,0,0,0.35)] flex flex-col sm:flex-row gap-3 justify-end">
           <button
             type="button"
             onClick={handleBack}

@@ -548,7 +548,7 @@ export const AdminAboutPage: React.FC = () => {
 
         <div className="space-y-4">
           {profile.experienceTimeline.length === 0 ? (
-            <div className="bg-surface p-8 text-center rounded-2xl border border-border">
+            <div className="bg-surface p-6 sm:p-8 text-center rounded-2xl border border-border">
               <p className="text-xs text-text-secondary italic">No career entries configured.</p>
             </div>
           ) : (
@@ -680,7 +680,7 @@ export const AdminAboutPage: React.FC = () => {
 
         <div className="space-y-3">
           {(profile.personalDetails ?? []).length === 0 ? (
-            <div className="bg-surface p-8 text-center rounded-2xl border border-border">
+            <div className="bg-surface p-6 sm:p-8 text-center rounded-2xl border border-border">
               <p className="text-xs text-text-secondary italic">No personal details configured. Add labels like Location, Languages, or Email.</p>
             </div>
           ) : (
@@ -748,7 +748,7 @@ export const AdminAboutPage: React.FC = () => {
 
         <div className="space-y-4">
           {(profile.education ?? []).length === 0 ? (
-            <div className="bg-surface p-8 text-center rounded-2xl border border-border">
+            <div className="bg-surface p-6 sm:p-8 text-center rounded-2xl border border-border">
               <p className="text-xs text-text-secondary italic">No education entries configured.</p>
             </div>
           ) : (

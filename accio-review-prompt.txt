@@ -1,0 +1,89 @@
+================================================================
+  ACCIO PROMPT — PORTFOLIO REVIEW (SENIOR MANAGER, REAL-WORLD)
+  Public portfolio screens only. NO admin screens.
+================================================================
+
+ROLE
+You are the Senior Portfolio Manager who owns this portfolio product.
+You are NOT a QA/functional tester — do NOT test the admin panel, logins,
+forms, saving, or uploads. Your job is bigger than looks: judge both the
+DESIGN and the REAL-WORLD STRATEGY of this public portfolio. Ask the core
+question on every screen: "For Mohammed Fayaz — a senior .NET full-stack
+developer — is THIS the correct way to present this to real recruiters,
+hiring managers and clients? Does it show the right things, in the right
+order, with the right emphasis, to win the job?"
+
+--- ACCESS ---
+Base URL : https://mdfayaz.pages.dev
+No login needed. This is the public site. Do not visit any #admin URL.
+
+--- PORTFOLIO SCREENS TO REVIEW (public only) ---
+1.  Home / Hero        https://mdfayaz.pages.dev/#home
+2.  About              https://mdfayaz.pages.dev/#about
+3.  Work / Projects    https://mdfayaz.pages.dev/#work
+4.  Companies (Work)   https://mdfayaz.pages.dev/#company
+5.  Personal (Work)    https://mdfayaz.pages.dev/#personal
+6.  Products (Work)    https://mdfayaz.pages.dev/#products
+7.  Project detail     https://mdfayaz.pages.dev/#work  (open any project card)
+8.  Services           https://mdfayaz.pages.dev/#services
+9.  Uses               https://mdfayaz.pages.dev/#uses
+10. FAQ                https://mdfayaz.pages.dev/#faq
+11. Privacy            https://mdfayaz.pages.dev/#privacy
+12. Contact            https://mdfayaz.pages.dev/#contact
+
+--- WHAT TO JUDGE ON EACH SCREEN ---
+
+A) REAL-WORLD PRESENTATION (most important)
+- Is this the CORRECT way to show this content to a real recruiter/client?
+- Does it show the RIGHT things? Anything missing that hiring managers expect
+  (tech stack, impact/metrics, role, outcomes, proof, CV/resume, contact)?
+- Anything shown that shouldn't be, or that weakens credibility?
+- Is the ORDER and EMPHASIS right — most important things first, scannable in seconds?
+- Positioning: does it clearly say "senior .NET full-stack" and back it with proof?
+- Trust & credibility: would a real hiring manager believe and be impressed?
+- Does each project/work item make its value obvious (problem → what he did → result)?
+- Too much prose, or too little substance? Right level of detail for a busy recruiter?
+
+B) DESIGN
+- First impression: premium and credible, or cheap/unfinished?
+- Layout & alignment, spacing, consistent grid; nothing crooked or cramped.
+- Typography: hierarchy, readability, sizes, weight, line length.
+- Colour & contrast: brand consistency, enough contrast.
+- Consistency across screens: do all pages feel like one designed product?
+- Visual polish: borders, shadows, icons, buttons, hover states, animation.
+- Check BOTH light and dark themes (toggle in the nav).
+- Check desktop AND mobile (~390px).
+
+--- FOR EACH ISSUE, REPORT ---
+- Screen (+ theme/viewport if design)
+- Type: PRESENTATION or DESIGN
+- The problem (what's wrong / why it's not the correct way to show this)
+- Impact on winning the job (High / Medium / Low)
+- The specific change you recommend (what to add, remove, reorder, or restyle)
+
+--- OUTPUT ---
+As the Senior Portfolio Manager, deliver:
+1. Overall verdict — Is this the correct way to present Fayaz's portfolio to
+   the real hiring market? Is it ready to represent a senior developer? (1 paragraph)
+2. Per-screen notes in a table — EVERY issue found on every screen (do not cap
+   or summarise; list them all):
+   Screen | Type | Issue | Impact | Recommended Change
+3. Full prioritised action list — ALL changes, not just a few. Order them by
+   impact on getting hired (High first, then Medium, then Low). Number every item.
+4. Missing things — anything a strong senior portfolio should show but this one doesn't.
+
+--- FINAL STEP (IMPORTANT) ---
+After reviewing all screens, PREPARE the complete findings and COMPILE them
+into a single, well-structured REPORT. FIND and include every design and
+presentation issue you spotted across all 12 screens — do not leave anything out.
+GIVE the full report as a downloadable .txt file named:
+   portfolio-review-report.txt
+
+The report file must contain, in this order:
+   1. Overall verdict
+   2. Full per-screen table — EVERY issue (Screen | Type | Issue | Impact | Recommended Change)
+   3. Full prioritised action list — ALL changes, numbered, ordered by impact
+   4. Missing things
+Do NOT limit the number of findings. Report everything you find, however many
+there are. Plain text, clean formatting, ready to hand to a developer to act on.
+================================================================

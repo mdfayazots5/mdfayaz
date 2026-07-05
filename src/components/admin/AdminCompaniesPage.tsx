@@ -3,6 +3,7 @@ import { getCompanies, createCompany, updateCompany, deleteCompany, uploadFile }
 import { CompanyProfile } from "../../models/portfolio.model";
 import { Plus, Edit2, Trash2, X, Building2, MapPin, Calendar, Upload, Image as ImageIcon } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
 
 const MAX_LOGO_BYTES = 5 * 1024 * 1024;
 
@@ -30,6 +31,8 @@ export const AdminCompaniesPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  useModalScrollLock(isModalOpen);
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -272,21 +275,24 @@ export const AdminCompaniesPage: React.FC = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-fade-in">
-          <div className="bg-surface border border-border p-6 md:p-8 rounded-3xl w-full max-w-lg space-y-6 max-h-[90vh] overflow-y-auto shadow-2xl text-left">
-            <div className="flex justify-between items-center pb-4 border-b border-border">
+          <div className="bg-surface border border-border rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl text-left flex flex-col">
+            <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-border flex justify-between items-center">
               <h3 className="text-base font-luxury font-bold uppercase tracking-wider">
                 {editing ? "Edit Company" : "Add Company"}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Close dialog"
+                title="Close"
                 className="p-1 text-text-secondary hover:text-text-primary cursor-pointer border border-border hover:border-accent/40 rounded-xl"
               >
                 <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold">
+            <form onSubmit={handleSave} className="flex flex-col min-h-0 flex-1">
+              <div data-lenis-prevent className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 md:px-8 py-5 space-y-4 text-xs font-semibold">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Company Name *" value={form.name} onChange={(v) => setField("name", v)} placeholder="e.g. Revalsys Technologies" />
                 <Field label="Your Role *" value={form.role} onChange={(v) => setField("role", v)} placeholder="e.g. .NET Developer & Team Lead" />
@@ -298,6 +304,7 @@ export const AdminCompaniesPage: React.FC = () => {
                   <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Display Order</label>
                   <input
                     type="number"
+                    aria-label="Display order"
                     value={form.displayOrder}
                     onChange={(e) => setField("displayOrder", Number(e.target.value))}
                     className="w-full bg-background border border-border rounded-xl px-4 py-3 text-text-primary font-medium focus:border-accent focus:outline-none"
@@ -365,7 +372,9 @@ export const AdminCompaniesPage: React.FC = () => {
                 />
               </div>
 
-              <div className="pt-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
+              </div>
+
+              <div className="shrink-0 px-6 md:px-8 py-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

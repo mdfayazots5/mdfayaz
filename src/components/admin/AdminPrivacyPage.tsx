@@ -9,6 +9,7 @@ import {
 import { PrivacySection } from "../../models/portfolio.model";
 import { Plus, Edit2, Trash2, Shield, ChevronUp, ChevronDown, X } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
 import { PublishToggle } from "./PublishToggle";
 
 export const AdminPrivacyPage: React.FC = () => {
@@ -25,6 +26,8 @@ export const AdminPrivacyPage: React.FC = () => {
 
   // Deletion purgatory lock
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useModalScrollLock(isModalOpen);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const fetchSections = async () => {
@@ -303,21 +306,25 @@ export const AdminPrivacyPage: React.FC = () => {
         <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-fade-in">
           <div 
             id="privacy-modal-container"
-            className="bg-surface border border-border p-6 md:p-8 rounded-3xl w-full max-w-lg space-y-6 max-h-[90vh] overflow-y-auto shadow-2xl text-left"
+            className="bg-surface border border-border rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl text-left flex flex-col"
           >
-            <div className="flex justify-between items-center pb-4 border-b border-border">
+            <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-border flex justify-between items-center">
               <h3 className="text-base font-luxury font-bold uppercase tracking-wider">
                 {editingSection ? "Edit Policy Segment" : "New Privacy Clause"}
               </h3>
-              <button 
+              <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Close dialog"
+                title="Close"
                 className="p-1 text-text-secondary hover:text-text-primary cursor-pointer border border-border hover:border-accent/40 rounded-xl"
               >
                 <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveSection} className="space-y-4 text-xs font-semibold">
+            <form onSubmit={handleSaveSection} className="flex flex-col min-h-0 flex-1">
+              <div data-lenis-prevent className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 md:px-8 py-5 space-y-4 text-xs font-semibold">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Clause / Section Title</label>
                 <input
@@ -344,7 +351,9 @@ export const AdminPrivacyPage: React.FC = () => {
                 />
               </div>
 
-              <div className="pt-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
+              </div>
+
+              <div className="shrink-0 px-6 md:px-8 py-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

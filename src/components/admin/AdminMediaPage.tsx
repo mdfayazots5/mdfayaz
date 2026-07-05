@@ -17,6 +17,7 @@ import { getSiteSettings, updateSiteSettings, uploadFile } from "../../services/
 import { SiteSettings } from "../../models/portfolio.model";
 import { LoadingScreen } from "../LoadingScreen";
 import { getCroppedBlob, readImageDimensions } from "./cropImage";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
 
 type SlotKey = "profileImage" | "heroBackground";
 type Variant = "desktop" | "mobile";
@@ -74,6 +75,8 @@ export const AdminMediaPage: React.FC = () => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+
+  useModalScrollLock(!!session);
 
   useEffect(() => {
     let isMounted = true;
@@ -274,7 +277,7 @@ export const AdminMediaPage: React.FC = () => {
                       <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
                         <VariantIcon size={12} className="text-text-secondary" />
                         {variant}
-                        <span className="text-text-secondary/60 normal-case tracking-normal">
+                        <span className="text-text-secondary/75 normal-case tracking-normal">
                           · {slot.aspect[variant].toFixed(2).replace(/\.00$/, "")}:1
                         </span>
                       </span>
@@ -291,23 +294,43 @@ export const AdminMediaPage: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Preview */}
-                    <div className="flex items-center justify-center min-h-[8rem] rounded-xl border border-dashed border-border bg-surface/40 p-3">
-                      {url ? (
-                        <img
-                          src={url}
-                          alt={`${slot.title} ${variant}`}
-                          className={`object-cover border border-border ${slot.previewClass[variant]}`}
-                        />
-                      ) : inheriting ? (
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary/70 text-center px-3">
-                          Inherits desktop
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary/50 text-center px-3">
-                          No image set
-                        </span>
-                      )}
+                    {/* Preview — wrapped in a device frame (phone / monitor) for instant context */}
+                    <div className="flex items-center justify-center min-h-[9rem] rounded-xl border border-dashed border-border bg-surface/40 p-4">
+                      {(() => {
+                        const inner = url ? (
+                          <img
+                            src={url}
+                            alt={`${slot.title} ${variant}`}
+                            className={`object-cover border border-border ${slot.previewClass[variant]}`}
+                          />
+                        ) : inheriting ? (
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary/80 text-center px-3">
+                            Inherits desktop
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary/70 text-center px-3">
+                            No image set
+                          </span>
+                        );
+                        return variant === "mobile" ? (
+                          <div className="relative rounded-[1.6rem] border-4 border-text-primary/20 bg-background p-1.5 shadow-sm">
+                            <span className="absolute left-1/2 -translate-x-1/2 top-1 h-1 w-8 rounded-full bg-text-primary/20" />
+                            <div className="flex items-center justify-center overflow-hidden rounded-[1.15rem] min-h-[6.5rem] min-w-[5rem] px-2 py-3">
+                              {inner}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <div className="rounded-lg border-4 border-text-primary/20 bg-background p-1.5 shadow-sm">
+                              <div className="flex items-center justify-center overflow-hidden rounded-md min-h-[6.5rem] min-w-[10rem] px-2 py-2">
+                                {inner}
+                              </div>
+                            </div>
+                            <span className="mt-1 h-2 w-14 rounded-b-md bg-text-primary/20" />
+                            <span className="h-1 w-20 rounded-full bg-text-primary/15" />
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <input
@@ -334,7 +357,7 @@ export const AdminMediaPage: React.FC = () => {
 
       {/* Crop Modal */}
       {session && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div data-lenis-prevent className="fixed inset-0 z-[150] flex items-center justify-center p-4" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={busy ? undefined : closeCropper} />
           <div className="relative w-full max-w-2xl bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden">
             {/* Modal header */}
@@ -379,6 +402,7 @@ export const AdminMediaPage: React.FC = () => {
                 </span>
                 <input
                   type="range"
+                  aria-label="Zoom"
                   min={1}
                   max={3}
                   step={0.01}

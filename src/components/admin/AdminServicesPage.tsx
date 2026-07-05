@@ -3,6 +3,7 @@ import { getServices, createService, updateService, deleteService } from "../../
 import { Service } from "../../models/portfolio.model";
 import { Plus, Edit2, Trash2, X, Layers, ListPlus, ArrowUpDown } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
 import { PublishToggle } from "./PublishToggle";
 
 // Common clean lucide icon list for portfolio selection
@@ -29,6 +30,8 @@ export const AdminServicesPage: React.FC = () => {
   const [status, setStatus] = useState<"Active" | "Inactive">("Active");
   const [displayOrder, setDisplayOrder] = useState<number>(1);
   const [highlights, setHighlights] = useState<string[]>([""]);
+
+  useModalScrollLock(isModalOpen);
 
   const fetchServices = async () => {
     setLoading(true);
@@ -465,21 +468,25 @@ export const AdminServicesPage: React.FC = () => {
         <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-fade-in select-none">
           <div 
             id="service-modal-container"
-            className="bg-surface border border-border p-6 md:p-8 rounded-3xl w-full max-w-xl space-y-6 max-h-[90vh] overflow-y-auto shadow-2xl text-left"
+            className="bg-surface border border-border rounded-3xl w-full max-w-xl max-h-[90vh] overflow-hidden shadow-2xl text-left flex flex-col"
           >
-            <div className="flex justify-between items-center pb-4 border-b border-border">
+            <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-border flex justify-between items-center">
               <h3 className="text-base font-luxury font-bold uppercase tracking-wider">
                 {editingService ? "Update Services Offer" : "Spawn New Consulting Area"}
               </h3>
-              <button 
+              <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Close dialog"
+                title="Close"
                 className="p-1 text-text-secondary hover:text-text-primary cursor-pointer border border-border hover:border-accent/40 rounded-xl"
               >
                 <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveService} className="space-y-4 text-xs font-semibold">
+            <form onSubmit={handleSaveService} className="flex flex-col min-h-0 flex-1">
+              <div data-lenis-prevent className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 md:px-8 py-5 space-y-4 text-xs font-semibold">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Service Name *</label>
@@ -498,6 +505,7 @@ export const AdminServicesPage: React.FC = () => {
                   <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Display order *</label>
                   <input
                     id="service-displayOrder-input"
+                    aria-label="Display order"
                     type="number"
                     required
                     min={1}
@@ -539,6 +547,7 @@ export const AdminServicesPage: React.FC = () => {
                   <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Visual theme Icon</label>
                   <select
                     id="service-icon-select"
+                    aria-label="Visual theme icon"
                     value={icon}
                     onChange={(e) => setIcon(e.target.value)}
                     className="w-full bg-background border border-border rounded-xl px-4 py-3 text-text-primary font-medium focus:border-accent focus:outline-none cursor-pointer"
@@ -613,7 +622,9 @@ export const AdminServicesPage: React.FC = () => {
               </div>
 
               {/* Action buttons */}
-              <div className="pt-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider select-none">
+              </div>
+
+              <div className="shrink-0 px-6 md:px-8 py-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider select-none">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
