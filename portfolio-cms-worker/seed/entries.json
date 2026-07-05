@@ -16,11 +16,18 @@
     "tech": [
       "ASP.NET Core",
       "Web API",
+      "EF Core",
       "SQL Server",
-      "Web-based UI"
+      "Angular",
+      "Clean Architecture"
     ],
-    "achievements": [],
-    "companyName": "Revalsys Technologies",
+    "achievements": [
+      "Coordinated a 5-developer delivery flow across registration, doctor search, scheduling, and prescription modules.",
+      "Reduced scheduling friction by designing automatic availability checks and collision-free booking flows.",
+      "Improved maintainability by aligning REST APIs with repository and layered architecture patterns."
+    ],
+    "companyId": 1,
+    "companyName": "Revalsys Technologies Pvt Ltd",
     "role": "Team Lead + Dot Net Developer",
     "teamSize": 5,
     "startDate": "Feb 2023",
@@ -28,6 +35,7 @@
     "featured": false,
     "displayOrder": 1,
     "color": "#0EA5E9",
+    "caseStudyUrl": "https://mdfayaz.pages.dev/#project/1",
     "icon": "🏥"
   },
   {
@@ -46,10 +54,18 @@
     "tech": [
       "ASP.NET Core",
       "Web API",
-      "SQL Server"
+      "EF Core",
+      "SQL Server",
+      "Angular",
+      "RBAC"
     ],
-    "achievements": [],
-    "companyName": "Revalsys Technologies",
+    "achievements": [
+      "Mapped recruitment, consultant handoff, interview feedback, offer-letter, and onboarding workflows into one HRMS pipeline.",
+      "Improved operational visibility with role-based filters and centralized feedback tracking for hiring stakeholders.",
+      "Designed checklist-driven onboarding flows to reduce manual document validation and follow-up work."
+    ],
+    "companyId": 1,
+    "companyName": "Revalsys Technologies Pvt Ltd",
     "role": "Team Lead + Dot Net Developer",
     "teamSize": 5,
     "startDate": "Jan 2024",
@@ -57,6 +73,7 @@
     "featured": false,
     "displayOrder": 2,
     "color": "#8B5CF6",
+    "caseStudyUrl": "https://mdfayaz.pages.dev/#project/2",
     "icon": "👥"
   },
   {
@@ -75,17 +92,25 @@
     "tech": [
       "ASP.NET Core",
       "Web API",
+      "EF Core",
       "SQL Server",
-      "Firebase Cloud Messaging (FCM)"
+      "Firebase Cloud Messaging (FCM)",
+      "Mobile Push"
     ],
-    "achievements": [],
-    "companyName": "Revalsys Technologies",
+    "achievements": [
+      "Reduced marketplace data gaps by introducing standardized vehicle inspection checklists and structured seller inputs.",
+      "Kept high-traffic catalog interactions responsive through optimized relational queries and focused API paths.",
+      "Enabled transactional Web, Android, and iOS push notifications through Firebase Cloud Messaging integration."
+    ],
+    "companyId": 1,
+    "companyName": "Revalsys Technologies Pvt Ltd",
     "role": "Dot Net Developer",
     "startDate": "Sep 2024",
     "endDate": "May 2026",
     "featured": false,
     "displayOrder": 3,
     "color": "#10B981",
+    "caseStudyUrl": "https://mdfayaz.pages.dev/#project/3",
     "icon": "⚡"
   },
   {
@@ -99,6 +124,7 @@
     "tech": [
       "ASP.NET Core",
       "Angular",
+      "EF Core",
       "SQL Server",
       "PostgreSQL",
       "Firebase FCM"
@@ -110,11 +136,17 @@
     ],
     "audience": "Premium AC service companies and their field teams",
     "liveUrl": "https://www.coolzo.in/",
+    "repoUrl": "https://github.com/mdfayazots5/Coolzo",
+    "caseStudyUrl": "https://mdfayaz.pages.dev/#project/4",
     "icon": "Snowflake",
     "featured": true,
     "displayOrder": 4,
     "color": "#1B2A4A",
-    "achievements": []
+    "achievements": [
+      "Designed a booking-to-invoice service lifecycle covering customers, technicians, admins, inventory, payments, and AMC workflows.",
+      "Built role-based operations across 15+ business roles for field-service teams.",
+      "Added technician mobile workflows for GPS check-in, checklists, photos, e-signature, and on-site payment."
+    ]
   },
   {
     "id": 5,
@@ -128,6 +160,7 @@
       ".NET 8",
       "Angular",
       "SignalR",
+      "EF Core",
       "SQL Server",
       "PostgreSQL"
     ],
@@ -138,16 +171,21 @@
     ],
     "audience": "Language learners building spoken fluency together",
     "liveUrl": "https://gowithflow-ui.pages.dev/",
+    "caseStudyUrl": "https://mdfayaz.pages.dev/#project/5",
     "icon": "Mic",
     "featured": true,
     "displayOrder": 5,
     "color": "#8B5CF6",
-    "achievements": []
+    "achievements": [
+      "Designed real-time speaking sessions with join codes and turn-taking using SignalR.",
+      "Built a feedback loop for pronunciation, grammar mistakes, repractice, streaks, and badges.",
+      "Structured progress analytics so learners can see repeat mistakes and measurable improvement."
+    ]
   },
   {
     "id": 6,
     "type": "personal",
-    "title": "FamilyFirst",
+    "title": "Family First",
     "tagline": "All-in-one family coordination & care platform",
     "description": "FamilyFirst is a family-management PWA that brings tasks, attendance, rewards, a shared calendar, medical records, safety, and elder care into one app. Each member gets a role-tailored experience — parents, children, teachers, and elders — with photo-verified chores and smart reminders.",
     "status": "In Development",
@@ -156,6 +194,7 @@
       ".NET 8",
       "React 19",
       "TypeScript",
+      "EF Core",
       "SQL Server",
       "Firebase FCM",
       "AWS S3"
@@ -166,11 +205,16 @@
       "Role-based experiences for parents, children, teachers, and elders"
     ],
     "audience": "Families coordinating daily tasks, care, and schedules",
+    "caseStudyUrl": "https://mdfayaz.pages.dev/#project/6",
     "icon": "HeartHandshake",
     "featured": false,
     "displayOrder": 6,
     "color": "#10B981",
-    "achievements": []
+    "achievements": [
+      "Modeled role-specific experiences for parents, children, teachers, and elders in a single family PWA.",
+      "Designed photo-verified task workflows, shared calendar coordination, medical vault, and safety modules.",
+      "Planned cloud-backed media storage and push notification flows for daily family coordination."
+    ]
   },
   {
     "id": 7,
@@ -185,7 +229,8 @@
       "TypeScript",
       "Tailwind CSS",
       "Cloudflare Workers",
-      "R2"
+      "R2",
+      "CI/CD"
     ],
     "features": [
       "Self-serve admin CMS for projects, services, and site content",
@@ -194,10 +239,16 @@
     ],
     "audience": "Recruiters and collaborators evaluating my work",
     "liveUrl": "https://mdfayaz.pages.dev",
+    "repoUrl": "https://github.com/mdfayazots5/FayazMd",
+    "caseStudyUrl": "https://mdfayaz.pages.dev/#project/7",
     "icon": "LayoutDashboard",
     "featured": false,
     "displayOrder": 7,
     "color": "#0EA5E9",
-    "achievements": []
+    "achievements": [
+      "Built a self-serve admin CMS so portfolio content can be updated without redeploying the frontend.",
+      "Connected Cloudflare Worker APIs to R2 JSON storage with authenticated mutations and public read endpoints.",
+      "Added media upload, theme selection, SEO metadata, and fallback data paths for resilient content delivery."
+    ]
   }
 ]

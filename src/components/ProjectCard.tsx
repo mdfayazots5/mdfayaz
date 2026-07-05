@@ -1,5 +1,5 @@
 import React from "react";
-import { Briefcase, Calendar, Users, User, ArrowUpRight, ChevronDown } from "lucide-react";
+import { Briefcase, Calendar, Users, User, ArrowUpRight, ChevronDown, ExternalLink, Github, BookOpen } from "lucide-react";
 
 export interface ProjectData {
   id: string | number;
@@ -70,6 +70,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
   const overview = project.tagline || project.shortOverview || project.description || "";
   const role = project.role || "";
   const techStack = project.tech || project.techStack || [];
+  const proofLinks = [
+    { href: project.liveUrl, label: "Live", Icon: ExternalLink },
+    { href: project.repoUrl, label: "GitHub", Icon: Github },
+    { href: project.caseStudyUrl, label: "Case", Icon: BookOpen },
+  ].filter((item) => !!item.href);
 
   // Desktop: hover reveals the overview; a click opens the detail page.
   // Touch: first tap reveals the overview; a second tap opens the detail page.
@@ -173,6 +178,24 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
                 >
                   {tech}
                 </span>
+              ))}
+            </div>
+          )}
+
+          {proofLinks.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {proofLinks.map(({ href, label, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-background border border-border hover:border-accent text-text-primary hover:text-accent rounded-lg text-[9px] font-bold uppercase tracking-widest transition-colors"
+                >
+                  <Icon size={11} />
+                  <span>{label}</span>
+                </a>
               ))}
             </div>
           )}

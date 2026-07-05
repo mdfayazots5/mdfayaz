@@ -102,14 +102,14 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   // Dynamic Metadata Sync Helper
   const updatePageMetadata = (tab: string) => {
     let titleSet = "Mohammed Fayaz | .NET Full Stack Developer";
-    let descSet = "Mohammed Fayaz — .NET Full Stack Developer with 3+ years building scalable healthcare, HRMS and SaaS applications using ASP.NET Core, Angular and SQL Server.";
+    let descSet = "Mohammed Fayaz - .NET Full Stack Developer building scalable enterprise systems with ASP.NET Core, Angular, SQL Server, EF Core, and cloud-ready architecture.";
 
     if (tab === "work") {
       titleSet = "Work | Mohammed Fayaz";
       descSet = "Healthcare, HRMS, and marketplace platform projects by Mohammed Fayaz.";
     } else if (tab === "about") {
       titleSet = "About | Mohammed Fayaz";
-      descSet = "Learn more about Mohammed Fayaz — background, core skills, and professional experience as a .NET Full Stack Developer.";
+      descSet = "Learn more about Mohammed Fayaz, his .NET, Angular, SQL Server, EF Core, and enterprise architecture experience.";
     } else if (tab === "products") {
       titleSet = "Projects | Mohammed Fayaz";
       descSet = "Curated showcase of personal projects and self-hosted tools built by Mohammed Fayaz.";
@@ -530,14 +530,14 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   <a
                     href={settings?.socialLinks?.linkedin || master.candidate.linkedin}
                     target="_blank" rel="noreferrer" id="footer-linkedin-link" aria-label="LinkedIn"
-                    className="p-2 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
+                    className="w-11 h-11 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors inline-flex items-center justify-center"
                   >
                     <Linkedin size={14} />
                   </a>
                   <a
                     href={settings?.socialLinks?.github || master.candidate.github}
                     target="_blank" rel="noreferrer" id="footer-github-link" aria-label="GitHub"
-                    className="p-2 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
+                    className="w-11 h-11 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors inline-flex items-center justify-center"
                   >
                     <Github size={14} />
                   </a>
@@ -545,7 +545,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                     <a
                       href={settings?.blog || master.candidate.blog}
                       target="_blank" rel="noreferrer" id="footer-blog-link" aria-label="Blog"
-                      className="p-2 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
+                      className="w-11 h-11 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors inline-flex items-center justify-center"
                     >
                       <BookOpen size={14} />
                     </a>

@@ -12,6 +12,7 @@ import {
   Layers,
   Users,
   CheckCircle2,
+  BookOpen,
 } from "lucide-react";
 import { PortfolioData, AboutProfile, SiteSettings, Service } from "../models/portfolio.model";
 import { getAboutProfile, getSiteSettings, getServices } from "../services/api";
@@ -115,8 +116,23 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
 
   const strengths = [
     "3+ years of production .NET delivery",
-    "SQL Server tuning & clean, layered architecture",
-    "Team-lead experience with end-to-end ownership",
+    "EF Core, SQL Server tuning & clean, layered architecture",
+    "Team-lead experience with code reviews and delivery ownership",
+  ];
+
+  const credibilityNotes = [
+    {
+      title: "Architecture-first delivery",
+      desc: "I architect layered .NET systems around clean APIs, stable data models, and maintainable module boundaries.",
+    },
+    {
+      title: "Testing and review discipline",
+      desc: "I use code reviews, testable service design, and unit-test-friendly patterns to keep production changes controlled.",
+    },
+    {
+      title: "Technical writing",
+      desc: "I document implementation decisions and share notes on full-stack engineering, tools, and delivery practices.",
+    },
   ];
 
   const openProject = (p: any) => {
@@ -195,7 +211,7 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
               onClick={() => handleNavClick("company")}
               className="group inline-flex items-center gap-2 px-5 py-3 bg-accent text-accent-foreground text-[11px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all cursor-pointer"
             >
-              <span>Explore work</span>
+              <span>Explore enterprise work</span>
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
             <button
@@ -211,7 +227,7 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-3 bg-surface border border-border text-text-primary hover:border-accent hover:text-accent text-[11px] font-bold uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
               >
-                <span>Resume</span>
+                <span>Download resume</span>
                 <Download size={13} />
               </a>
             )}
@@ -225,7 +241,7 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
                   target="_blank"
                   rel="noreferrer"
                   aria-label="LinkedIn"
-                  className="p-2 rounded-lg border border-border bg-surface/60 text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
+                  className="w-11 h-11 rounded-lg border border-border bg-surface/60 text-text-secondary hover:text-accent hover:border-accent/50 transition-colors inline-flex items-center justify-center"
                 >
                   <Linkedin size={15} />
                 </a>
@@ -236,7 +252,7 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
                   target="_blank"
                   rel="noreferrer"
                   aria-label="GitHub"
-                  className="p-2 rounded-lg border border-border bg-surface/60 text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
+                  className="w-11 h-11 rounded-lg border border-border bg-surface/60 text-text-secondary hover:text-accent hover:border-accent/50 transition-colors inline-flex items-center justify-center"
                 >
                   <Github size={15} />
                 </a>
@@ -344,6 +360,45 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
           </div>
         </section>
       )}
+
+      {/* ===== TECHNICAL CREDIBILITY ===== */}
+      <section className="px-5 md:px-8 lg:px-16 pb-16">
+        <div className="max-w-6xl mx-auto bg-surface border border-border rounded-3xl p-8 md:p-10">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-7">
+            <div className="space-y-2 max-w-2xl">
+              <span className="text-[10px] font-bold text-accent uppercase tracking-[0.35em] block">
+                Technical proof
+              </span>
+              <h2 className="text-2xl md:text-4xl font-luxury font-bold text-text-primary leading-tight">
+                Built for systems that need to survive real users.
+              </h2>
+              <p className="text-sm text-text-secondary font-medium leading-relaxed">
+                The focus is not only UI output. It is reliable APIs, clear database decisions, reviewable code, and measurable delivery.
+              </p>
+            </div>
+            {(settings.blog || master.candidate.blog) && (
+              <a
+                href={settings.blog || master.candidate.blog}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-background border border-border text-text-primary hover:border-accent hover:text-accent text-[11px] font-bold uppercase tracking-widest rounded-xl transition-colors cursor-pointer shrink-0"
+              >
+                <BookOpen size={14} />
+                <span>Read technical notes</span>
+              </a>
+            )}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {credibilityNotes.map((note) => (
+              <div key={note.title} className="bg-background border border-border rounded-2xl p-5">
+                <CheckCircle2 size={16} className="text-accent mb-4" />
+                <h3 className="text-sm font-bold text-text-primary">{note.title}</h3>
+                <p className="mt-2 text-sm text-text-secondary font-medium leading-relaxed">{note.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ===== HIRING CTA ===== */}
       <section className="px-5 md:px-8 lg:px-16 pb-8">

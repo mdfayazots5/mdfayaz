@@ -1,16 +1,17 @@
 import { AboutProfile } from "../../models/portfolio.model";
 
 export const ABOUT_FALLBACK: AboutProfile = {
-  tagline: "I build enterprise systems that scale from database to UI — production-ready.",
-  architectBio: "Building robust enterprise systems that scale from database to UI — designed for resilience, modularity, and long-term maintainability.",
-  leadBio: "Led delivery of key Enterprise SaaS modules (HCM, HRMS) directing 5-developer agile teams and delivering zero-collision scheduling models.",
-  developerBio: "Focused on shipping fast C# backend microservices, optimized SQL Server queries, and clean Angular user interfaces.",
+  tagline: "Building scalable enterprise systems with .NET Core & Angular | 3+ years delivering high-performance Healthcare, HRMS, and ERP solutions.",
+  architectBio: "I architect clean, layered .NET systems that solve business problems across healthcare, HRMS, ERP, and field-service workflows.",
+  leadBio: "I lead delivery through sprint planning, code review, task allocation, and production-minded decisions for teams of up to 5 developers.",
+  developerBio: "I engineer ASP.NET Core APIs, EF Core data access, optimized SQL Server queries, and Angular interfaces with a focus on maintainability and measurable results.",
   skills: [
-    { category: "Backend", items: ["C#", "ASP.NET Core", "Web API", "REST APIs", "MVC", "JWT Auth", "Firebase FCM"] },
-    { category: "Frontend", items: ["Angular", "TypeScript", "JavaScript", "HTML5", "CSS3", "Web UI"] },
-    { category: "Database", items: ["SQL Server", "Stored Procedures", "Query Optimization", "Indexing", "Schema Design"] },
-    { category: "Architecture", items: ["Repository Pattern", "Layered Architecture", "RBAC", "Modular Design"] },
-    { category: "Cloud & Perf", items: ["Azure", "Redis Caching", "Performance Tuning", "Agile/Scrum"] },
+    { category: "Backend", items: ["C#", ".NET 8", "ASP.NET Core", "Web API", "REST APIs", "EF Core", "JWT Auth", "Microservices"] },
+    { category: "Frontend", items: ["Angular 14+", "TypeScript", "RxJS", "JavaScript", "HTML5", "CSS3", "Responsive UI"] },
+    { category: "Database", items: ["SQL Server", "PostgreSQL", "Stored Procedures", "Query Optimization", "Indexing", "Schema Design"] },
+    { category: "Architecture", items: ["Clean Architecture", "Repository Pattern", "Layered Architecture", "RBAC", "CQRS", "Modular Design"] },
+    { category: "Testing & Quality", items: ["xUnit", "NUnit", "Moq", "Unit Testing", "Code Reviews", "Swagger/OpenAPI"] },
+    { category: "Cloud & DevOps", items: ["Azure", "AWS S3", "Docker", "CI/CD", "Azure DevOps", "Redis Caching"] },
     { category: "AI Tools", items: ["GitHub Copilot", "ChatGPT", "Claude AI", "Codex", "Google AI Studio"] }
   ],
   experienceTimeline: [
@@ -18,7 +19,7 @@ export const ABOUT_FALLBACK: AboutProfile = {
       company: "Revalsys Technologies Pvt. Ltd.",
       role: "Dot Net Developer",
       period: "Feb 2023 — May 2026",
-      description: "Recognized with the AI Marathon Award for pioneering AI-driven development workflows and delivering high-impact modular systems."
+      description: "Delivered healthcare, HRMS, and marketplace modules while leading reviews, coordinating 5-developer sprint execution, and improving release confidence through cleaner architecture."
     }
   ],
   personalDetails: [

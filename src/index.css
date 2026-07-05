@@ -177,6 +177,7 @@
 
   body {
     @apply bg-background text-text-primary font-sans antialiased;
+    line-height: 1.6;
     transition: background-color 0.2s ease, border-color 0.2s ease, text-color 0.2s ease;
   }
 

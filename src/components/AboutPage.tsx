@@ -128,7 +128,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ handleNavClick }) => {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-3 bg-background border border-border text-text-primary hover:border-accent hover:text-accent text-[11px] font-bold uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
                 >
-                  <span>Resume</span>
+                  <span>Download resume</span>
                   <Download size={13} />
                 </a>
               )}

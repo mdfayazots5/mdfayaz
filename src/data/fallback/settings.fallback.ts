@@ -6,7 +6,7 @@ export const SETTINGS_FALLBACK: SiteSettings = {
   location: "Hyderabad, Telangana, India",
   availability: "Immediate",
   openToRelocation: true,
-  yearsExperience: "3.3",
+  yearsExperience: "3+",
   blog: "https://dev.to/fayaz_md",
   contactEmail: "mdfayazots5@gmail.com",
   socialLinks: {
@@ -15,8 +15,8 @@ export const SETTINGS_FALLBACK: SiteSettings = {
     dob: "26 August 2002",
     mobile: "+91 70954 41960"
   },
-  resumeUrl: "#",
-  tagline: "I build enterprise systems that scale from database to UI — production-ready.",
+  resumeUrl: "/resume-mohammed-fayaz.pdf",
+  tagline: "Building scalable enterprise systems with .NET Core & Angular | 3+ years delivering high-performance Healthcare, HRMS, and ERP solutions.",
   profileImage: { desktop: "", mobile: "" },
   heroBackground: { desktop: "", mobile: "" },
   themeSet: "slate-classic"

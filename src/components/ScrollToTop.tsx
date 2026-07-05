@@ -10,10 +10,7 @@ export const ScrollToTop: React.FC = () => {
   React.useEffect(() => {
     const toggleVisibility = () => {
       const scrolled = window.pageYOffset;
-      const nearBottom =
-        window.innerHeight + scrolled >= document.documentElement.scrollHeight - 140;
-      // Show after a bit of scroll, but hide near the very bottom so it never overlaps the footer.
-      setIsVisible(scrolled > 500 && !nearBottom);
+      setIsVisible(scrolled > 500);
     };
 
     window.addEventListener("scroll", toggleVisibility, { passive: true });
@@ -34,6 +31,7 @@ export const ScrollToTop: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
           onClick={scrollToTop}
+          aria-label="Back to top"
           className="fixed bottom-6 right-6 z-[9999] w-12 h-12 bg-accent text-accent-foreground rounded-full shadow-2xl flex items-center justify-center hover:bg-accent-hover transition-all group"
         >
           <ArrowUpRight className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" size={20} />
