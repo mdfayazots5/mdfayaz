@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getEntries, createEntry, updateEntry, getCompanies } from "../../services/api";
+import { getEntry, createEntry, updateEntry, getCompanies } from "../../services/api";
 import { Entry, CompanyProfile } from "../../models/portfolio.model";
 import { ArrowLeft, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
@@ -63,8 +63,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
     let isMounted = true;
     async function loadEntryDetails() {
       try {
-        const entries = await getEntries();
-        const found = entries.find(e => String(e.id) === String(entryId));
+        const found = await getEntry(entryId!);
         if (found && isMounted) {
           setType(found.type);
           setTitle(found.title || "");

@@ -8,8 +8,9 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
 };
 
-// L2: public GETs opt into caching; everything else defaults to no-store.
-export const PUBLIC_CACHE = 'public, max-age=300, s-maxage=3600';
+// L2: CMS JSON must reflect R2 writes immediately, especially in the admin editor.
+// Browser/edge caching here can make a saved company or entry look like it did not bind.
+export const PUBLIC_CACHE = 'no-store';
 const NO_STORE = 'no-store';
 
 export function jsonResponse<T>(

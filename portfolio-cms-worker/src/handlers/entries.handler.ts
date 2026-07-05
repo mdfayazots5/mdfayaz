@@ -23,6 +23,18 @@ export async function handleGetEntries(request: Request, env: Env): Promise<Resp
   }
 }
 
+export async function handleGetEntry(request: Request, env: Env, id: string): Promise<Response> {
+  try {
+    const numericId = Number(id);
+    const entries = await readJson<Entry[]>(env, R2_KEYS.ENTRIES, []);
+    const entry = entries.find((item) => item.id === numericId);
+    if (!entry) return notFoundResponse(request, env, 'Entry');
+    return jsonResponse(request, env, entry, 200, PUBLIC_CACHE);
+  } catch (error) {
+    return errorResponse(request, env, `Failed to read entry: ${(error as Error).message}`, 500);
+  }
+}
+
 export async function handleCreateEntry(request: Request, env: Env): Promise<Response> {
   try {
     const body = (await request.json()) as Record<string, unknown>;

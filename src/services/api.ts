@@ -36,7 +36,7 @@ async function parseJsonResponse<T>(response: Response, path: string): Promise<T
 
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const baseUrl = requireApiBaseUrl();
-  const response = await fetch(`${baseUrl}${path}`, init);
+  const response = await fetch(`${baseUrl}${path}`, { cache: "no-store", ...init });
   return parseJsonResponse<T>(response, path);
 }
 
@@ -100,6 +100,10 @@ export function invalidateReadCache(): void {
 
 export async function getEntries(): Promise<Entry[]> {
   return cachedGet("/entries", () => fetchList<Entry>("/entries"));
+}
+
+export async function getEntry(id: number | string): Promise<Entry> {
+  return fetchJson<Entry>(`/entries/${id}`);
 }
 
 export async function login(username: string, password: string): Promise<boolean> {

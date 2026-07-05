@@ -5,6 +5,7 @@ import { requireAuth } from './middleware/auth-guard';
 import { handleLogin } from './handlers/auth.handler';
 import {
   handleGetEntries,
+  handleGetEntry,
   handleCreateEntry,
   handleUpdateEntry,
   handleDeleteEntry,
@@ -78,6 +79,7 @@ async function route(request: Request, env: Env, segments: string[], method: str
       if (method === 'POST') return handleCreateEntry(request, env);
     }
     if (segments.length === 2) {
+      if (method === 'GET') return handleGetEntry(request, env, segments[1]);
       if (method === 'PUT') return handleUpdateEntry(request, env, segments[1]);
       if (method === 'DELETE') return handleDeleteEntry(request, env, segments[1]);
     }
