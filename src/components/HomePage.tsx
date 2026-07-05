@@ -84,8 +84,18 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
   })();
 
   const projects = (master.projects || []) as any[];
-  const featuredList = projects.filter((p) => p.featured);
-  const featuredProjects = (featuredList.length ? featuredList : projects).slice(0, 3);
+  const companyProjects = projects.filter((p) => p.type === "company");
+  const personalProjects = projects.filter((p) => p.type === "personal");
+  // Home leads with enterprise experience: company work first (any admin-featured company
+  // items float to the top), falling back to personal projects only if there's no company work.
+  const showcasePool = companyProjects.length ? companyProjects : personalProjects;
+  const featuredProjects = [...showcasePool]
+    .sort((a, b) => Number(!!b.featured) - Number(!!a.featured))
+    .slice(0, 3);
+  const leadsWithCompany = companyProjects.length > 0;
+  const viewAllTab = leadsWithCompany ? "company" : "products";
+  const viewAllLabel = leadsWithCompany ? "View all experience" : "View all projects";
+  const featuredHeading = leadsWithCompany ? "Enterprise work & experience." : "Projects with real impact.";
 
   const stats = [
     { label: "Years Experience", value: yearsDisplay, icon: TrendingUp },
@@ -103,14 +113,15 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
         desc: g.items.join(" · "),
       }));
 
-  const expectations = [
-    "Clear scope and milestones",
-    "Production-grade implementation",
-    "Reliable communication and delivery",
+  const strengths = [
+    "3+ years of production .NET delivery",
+    "SQL Server tuning & clean, layered architecture",
+    "Team-lead experience with end-to-end ownership",
   ];
 
-  const openProject = (p: any) =>
-    handleNavClick(p?.type === "personal" ? "products" : "company");
+  const openProject = (p: any) => {
+    window.location.hash = `#project/${p.id}`;
+  };
 
   const techPill = (t: string) => (
     <span
@@ -263,14 +274,14 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
               <div className="space-y-2 max-w-xl">
                 <span className="text-[10px] font-bold text-accent uppercase tracking-[0.35em] block">Featured Work</span>
                 <h2 className="text-2xl md:text-4xl font-luxury font-bold text-text-primary leading-tight">
-                  Shipped systems with real impact.
+                  {featuredHeading}
                 </h2>
               </div>
               <button
-                onClick={() => handleNavClick("company")}
+                onClick={() => handleNavClick(viewAllTab)}
                 className="group inline-flex items-center gap-1.5 px-4 py-2.5 bg-surface border border-border hover:border-accent text-text-primary hover:text-accent text-[10px] font-bold uppercase tracking-widest rounded-xl transition-colors cursor-pointer shrink-0"
               >
-                <span>View all</span>
+                <span>{viewAllLabel}</span>
                 <ArrowUpRight size={13} />
               </button>
             </div>
@@ -334,39 +345,42 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
         </section>
       )}
 
-      {/* ===== SERVICES CTA ===== */}
+      {/* ===== HIRING CTA ===== */}
       <section className="px-5 md:px-8 lg:px-16 pb-8">
         <div className="max-w-6xl mx-auto bg-surface border border-border rounded-3xl p-8 md:p-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-5">
-            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.35em] block">Services</span>
+            <span className="text-[10px] font-bold text-accent uppercase tracking-[0.35em] block">Open to roles</span>
             <h2 className="text-2xl md:text-4xl font-luxury font-bold text-text-primary leading-tight">
-              Need hands-on engineering support?
+              Looking for a .NET developer?
             </h2>
             <p className="text-sm text-text-secondary font-medium leading-relaxed max-w-md">
-              Full-stack delivery across .NET APIs, SQL Server, and web UIs. Share your scope and get a clear execution path.
+              {settings.availability
+                ? `Availability: ${settings.availability}. `
+                : ""}
+              Let's talk about how I can contribute to your team and your systems.
             </p>
             <div className="flex flex-wrap gap-3 pt-1">
               <button
-                onClick={() => handleNavClick("services")}
+                onClick={() => handleNavClick("contact")}
                 className="inline-flex items-center gap-2 px-5 py-3 bg-accent text-accent-foreground text-[11px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all cursor-pointer"
               >
-                Explore services
+                Get in touch
               </button>
               <button
-                onClick={() => handleNavClick("contact")}
+                onClick={() => handleNavClick("company")}
                 className="inline-flex items-center gap-2 px-5 py-3 bg-background border border-border text-text-primary hover:border-accent hover:text-accent text-[11px] font-bold uppercase tracking-widest rounded-xl transition-colors cursor-pointer"
               >
-                Start a conversation
+                View experience
               </button>
             </div>
           </div>
 
           <div className="bg-background border border-border rounded-2xl p-6 md:p-7">
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary">
-              What you can expect
+              What I bring
             </span>
             <ul className="mt-4 space-y-3">
-              {expectations.map((e) => (
+              {strengths.map((e) => (
                 <li key={e} className="flex items-center gap-3 text-sm font-medium text-text-primary">
                   <CheckCircle2 size={16} className="text-accent shrink-0" />
                   <span>{e}</span>

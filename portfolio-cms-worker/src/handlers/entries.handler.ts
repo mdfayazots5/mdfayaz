@@ -10,7 +10,7 @@ import { jsonResponse, errorResponse, notFoundResponse, PUBLIC_CACHE } from '../
 const EDITABLE_ENTRY_FIELDS: readonly (keyof Entry)[] = [
   'type', 'title', 'tagline', 'categoryTag', 'description', 'features', 'tech',
   'achievements', 'companyName', 'role', 'teamSize', 'startDate', 'endDate',
-  'status', 'audience', 'liveUrl', 'repoUrl', 'caseStudyUrl', 'videoUrl',
+  'status', 'audience', 'companyId', 'liveUrl', 'repoUrl', 'caseStudyUrl', 'videoUrl',
   'coverImage', 'icon', 'color', 'featured', 'displayOrder', 'published',
 ];
 

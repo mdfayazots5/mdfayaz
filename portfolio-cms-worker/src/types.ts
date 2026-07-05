@@ -26,6 +26,7 @@ export interface Entry {
   endDate?: string;
   status?: 'Live' | 'In Development' | 'Private Beta' | 'Completed';
   audience?: string;
+  companyId?: number;
   liveUrl?: string;
   repoUrl?: string;
   caseStudyUrl?: string;
@@ -46,6 +47,19 @@ export interface Service {
   highlights: string[];
   icon: string;
   status: 'Active' | 'Inactive';
+  displayOrder: number;
+}
+
+export interface CompanyProfile {
+  id: number;
+  name: string;
+  role: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  description?: string;
+  website?: string;
+  logo?: string;
   displayOrder: number;
 }
 
@@ -101,6 +115,7 @@ export interface LoginResponse { token: string; expiresAt: string; }
 export const R2_KEYS = {
   ENTRIES:  'data/entries.json',
   SERVICES: 'data/services.json',
+  COMPANIES: 'data/companies.json',
   ABOUT:    'data/about.json',
   FAQ:      'data/faq.json',
   USES:     'data/uses.json',

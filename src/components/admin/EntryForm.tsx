@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getEntries, createEntry, updateEntry } from "../../services/api";
-import { Entry } from "../../models/portfolio.model";
+import { getEntries, createEntry, updateEntry, getCompanies } from "../../services/api";
+import { Entry, CompanyProfile } from "../../models/portfolio.model";
 import { ArrowLeft, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
 
@@ -31,6 +31,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
   const [videoUrl, setVideoUrl] = useState("");
 
   // Company Specific Fields
+  const [companyId, setCompanyId] = useState<number | undefined>(undefined);
+  const [companies, setCompanies] = useState<CompanyProfile[]>([]);
   const [companyName, setCompanyName] = useState("");
   const [role, setRole] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -43,6 +45,17 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
   const [icon, setIcon] = useState("Package");
   const [coverImage, setCoverImage] = useState("");
   const [displayOrder, setDisplayOrder] = useState<number>(0);
+
+  // Load the Company Master for the company selector.
+  useEffect(() => {
+    let alive = true;
+    getCompanies()
+      .then((data) => alive && setCompanies(data || []))
+      .catch(() => alive && setCompanies([]));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -82,6 +95,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
           setCaseStudyUrl(found.caseStudyUrl || "");
           setVideoUrl(found.videoUrl || "");
 
+          setCompanyId(found.companyId);
           setCompanyName(found.companyName || "");
           setRole(found.role || "");
           setStartDate(found.startDate || "");
@@ -183,6 +197,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
       caseStudyUrl: caseStudyUrl.trim() || undefined,
       videoUrl: videoUrl.trim() || undefined,
       ...(type === "company" ? {
+        companyId: companyId !== undefined ? Number(companyId) : undefined,
         companyName: companyName.trim(),
         role: role.trim(),
         startDate: startDate.trim(),
@@ -367,6 +382,42 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
             <h3 className="text-xs font-bold uppercase tracking-widest text-text-primary">
               🏢 Corporate Context Parameters
             </h3>
+
+            {/* Company Master link — pick a company you've added, or type a name below. */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
+                Company (from Company Master)
+              </label>
+              <select
+                aria-label="Company from Company Master"
+                value={companyId ?? ""}
+                onChange={(e) => {
+                  const id = e.target.value ? Number(e.target.value) : undefined;
+                  setCompanyId(id);
+                  const sel = companies.find((c) => c.id === id);
+                  if (sel) {
+                    setCompanyName(sel.name);
+                    if (!role.trim()) setRole(sel.role || "");
+                    if (!startDate.trim()) setStartDate(sel.startDate || "");
+                    if (!endDate.trim()) setEndDate(sel.endDate || "");
+                  }
+                }}
+                className="w-full px-4 py-3 bg-background border border-border focus:border-accent rounded-xl text-xs font-medium focus:outline-none transition-colors cursor-pointer"
+              >
+                <option value="">— None / custom name —</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              {companies.length === 0 && (
+                <p className="text-[10px] text-text-secondary">
+                  No companies yet — add them in <span className="text-accent font-bold">Admin → Companies</span>.
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">

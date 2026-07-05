@@ -21,6 +21,7 @@ import { AdminPrivacyPage } from "./components/admin/AdminPrivacyPage";
 import { AdminAboutPage } from "./components/admin/AdminAboutPage";
 import { AdminSettingsPage } from "./components/admin/AdminSettingsPage";
 import { AdminServicesPage } from "./components/admin/AdminServicesPage";
+import { AdminCompaniesPage } from "./components/admin/AdminCompaniesPage";
 import { AdminMediaPage } from "./components/admin/AdminMediaPage";
 
 const AdminPlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
@@ -134,6 +135,9 @@ function PortfolioRouter() {
     } else if (normalized === "#admin/services") {
       activeSub = "services";
       componentToRender = <AdminServicesPage />;
+    } else if (normalized === "#admin/companies") {
+      activeSub = "companies";
+      componentToRender = <AdminCompaniesPage />;
     } else if (normalized === "#admin/uses") {
       activeSub = "uses";
       componentToRender = <AdminUsesPage />;

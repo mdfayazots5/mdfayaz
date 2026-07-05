@@ -207,7 +207,8 @@ export interface Entry {
   achievements: string[];    // quantified impact, e.g. "Led a team of 5"
 
   // company-specific (present when type === 'company')
-  companyName?: string;
+  companyId?: number;        // links to a CompanyProfile in the Company Master
+  companyName?: string;      // denormalized name (kept for back-compat / display)
   role?: string;
   teamSize?: number;
   startDate?: string;
@@ -241,6 +242,24 @@ export interface Service {
   highlights: string[];   // 2-4 bullet points for the detail modal
   icon: string;           // lucide-react icon name
   status: 'Active' | 'Inactive';
+  displayOrder: number;
+}
+
+/**
+ * A company/employer record ("Company Master"). Experiences (Entry with type 'company')
+ * link to one of these via `companyId`, so the Work page can group projects under the
+ * company they were built at.
+ */
+export interface CompanyProfile {
+  id: number;
+  name: string;
+  role: string;          // your title at this company
+  location: string;      // office / address
+  startDate: string;     // join date, e.g. "Feb 2023"
+  endDate: string;       // "Present" or leaving date
+  description?: string;  // short blurb about the company / your tenure
+  website?: string;
+  logo?: string;         // optional logo URL (R2)
   displayOrder: number;
 }
 

@@ -1,4 +1,4 @@
-import { AboutProfile, FaqItem, UsesCategory, PrivacySection, SiteSettings, Entry, Service } from "../models/portfolio.model";
+import { AboutProfile, FaqItem, UsesCategory, PrivacySection, SiteSettings, Entry, Service, CompanyProfile } from "../models/portfolio.model";
 
 const API_BASE_URL = ((import.meta as any).env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
@@ -244,6 +244,23 @@ export async function updateService(id: number | string, data: Partial<Service>)
 
 export async function deleteService(id: number | string): Promise<boolean> {
   await deleteJson<{ success: boolean }>(`/services/${id}`);
+  return true;
+}
+
+export async function getCompanies(): Promise<CompanyProfile[]> {
+  return cachedGet("/companies", () => fetchList<CompanyProfile>("/companies"));
+}
+
+export async function createCompany(data: Partial<CompanyProfile>): Promise<CompanyProfile> {
+  return postJson<CompanyProfile>("/companies", data);
+}
+
+export async function updateCompany(id: number | string, data: Partial<CompanyProfile>): Promise<CompanyProfile> {
+  return putJson<CompanyProfile>(`/companies/${id}`, data);
+}
+
+export async function deleteCompany(id: number | string): Promise<boolean> {
+  await deleteJson<{ success: boolean }>(`/companies/${id}`);
   return true;
 }
 

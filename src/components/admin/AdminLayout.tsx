@@ -12,6 +12,7 @@ import {
   Moon,
   ArrowLeft,
   Sparkles,
+  Building2,
   Image as ImageIcon,
 } from "lucide-react";
 import { logout } from "../../services/api";
@@ -33,6 +34,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSub })
   const menuItems = [
     { label: "Dashboard", id: "dashboard", icon: LayoutDashboard, route: "#admin" },
     { label: "Portfolio Nodes", id: "entries", icon: Briefcase, route: "#admin/entries" },
+    { label: "Companies", id: "companies", icon: Building2, route: "#admin/companies" },
     { label: "About", id: "about", icon: User, route: "#admin/about" },
     { label: "FAQ", id: "faq", icon: HelpCircle, route: "#admin/faq" },
     { label: "Services", id: "services", icon: Sparkles, route: "#admin/services" },

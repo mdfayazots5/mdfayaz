@@ -15,6 +15,12 @@ import {
   handleUpdateService,
   handleDeleteService,
 } from './handlers/services.handler';
+import {
+  handleGetCompanies,
+  handleCreateCompany,
+  handleUpdateCompany,
+  handleDeleteCompany,
+} from './handlers/companies.handler';
 import { handleGetFaq, handleCreateFaq, handleUpdateFaq, handleDeleteFaq } from './handlers/faq.handler';
 import {
   handleGetUses,
@@ -86,6 +92,18 @@ async function route(request: Request, env: Env, segments: string[], method: str
     if (segments.length === 2) {
       if (method === 'PUT') return handleUpdateService(request, env, segments[1]);
       if (method === 'DELETE') return handleDeleteService(request, env, segments[1]);
+    }
+  }
+
+  // /companies, /companies/:id
+  if (segments[0] === 'companies') {
+    if (segments.length === 1) {
+      if (method === 'GET') return handleGetCompanies(request, env);
+      if (method === 'POST') return handleCreateCompany(request, env);
+    }
+    if (segments.length === 2) {
+      if (method === 'PUT') return handleUpdateCompany(request, env, segments[1]);
+      if (method === 'DELETE') return handleDeleteCompany(request, env, segments[1]);
     }
   }
 

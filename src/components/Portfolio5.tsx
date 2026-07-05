@@ -12,12 +12,14 @@ import { PrivacyPage } from "./PrivacyPage";
 import { FaqPage } from "./FaqPage";
 import { ProductsPage } from "./ProductsPage";
 import { ServicesPage } from "./ServicesPage";
-import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Palette, FileText } from "lucide-react";
+import { ProjectDetailPage } from "./ProjectDetailPage";
+import { WorkExperience } from "./WorkExperience";
+import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Lock, Briefcase, Palette, FileText } from "lucide-react";
 import { ThemeSidebar } from "./ThemeSidebar";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./ThemeProvider";
-import { SiteSettings } from "../models/portfolio.model";
-import { getSiteSettings } from "../services/api";
+import { SiteSettings, CompanyProfile } from "../models/portfolio.model";
+import { getSiteSettings, getCompanies } from "../services/api";
 
 interface Portfolio5Props {
   data: PortfolioData;
@@ -27,12 +29,14 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const { master } = data;
   const { applyAdminDefault } = useTheme();
 
-  const [activeTab, setActiveTab] = React.useState<"home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("home");
+  const [activeTab, setActiveTab] = React.useState<"home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "project">("home");
+  const [projectId, setProjectId] = React.useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isThemePanelOpen, setIsThemePanelOpen] = React.useState(false);
   const [isWorkDropdownOpen, setIsWorkDropdownOpen] = React.useState(false);
   const [workSubTab, setWorkSubTab] = React.useState<"company" | "personal" | "products" | "services">("personal");
   const [settings, setSettings] = React.useState<SiteSettings | null>(null);
+  const [companies, setCompanies] = React.useState<CompanyProfile[]>([]);
   const [scrolled, setScrolled] = React.useState(false);
   const hoverTimeout = React.useRef<number | null>(null);
   const lenis = useLenis();
@@ -126,6 +130,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         applyAdminDefault(result?.themeSet);
       }
     });
+    getCompanies()
+      .then((result) => isMounted && setCompanies(result || []))
+      .catch(() => isMounted && setCompanies([]));
     return () => {
       isMounted = false;
     };
@@ -169,6 +176,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       } else if (hash === "contact") {
         setActiveTab("contact");
         updatePageMetadata("contact");
+      } else if (hash.startsWith("project/")) {
+        setProjectId(hash.slice("project/".length));
+        setActiveTab("project");
       } else if (hash.startsWith("admin")) {
         // Handled by top-level Admin router
       } else {
@@ -296,7 +306,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 setIsDropdownOpen(false);
                 setIsWorkDropdownOpen(!isWorkDropdownOpen);
               }}
-              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || ["work", "uses"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
+              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || ["work", "uses", "project"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
               <span>Work</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
@@ -353,15 +363,18 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 const activeEntries = (master.projects || []).filter(
                   (p: any) => p.type === workSubTab || p.category === workSubTab
                 );
+
+                // Company experience is grouped under company header cards; personal is a flat list.
+                if (workSubTab === "company") {
+                  return <WorkExperience entries={activeEntries} companies={companies} />;
+                }
+
                 return (
-                  <>
-                    {/* Recruiter-First Simple/Professional Projects List */}
-                    <div className="space-y-5 py-10">
-                      {activeEntries.map((project: any, idx: number) => (
-                        <ProjectCard key={project.id} project={project} index={idx} />
-                      ))}
-                    </div>
-                  </>
+                  <div className="space-y-5 py-10">
+                    {activeEntries.map((project: any, idx: number) => (
+                      <ProjectCard key={project.id} project={project} index={idx} />
+                    ))}
+                  </div>
                 );
               })()}
             </div>
@@ -398,6 +411,17 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         {activeTab === "products" && <ProductsPage />}
 
         {activeTab === "services" && <ServicesPage />}
+
+        {activeTab === "project" && (() => {
+          const proj = (master.projects || []).find((p: any) => String(p.id) === String(projectId));
+          return (
+            <ProjectDetailPage
+              project={proj}
+              onBack={() => handleNavClick(proj?.type === "personal" ? "products" : "company")}
+              onContact={() => handleNavClick("contact")}
+            />
+          );
+        })()}
 
         {activeTab === "privacy" && <PrivacyPage onBack={() => handleNavClick("home")} />}
 
@@ -528,9 +552,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
                   {[
                     { label: "Home", tab: "home" as const },
+                    { label: "About", tab: "about" as const },
                     { label: "Experience", tab: "company" as const },
                     { label: "Projects", tab: "products" as const },
-                    { label: "Services", tab: "services" as const },
                   ].map((l) => (
                     <button
                       key={l.label}
@@ -752,22 +776,6 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 <div>
                   <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Projects</h4>
                   <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Personal builds and side projects I own</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsWorkDropdownOpen(false);
-                  handleNavClick("services");
-                }}
-                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
-              >
-                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Sparkles size={15} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Services</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">SaaS design and specialized consulting</p>
                 </div>
               </button>
 
