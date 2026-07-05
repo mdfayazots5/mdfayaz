@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getEntries, getFaqItems, getUsesCategories, getSiteSettings, getServices } from "../../services/api";
+import { getEntries, getFaqItems, getUsesCategories, getSiteSettings, getServices, getCompanies } from "../../services/api";
 import {
   Briefcase,
+  Building2,
   HelpCircle,
   Wrench,
   ShieldCheck,
@@ -19,6 +20,7 @@ import { LoadingScreen } from "../LoadingScreen";
 export const AdminDashboardPage: React.FC = () => {
   const [projectCount, setProjectCount] = useState<number | string>("—");
   const [productCount, setProductCount] = useState<number | string>("—");
+  const [companyMasterCount, setCompanyMasterCount] = useState<number | string>("—");
   const [faqCount, setFaqCount] = useState<number | string>("—");
   const [usesCount, setUsesCount] = useState<number | string>("—");
   const [servicesCount, setServicesCount] = useState<string>("—");
@@ -31,12 +33,13 @@ export const AdminDashboardPage: React.FC = () => {
 
     async function loadStats() {
       try {
-        const [entries, faqs, uses, settings, services] = await Promise.all([
+        const [entries, faqs, uses, settings, services, companies] = await Promise.all([
           getEntries().catch(() => []),
           getFaqItems().catch(() => []),
           getUsesCategories().catch(() => []),
           getSiteSettings().catch(() => null),
-          getServices().catch(() => [])
+          getServices().catch(() => []),
+          getCompanies().catch(() => [])
         ]);
 
         if (isMounted) {
@@ -44,6 +47,7 @@ export const AdminDashboardPage: React.FC = () => {
           const personalsCount = entries.filter((e) => e.type === "personal").length;
           setProjectCount(companiesCount);
           setProductCount(personalsCount);
+          setCompanyMasterCount(companies.length);
           setFaqCount(faqs.length);
 
           const activeServices = (services || []).filter((s: any) => s.status === "Active").length;
@@ -96,6 +100,14 @@ export const AdminDashboardPage: React.FC = () => {
       href: "#admin/entries"
     },
     {
+      label: "Company Master",
+      value: companyMasterCount,
+      icon: Building2,
+      color: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20",
+      desc: "Employer records and logos",
+      href: "#admin/companies"
+    },
+    {
       label: "Verified FAQs",
       value: faqCount,
       icon: HelpCircle,
@@ -135,6 +147,13 @@ export const AdminDashboardPage: React.FC = () => {
       icon: ListCollapse,
       desc: "Edit experience, project details, links, tech, and impact points.",
       tone: "text-blue-500 bg-blue-500/10 border-blue-500/20"
+    },
+    {
+      title: "Company Master",
+      href: "#admin/companies",
+      icon: Building2,
+      desc: "Add employer profile, role, dates, address, website, and logo.",
+      tone: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20"
     },
     {
       title: "Services",

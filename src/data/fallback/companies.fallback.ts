@@ -1,0 +1,17 @@
+import { CompanyProfile } from "../../models/portfolio.model";
+
+export const COMPANIES_FALLBACK: CompanyProfile[] = [
+  {
+    id: 1,
+    name: "Revalsys Technologies Pvt Ltd",
+    role: "Dot Net Developer",
+    location:
+      "Revalsys Technologies  8-2-293/82/1/83-A, 4th Floor, Road No 12, Banjara Hills,  MLA Colony, Hyderabad - 500034 Telangana, India",
+    startDate: "Feb 2023",
+    endDate: "May 2026",
+    description: "",
+    website: "https://www.revalsys.com/",
+    logo: "https://pub-6b37856b9c4e4ea5b0581e9b4e646c2b.r2.dev/assets/logos/1783232479088-logo-1783232478950-Revalsys-logo-sm.jpg",
+    displayOrder: 1,
+  },
+];

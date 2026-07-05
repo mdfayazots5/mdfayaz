@@ -99,9 +99,9 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
 
   const stats = [
     { label: "Years Experience", value: yearsDisplay, icon: TrendingUp },
-    { label: "Projects Shipped", value: `${projects.length}`, icon: FolderGit2 },
-    { label: "Domains", value: `${master.stats.domains || 0}`, icon: Layers },
-    master.stats.teamLed ? { label: "Team Led", value: `${master.stats.teamLed}`, icon: Users } : null,
+    { label: "Production Projects", value: `${companyProjects.length || projects.length}`, icon: FolderGit2 },
+    master.stats.teamLed ? { label: "Team Size Led", value: `${master.stats.teamLed}`, icon: Users } : null,
+    { label: "Business Domains", value: `${master.stats.domains || 0}`, icon: Layers },
   ].filter(Boolean) as { label: string; value: string; icon: any }[];
 
   const activeServices = services.filter((s) => s.status === "Active");
@@ -158,7 +158,7 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
           className="relative z-10 flex flex-col items-center"
         >
           {/* Profile photo on the background */}
-          <div className="w-32 h-32 lg:w-44 lg:h-44 rounded-full overflow-hidden border border-border bg-surface shadow-2xl ring-4 ring-background/70">
+          <div className="w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 rounded-full overflow-hidden border border-border bg-surface shadow-2xl ring-4 ring-background/70">
             {hasProfile ? (
               <picture>
                 {profileMobile && <source media="(max-width: 767px)" srcSet={profileMobile} />}
@@ -166,7 +166,7 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
               </picture>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/15 to-surface">
-                <span className="text-4xl lg:text-5xl font-luxury font-light text-accent">
+                <span className="text-5xl lg:text-6xl font-luxury font-light text-accent">
                   {name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                 </span>
               </div>

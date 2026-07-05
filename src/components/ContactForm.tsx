@@ -16,6 +16,7 @@ interface FormState {
 }
 
 const INQUIRY_TYPES = [
+  { value: "", label: "Select purpose" },
   { value: "new_project", label: "New Project" },
   { value: "service_request", label: "Service Request" },
   { value: "technical_support", label: "Technical Support" },
@@ -31,7 +32,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
     name: "",
     email: "",
     company: "",
-    inquiryType: "new_project",
+    inquiryType: "",
     message: "",
     botcheck: "",
   });
@@ -39,7 +40,6 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
   const [errors, setErrors] = React.useState<Partial<Record<keyof FormState, string>>>({});
   const [status, setStatus] = React.useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = React.useState("");
-  const [purposeOpen, setPurposeOpen] = React.useState(false);
 
   const web3FormsAccessKey = (import.meta as any).env?.VITE_WEB3FORMS_ACCESS_KEY || "";
 
@@ -48,7 +48,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
       name: "",
       email: "",
       company: "",
-      inquiryType: "new_project",
+      inquiryType: "",
       message: "",
       botcheck: "",
     });
@@ -66,6 +66,10 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
       nextErrors.email = "Please enter your email address.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       nextErrors.email = "Please enter a valid email address.";
+    }
+
+    if (!formData.inquiryType) {
+      nextErrors.inquiryType = "Please select a purpose.";
     }
 
     if (!formData.message.trim()) {
@@ -164,7 +168,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
   };
 
   return (
-    <div id="contact-form-container" className="w-full max-w-2xl mx-auto bg-surface rounded-2xl border border-border shadow-2xl shadow-text-secondary/5 p-5 md:p-8 lg:p-10 relative overflow-hidden text-left">
+    <div id="contact-form-container" className="w-full max-w-2xl mx-auto bg-surface rounded-2xl border border-border shadow-2xl shadow-text-secondary/5 p-5 md:p-8 lg:p-10 relative overflow-visible text-left">
       <div className="absolute top-0 left-0 right-0 h-1 bg-accent" />
 
       <AnimatePresence mode="wait">
@@ -279,49 +283,41 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
               </div>
 
               <div className="space-y-2 relative">
-                <label id="purpose-label" className="text-[10px] font-bold text-text-secondary uppercase tracking-widest block">
-                  Purpose
+                <label htmlFor="inquiryType" className="text-[10px] font-bold text-text-secondary uppercase tracking-widest block">
+                  Purpose <span className="text-accent">*</span>
                 </label>
-                <button
-                  type="button"
-                  aria-labelledby="purpose-label"
-                  aria-haspopup="listbox"
-                  aria-expanded={purposeOpen}
-                  onClick={() => setPurposeOpen((value) => !value)}
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-text-primary transition-all duration-200 outline-none focus:border-accent cursor-pointer flex items-center justify-between gap-3 text-left"
+                <select
+                  id="inquiryType"
+                  name="inquiryType"
+                  value={formData.inquiryType}
+                  onChange={handleInputChange}
+                  aria-invalid={!!errors.inquiryType}
+                  aria-describedby={errors.inquiryType ? "purpose-error" : undefined}
+                  className={`w-full appearance-none px-4 py-3 pr-10 rounded-xl border bg-background text-sm transition-all duration-200 outline-none focus:border-accent cursor-pointer ${
+                    errors.inquiryType
+                      ? "border-rose-400 text-text-primary"
+                      : formData.inquiryType
+                        ? "border-border text-text-primary"
+                        : "border-border text-text-secondary/55"
+                  }`}
                 >
-                  <span>{labelFor(INQUIRY_TYPES, formData.inquiryType)}</span>
-                  <ChevronDown size={15} className={`text-text-secondary transition-transform ${purposeOpen ? "rotate-180" : ""}`} />
-                </button>
-                {purposeOpen && (
-                  <div
-                    role="listbox"
-                    aria-labelledby="purpose-label"
-                    className="absolute left-0 right-0 top-full mt-2 z-30 bg-surface border border-border rounded-xl shadow-2xl p-1.5 text-sm"
-                  >
-                    {INQUIRY_TYPES.map((type) => {
-                      const active = formData.inquiryType === type.value;
-                      return (
-                        <button
-                          key={type.value}
-                          type="button"
-                          role="option"
-                          aria-selected={active}
-                          onClick={() => {
-                            setFormData((prev) => ({ ...prev, inquiryType: type.value }));
-                            setPurposeOpen(false);
-                          }}
-                          className={`w-full text-left px-3.5 py-2.5 rounded-lg transition-colors cursor-pointer ${
-                            active
-                              ? "bg-accent text-accent-foreground"
-                              : "text-text-secondary hover:text-text-primary hover:bg-background"
-                          }`}
-                        >
-                          {type.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {INQUIRY_TYPES.map((type) => (
+                    <option
+                      key={type.value}
+                      value={type.value}
+                      disabled={!type.value}
+                      style={{ color: "#0F172A", backgroundColor: "#FFFFFF" }}
+                    >
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={15} className="pointer-events-none absolute right-4 top-[38px] text-text-secondary" />
+                {errors.inquiryType && (
+                  <p id="purpose-error" className="text-xs text-rose-500 font-semibold flex items-center gap-1">
+                    <AlertCircle size={12} className="shrink-0" />
+                    {errors.inquiryType}
+                  </p>
                 )}
               </div>
             </div>

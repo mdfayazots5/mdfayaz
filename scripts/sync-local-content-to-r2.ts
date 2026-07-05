@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ABOUT_FALLBACK } from "../src/data/fallback/about.fallback";
+import { COMPANIES_FALLBACK } from "../src/data/fallback/companies.fallback";
 import { ENTRIES_FALLBACK } from "../src/data/fallback/entries.fallback";
 import { FAQ_FALLBACK } from "../src/data/fallback/faq.fallback";
 import { PRIVACY_FALLBACK } from "../src/data/fallback/privacy.fallback";
@@ -20,6 +21,7 @@ const workDir = path.join(rootDir, ".r2-migration");
 const collections = [
   { key: "data/entries.json", value: ENTRIES_FALLBACK },
   { key: "data/services.json", value: SERVICES_FALLBACK },
+  { key: "data/companies.json", value: COMPANIES_FALLBACK },
   { key: "data/faq.json", value: FAQ_FALLBACK },
   { key: "data/uses.json", value: USES_FALLBACK },
   { key: "data/privacy.json", value: PRIVACY_FALLBACK },

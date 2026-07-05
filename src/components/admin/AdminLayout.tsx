@@ -67,12 +67,16 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSub })
 
       {/* Mobile Header */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-border sticky top-0 z-[110]">
-        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-1 rounded-lg">
-          Fayaz Admin
-        </span>
+        <a
+          href="#admin"
+          className="text-lg font-luxury font-bold tracking-tighter text-text-primary hover:text-accent transition-colors"
+          aria-label="Go to admin dashboard"
+        >
+          Fayaz
+        </a>
         <div className="flex items-center gap-2">
           <a
-            href="#about"
+            href="#home"
             className="p-2 rounded-lg border border-border bg-background text-text-secondary hover:text-accent cursor-pointer transition-all duration-300"
             aria-label="Open public site"
             title="Public site"
@@ -103,10 +107,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSub })
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-[120] w-64 bg-surface border-r border-border flex-col justify-between p-6 md:sticky md:top-0 md:h-screen">
         {/* Top brand header */}
         <div className="space-y-8">
-          <div className="flex items-center gap-2.5">
+          <a href="#admin" className="flex items-center gap-2.5 group" aria-label="Go to admin dashboard">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            <h2 className="text-base font-luxury font-bold tracking-tight">Mohammed Fayaz</h2>
-          </div>
+            <h2 className="text-lg font-luxury font-bold tracking-tighter group-hover:text-accent transition-colors">Fayaz</h2>
+          </a>
 
           {/* Navigation Links */}
           <nav className="space-y-1">
@@ -134,7 +138,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSub })
         {/* Bottom actions */}
         <div className="pt-6 border-t border-border space-y-3">
           <a
-            href="#about"
+            href="#home"
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-text-secondary hover:text-accent hover:bg-background transition-all duration-200 cursor-pointer"
           >
             <ArrowLeft size={14} />

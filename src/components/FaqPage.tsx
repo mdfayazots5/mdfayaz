@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { FaqItem } from "../models/portfolio.model";
 import { getFaqItems } from "../services/api";
-import { SectionLoader, SectionError } from "./SectionState";
+import { SectionError, SectionLoader } from "./SectionState";
 
 export const FaqPage: React.FC = () => {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
@@ -19,8 +19,7 @@ export const FaqPage: React.FC = () => {
     getFaqItems()
       .then((items) => {
         if (isMounted) {
-          // Only published FAQs reach the portal (absent flag = published).
-          setFaqs((items || []).filter((f) => f.published !== false));
+          setFaqs((items || []).filter((faq) => faq.published !== false));
         }
       })
       .catch(() => {
@@ -34,13 +33,8 @@ export const FaqPage: React.FC = () => {
     };
   }, [reloadKey]);
 
-  if (loading) {
-    return <SectionLoader label="Loading questions..." minHeight="70vh" />;
-  }
-
-  if (error) {
-    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="70vh" />;
-  }
+  if (loading) return <SectionLoader label="Loading questions..." minHeight="70vh" />;
+  if (error) return <SectionError onRetry={() => setReloadKey((k) => k + 1)} minHeight="70vh" />;
 
   return (
     <div id="faq-page-container" className="pt-24 lg:pt-36 bg-background select-none text-text-primary text-left">
@@ -56,15 +50,20 @@ export const FaqPage: React.FC = () => {
             Architect & Recruiter FAQ
           </h1>
           <p className="text-sm text-text-secondary font-medium max-w-xl mx-auto leading-relaxed">
-            Quick, objective responses about software design, database optimization, availability, and collaboration style.
+            Hover a record on desktop to preview the answer. Tap a record on mobile to open it.
           </p>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-5 md:px-8 py-12 lg:py-20 space-y-8">
-        <div className="space-y-4 min-h-[300px]">
-          {faqs.length > 0 ? (
-            faqs.map((faq, idx) => {
+      <main className="max-w-4xl mx-auto px-5 md:px-8 py-12 lg:py-20">
+        {faqs.length === 0 ? (
+          <div className="py-20 text-center border border-dashed border-border rounded-3xl bg-surface/50">
+            <HelpCircle size={32} className="text-text-secondary/50 mx-auto mb-3" />
+            <p className="text-xs text-text-secondary font-medium italic">No questions are published yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => {
               const isOpen = expandedIndex === idx;
               let iconColor = "text-sky-500 bg-sky-500/10";
               if (faq.category === "Architectural") iconColor = "text-accent bg-accent/10";
@@ -74,11 +73,14 @@ export const FaqPage: React.FC = () => {
               return (
                 <div
                   key={faq.id || idx}
+                  onMouseEnter={() => setExpandedIndex(idx)}
+                  onFocus={() => setExpandedIndex(idx)}
                   className={`border rounded-2xl transition-all duration-300 overflow-hidden bg-surface ${
                     isOpen ? "border-accent/40 shadow-md shadow-accent/5" : "border-border hover:border-text-secondary/30"
                   }`}
                 >
                   <button
+                    type="button"
                     onClick={() => setExpandedIndex(isOpen ? null : idx)}
                     className="w-full px-5 md:px-6 py-5 flex items-center justify-between text-left gap-4 cursor-pointer hover:bg-background/25 transition-colors"
                   >
@@ -102,7 +104,8 @@ export const FaqPage: React.FC = () => {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                        transition={{ duration: 0.22, ease: "easeInOut" }}
+                        className="overflow-hidden"
                       >
                         <div className="px-5 md:px-6 pb-6 pt-1 text-xs md:text-sm text-text-secondary font-medium leading-relaxed border-t border-border bg-background/10 md:pl-24">
                           <p className="max-w-2xl">{faq.answer}</p>
@@ -112,15 +115,10 @@ export const FaqPage: React.FC = () => {
                   </AnimatePresence>
                 </div>
               );
-            })
-          ) : (
-            <div className="py-20 text-center border border-dashed border-border rounded-3xl bg-surface/50">
-              <HelpCircle size={32} className="text-text-secondary/50 mx-auto mb-3" />
-              <p className="text-xs text-text-secondary font-medium italic">No questions are published yet.</p>
-            </div>
-          )}
-        </div>
-      </div>
+            })}
+          </div>
+        )}
+      </main>
     </div>
   );
 };

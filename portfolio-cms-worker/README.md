@@ -128,7 +128,7 @@ Origin not listed, so leaving it on `localhost` blocks the deployed frontend.
 seeded Worker and a freshly loaded frontend (with no `VITE_API_BASE_URL`) start from identical
 content.
 
-`seed/seed.ts` exports `seed(env)`, which writes all seven JSON files to their `R2_KEYS`
+`seed/seed.ts` exports `seed(env)`, which writes all eight JSON files to their `R2_KEYS`
 locations. It's idempotent — safe to re-run. Options to run it:
 
 - Bind it as a temporary Worker (`wrangler dev seed/seed.ts`) and hit it once, or

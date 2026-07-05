@@ -7,10 +7,12 @@ import faq from './faq.json';
 import uses from './uses.json';
 import privacy from './privacy.json';
 import siteSettings from './site-settings.json';
+import companies from './companies.json';
 
 const SEED_DATA: Record<string, unknown> = {
   [R2_KEYS.ENTRIES]: entries,
   [R2_KEYS.SERVICES]: services,
+  [R2_KEYS.COMPANIES]: companies,
   [R2_KEYS.ABOUT]: about,
   [R2_KEYS.FAQ]: faq,
   [R2_KEYS.USES]: uses,

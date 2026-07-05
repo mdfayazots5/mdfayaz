@@ -14,12 +14,10 @@ import { ProductsPage } from "./ProductsPage";
 import { ServicesPage } from "./ServicesPage";
 import { ProjectDetailPage } from "./ProjectDetailPage";
 import { WorkExperience } from "./WorkExperience";
-import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Lock, Briefcase, Palette, FileText } from "lucide-react";
-import { ThemeSidebar } from "./ThemeSidebar";
-import { ThemeToggle } from "./ThemeToggle";
+import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Briefcase, FileText } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { SiteSettings, CompanyProfile } from "../models/portfolio.model";
-import { getSiteSettings, getCompanies } from "../services/api";
+import { getSiteSettings, getCompanies, isAuthenticated } from "../services/api";
 
 interface Portfolio5Props {
   data: PortfolioData;
@@ -32,13 +30,13 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const [activeTab, setActiveTab] = React.useState<"home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "project">("home");
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const [isThemePanelOpen, setIsThemePanelOpen] = React.useState(false);
   const [isWorkDropdownOpen, setIsWorkDropdownOpen] = React.useState(false);
   const [workSubTab, setWorkSubTab] = React.useState<"company" | "personal" | "products" | "services">("personal");
   const [settings, setSettings] = React.useState<SiteSettings | null>(null);
   const [companies, setCompanies] = React.useState<CompanyProfile[]>([]);
   const [scrolled, setScrolled] = React.useState(false);
   const hoverTimeout = React.useRef<number | null>(null);
+  const brandClickRef = React.useRef({ count: 0, lastAt: 0 });
   const lenis = useLenis();
 
   // Jump to top on tab switches (pushState doesn't fire hashchange, so we do it here).
@@ -78,6 +76,26 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
   const cancelHoverClose = () => {
     if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+  };
+
+  const handleBrandClick = () => {
+    const now = Date.now();
+    const recent = now - brandClickRef.current.lastAt < 900;
+    brandClickRef.current = {
+      count: recent ? brandClickRef.current.count + 1 : 1,
+      lastAt: now,
+    };
+
+    setIsDropdownOpen(false);
+    setIsWorkDropdownOpen(false);
+
+    if (brandClickRef.current.count >= 3) {
+      brandClickRef.current = { count: 0, lastAt: 0 };
+      window.location.hash = isAuthenticated() ? "#admin" : "#admin/login";
+      return;
+    }
+
+    handleNavClick("home");
   };
 
   // Dynamic Metadata Sync Helper
@@ -245,10 +263,12 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     }
   };
 
+  const contactEmail = settings?.contactEmail || master.candidate.email;
+  const contactPhone = settings?.socialLinks?.mobile || master.candidate.phone || "";
+  const contactPhoneHref = contactPhone ? `tel:${contactPhone.replace(/[^\d+]/g, "")}` : "";
+
   return (
     <div className="app-canvas min-h-screen text-text-primary selection:bg-accent selection:text-accent-foreground">
-      <ThemeSidebar open={isThemePanelOpen} onClose={() => setIsThemePanelOpen(false)} />
-
       {/* Minimal Navigation — transparent (blend) at top, solid blurred bar once scrolled (#1) */}
       <nav
         className={`fixed top-0 left-0 right-0 z-[100] px-5 md:px-8 py-5 md:py-7 flex justify-between items-center select-none transition-colors duration-300 ${
@@ -259,25 +279,11 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       >
         <span
           className="text-lg font-luxury font-bold tracking-tighter cursor-pointer"
-          onClick={() => {
-            setIsDropdownOpen(false);
-            setIsWorkDropdownOpen(false);
-            handleNavClick("home");
-          }}
+          onClick={handleBrandClick}
         >
           Fayaz
         </span>
         <div className="flex gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
-          <button
-            id="appearance-trigger-btn"
-            onClick={() => setIsThemePanelOpen(true)}
-            aria-label="Open appearance settings"
-            title="Appearance — theme & mode"
-            className="cursor-pointer transition-colors hover:text-accent flex items-center gap-1.5"
-          >
-            <Palette size={13} />
-            <span className="hidden sm:inline">Theme</span>
-          </button>
           <div
             className="relative"
             onMouseEnter={() => openMenuOnHover("about")}
@@ -461,7 +467,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   ESTABLISHED CHANNELS & PIPELINES
                 </p>
               </div>
-              <ContactForm candidateEmail={settings?.contactEmail || master.candidate.email} />
+              <ContactForm candidateEmail={contactEmail} />
             </div>
           </div>
         )}
@@ -493,13 +499,13 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               </div>
 
               {/* Embedded Contact Form Component */}
-              <ContactForm candidateEmail={settings?.contactEmail || master.candidate.email} />
+              <ContactForm candidateEmail={contactEmail} />
 
               <div className="pt-8 flex justify-center items-center border-t border-border max-w-2xl mx-auto text-text-primary">
                 <div className="text-center">
                   <span className="text-[9px] font-bold text-text-secondary uppercase tracking-widest block mb-1">Direct Correspondence</span>
-                  <a href={`mailto:${settings?.contactEmail || master.candidate.email}`} className="text-lg font-luxury font-medium text-text-primary hover:text-accent transition-colors border-b border-border hover:border-accent pb-0.5">
-                    {settings?.contactEmail || master.candidate.email}
+                  <a href={`mailto:${contactEmail}`} className="text-lg font-luxury font-medium text-text-primary hover:text-accent transition-colors border-b border-border hover:border-accent pb-0.5">
+                    {contactEmail}
                   </a>
                 </div>
               </div>
@@ -521,14 +527,14 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 </p>
                 <div className="flex items-center gap-2 pt-1">
                   <a
-                    href={settings?.socialLinks.linkedin || master.candidate.linkedin}
+                    href={settings?.socialLinks?.linkedin || master.candidate.linkedin}
                     target="_blank" rel="noreferrer" id="footer-linkedin-link" aria-label="LinkedIn"
                     className="p-2 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
                   >
                     <Linkedin size={14} />
                   </a>
                   <a
-                    href={settings?.socialLinks.github || master.candidate.github}
+                    href={settings?.socialLinks?.github || master.candidate.github}
                     target="_blank" rel="noreferrer" id="footer-github-link" aria-label="GitHub"
                     className="p-2 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors"
                   >
@@ -594,9 +600,14 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   <button onClick={() => handleNavClick("contact")} className="text-left hover:text-accent transition-colors w-fit">
                     Start a conversation
                   </button>
-                  <a href={`mailto:${settings?.contactEmail || master.candidate.email}`} className="hover:text-accent transition-colors break-all">
-                    {settings?.contactEmail || master.candidate.email}
+                  <a href={`mailto:${contactEmail}`} className="hover:text-accent transition-colors break-all">
+                    {contactEmail}
                   </a>
+                  {contactPhone && (
+                    <a href={contactPhoneHref} className="hover:text-accent transition-colors w-fit">
+                      {contactPhone}
+                    </a>
+                  )}
                   <span className="text-text-secondary/80 uppercase tracking-[0.15em] text-[10px]">
                     {(settings?.location || master.candidate.location)}
                   </span>
@@ -610,14 +621,6 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 <span className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.2em]">
                   © {new Date().getFullYear()} {settings?.name || master.candidate.name}. All rights reserved.
                 </span>
-                <a
-                  id="admin-login-lock-btn"
-                  href="#admin/login"
-                  className="text-text-secondary/70 hover:text-accent p-1 rounded-md hover:bg-surface/65 transition-colors cursor-pointer"
-                  title="Admin"
-                >
-                  <Lock size={11} />
-                </a>
               </div>
               <span className="text-[10px] font-bold text-text-secondary/80 uppercase tracking-[0.2em]">
                 Built with React, Tailwind &amp; .NET
@@ -709,23 +712,6 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 </div>
               </button>
 
-              <div className="border-t border-border mt-2 pt-2.5 px-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <a
-                    id="admin-dropdown-lock-btn"
-                    href="#admin/login"
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="inline-flex items-center gap-1.5 text-[9px] font-bold text-text-secondary hover:text-accent uppercase tracking-wider transition-colors cursor-pointer"
-                  >
-                    <Lock size={10} />
-                    <span>Admin Access</span>
-                  </a>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">Theme</span>
-                  <ThemeToggle />
-                </div>
-              </div>
             </div>
           </div>
         </>
