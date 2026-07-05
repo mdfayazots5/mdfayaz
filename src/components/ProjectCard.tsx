@@ -70,11 +70,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
   const overview = project.tagline || project.shortOverview || project.description || "";
   const role = project.role || "";
   const techStack = project.tech || project.techStack || [];
+  // A link is only "real" when it points somewhere — guard against empty and "#"
+  // placeholders so dead Case Study / GitHub buttons never render.
+  const isRealLink = (href?: string) => !!href && href.trim() !== "" && href.trim() !== "#";
   const proofLinks = [
     { href: project.liveUrl, label: "Live", Icon: ExternalLink },
     { href: project.repoUrl, label: "GitHub", Icon: Github },
     { href: project.caseStudyUrl, label: "Case", Icon: BookOpen },
-  ].filter((item) => !!item.href);
+  ].filter((item) => isRealLink(item.href));
 
   // Desktop: hover reveals the overview; a click opens the detail page.
   // Touch: first tap reveals the overview; a second tap opens the detail page.
@@ -124,6 +127,25 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
           <h3 className="text-2xl md:text-3xl font-luxury font-bold text-text-primary tracking-tight leading-tight group-hover:text-accent transition-colors">
             {displayTitle}
           </h3>
+
+          {/* Tech stack up-front — recruiters see the stack without opening the card. */}
+          {techStack.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-1.5">
+              {techStack.slice(0, 4).map((t, idx) => (
+                <span
+                  key={idx}
+                  className="text-[9px] font-mono font-bold px-2 py-0.5 bg-background border border-border text-text-secondary rounded-md uppercase tracking-wider"
+                >
+                  {t}
+                </span>
+              ))}
+              {techStack.length > 4 && (
+                <span className="text-[9px] font-mono font-bold px-2 py-0.5 text-text-secondary/70 uppercase tracking-wider">
+                  +{techStack.length - 4}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Reveal affordance */}
@@ -167,19 +189,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
 
           {overview && (
             <p className="text-sm text-text-secondary font-medium leading-relaxed">{overview}</p>
-          )}
-
-          {techStack.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {techStack.slice(0, 5).map((tech, idx) => (
-                <span
-                  key={idx}
-                  className="text-[9px] font-mono font-bold px-2 py-0.5 bg-background border border-border text-text-secondary rounded-md uppercase tracking-wider"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
           )}
 
           {proofLinks.length > 0 && (

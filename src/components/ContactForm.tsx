@@ -226,7 +226,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
                   placeholder="Your name"
                   aria-invalid={!!errors.name}
                   aria-describedby={errors.name ? "name-error" : undefined}
-                  className={`w-full px-4 py-3 rounded-xl border bg-background text-sm text-text-primary placeholder-text-secondary/40 transition-all duration-200 outline-none ${
+                  className={`w-full px-4 py-3 rounded-xl border bg-background text-sm text-text-primary placeholder-text-secondary/55 transition-all duration-200 outline-none ${
                     errors.name ? "border-rose-400 focus:border-rose-500" : "border-border focus:border-accent"
                   }`}
                 />
@@ -252,7 +252,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
                   placeholder="you@example.com"
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
-                  className={`w-full px-4 py-3 rounded-xl border bg-background text-sm text-text-primary placeholder-text-secondary/40 transition-all duration-200 outline-none ${
+                  className={`w-full px-4 py-3 rounded-xl border bg-background text-sm text-text-primary placeholder-text-secondary/55 transition-all duration-200 outline-none ${
                     errors.email ? "border-rose-400 focus:border-rose-500" : "border-border focus:border-accent"
                   }`}
                 />
@@ -278,7 +278,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
                   value={formData.company}
                   onChange={handleInputChange}
                   placeholder="Company or organization"
-                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-text-primary placeholder-text-secondary/40 transition-all duration-200 outline-none focus:border-accent"
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm text-text-primary placeholder-text-secondary/55 transition-all duration-200 outline-none focus:border-accent"
                 />
               </div>
 
@@ -336,7 +336,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ candidateEmail }) => {
                 placeholder="A short note about the role, project, or question..."
                 aria-invalid={!!errors.message}
                 aria-describedby={errors.message ? "message-error" : undefined}
-                className={`w-full px-4 py-3 rounded-xl border bg-background text-sm text-text-primary placeholder-text-secondary/40 transition-all duration-200 outline-none resize-none ${
+                className={`w-full px-4 py-3 rounded-xl border bg-background text-sm text-text-primary placeholder-text-secondary/55 transition-all duration-200 outline-none resize-none ${
                   errors.message ? "border-rose-400 focus:border-rose-500" : "border-border focus:border-accent"
                 }`}
               />

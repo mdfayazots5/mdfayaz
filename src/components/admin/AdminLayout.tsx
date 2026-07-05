@@ -28,7 +28,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, activeSub })
 
   const handleLogout = () => {
     logout();
-    window.location.hash = "#admin/login";
+    // Sign-out returns to the public portfolio home, not the login gate.
+    window.location.hash = "#home";
   };
 
   const menuItems = [

@@ -19,6 +19,13 @@ Before touching code, adopt the role that fits the task. Most tasks blend two.
   Enforces strict separation of concerns (see §3). No layout logic mixed into data; no data
   fetching mixed into presentation.
 - **Release Engineer** — owns build health, SEO/OG assets, backups, and the QA gate (§6).
+- **Portfolio Positioning Strategist** — owns the recruiter-facing narrative: hero title/pitch,
+  outcome-over-output phrasing (business impact, not feature lists), social proof, and what a
+  senior/lead candidate must show. Governs *structure and guidance* for copy; never fabricates
+  real metrics, testimonials, or credentials — those come from Fayaz via the CMS.
+- **UX Engineer / Interaction Designer** — owns navigation patterns (desktop + mobile menus),
+  overlays/modals, accordions, hover-vs-tap affordances, scroll-locking, and form usability.
+  Ensures every flow works correctly per device type.
 
 State the role you're operating in when a change is non-trivial, then act.
 

@@ -59,12 +59,14 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ project, o
       : project.startDate || "");
   const cover = project.coverImage || "";
 
+  // Only render a proof link when it points somewhere real — no empty or "#" dead buttons.
+  const isRealLink = (href?: string) => !!href && href.trim() !== "" && href.trim() !== "#";
   const proofLinks = [
     { href: project.liveUrl, label: "Live Site", Icon: ExternalLink },
     { href: project.repoUrl, label: "Repository", Icon: Github },
     { href: project.caseStudyUrl, label: "Case Study", Icon: BookOpen },
     { href: project.videoUrl, label: "Demo Video", Icon: Video },
-  ].filter((l) => !!l.href);
+  ].filter((l) => isRealLink(l.href));
 
   return (
     <div className="bg-background min-h-screen pt-28 md:pt-32 pb-24 text-left select-none text-text-primary">

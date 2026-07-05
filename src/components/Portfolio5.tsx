@@ -16,6 +16,7 @@ import { ProjectDetailPage } from "./ProjectDetailPage";
 import { WorkExperience } from "./WorkExperience";
 import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Briefcase, FileText } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
+import { ThemeToggle } from "./ThemeToggle";
 import { SiteSettings, CompanyProfile } from "../models/portfolio.model";
 import { getSiteSettings, getCompanies, isAuthenticated } from "../services/api";
 
@@ -319,6 +320,10 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
+
+          {/* Light/Dark theme control — inherits currentColor so it reads on both the
+              blend-mode hero (white) and the solid scrolled bar (text-primary). */}
+          <ThemeToggle />
         </div>
       </nav>
 
@@ -514,10 +519,42 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
           </section>
         )}
 
-        {/* Footer */}
-        <footer className="pt-16 pb-8 px-5 md:px-8 lg:px-24 border-t border-border bg-background select-none">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8 md:gap-6">
+        {/* Footer — extra bottom space holds the oversized brand watermark below the content. */}
+        <footer className="relative overflow-hidden pt-16 pb-20 md:pb-28 px-5 md:px-8 lg:px-24 border-t border-border bg-background select-none">
+          {/* Oversized brand watermark — faint, smoke-like, rising from the bottom below the
+              footer content (clipped at the bottom edge; fades upward). Sits behind everything (z-0). */}
+          {(() => {
+            const words = (settings?.name || master.candidate.name).trim().split(/\s+/).filter(Boolean);
+            const lastWord = words[words.length - 1] || "Fayaz";
+            const firstLine = words.length > 1 ? words.slice(0, -1).join(" ") : lastWord;
+            const secondLine = words.length > 1 ? lastWord : "";
+            const mask =
+              "[mask-image:linear-gradient(to_top,black_45%,transparent)] [-webkit-mask-image:linear-gradient(to_top,black_45%,transparent)]";
+            const base =
+              "pointer-events-none absolute inset-x-0 z-0 select-none font-luxury font-black tracking-tighter text-text-primary/[0.06]";
+            return (
+              <>
+                {/* Mobile: last name only, single line */}
+                <span
+                  aria-hidden="true"
+                  className={`${base} ${mask} -bottom-[0.24em] text-center whitespace-nowrap leading-none text-[27vw] md:hidden`}
+                >
+                  {lastWord}
+                </span>
+                {/* Desktop: full name across two lines */}
+                <span
+                  aria-hidden="true"
+                  className={`${base} ${mask} -bottom-[0.12em] hidden md:flex flex-col items-center text-center whitespace-nowrap leading-[0.8] md:text-[12vw]`}
+                >
+                  <span>{firstLine}</span>
+                  {secondLine && <span>{secondLine}</span>}
+                </span>
+              </>
+            );
+          })()}
+
+          <div className="relative z-10 max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 md:gap-6 gap-y-8">
               {/* Brand block */}
               <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
                 <span className="text-lg font-luxury font-bold tracking-tighter text-text-primary">
@@ -595,9 +632,11 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               </div>
 
               {/* Contact column */}
-              <div className="flex flex-col gap-2.5">
+              <div className="col-span-2 md:col-span-1 flex flex-col gap-2.5">
                 <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Contact</span>
-                <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
+                {/* Mobile: flow items horizontally so they fill the full width (no empty gap).
+                    Desktop: stack vertically like the other columns. */}
+                <div className="flex flex-row flex-wrap items-center gap-x-6 gap-y-1.5 md:flex-col md:items-start md:gap-1.5 text-[11px] font-semibold text-text-secondary">
                   <button onClick={() => handleNavClick("contact")} className="text-left hover:text-accent transition-colors w-fit">
                     Start a conversation
                   </button>
@@ -639,7 +678,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               swallowed the first tap on Work. */}
           <div
             id="nav-dropdown-backdrop"
-            className="fixed inset-0 z-[90] bg-transparent"
+            className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-[2px] md:bg-transparent md:backdrop-blur-none"
             onClick={() => setIsDropdownOpen(false)}
           />
           <div
@@ -724,7 +763,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
           {/* Invisible backdrop — z below nav so nav stays clickable while open (#3). */}
           <div
             id="nav-work-dropdown-backdrop"
-            className="fixed inset-0 z-[90] bg-transparent"
+            className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-[2px] md:bg-transparent md:backdrop-blur-none"
             onClick={() => setIsWorkDropdownOpen(false)}
           />
           <div

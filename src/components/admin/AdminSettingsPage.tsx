@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { getSiteSettings, updateSiteSettings } from "../../services/api";
+import React, { useEffect, useRef, useState } from "react";
+import { getSiteSettings, updateSiteSettings, uploadFile } from "../../services/api";
 import { SiteSettings, ThemeSet } from "../../models/portfolio.model";
 import { normalizeThemeSet } from "../../config/theme-sets";
 import { ThemeSetPicker } from "../ThemeSetPicker";
@@ -15,6 +15,7 @@ import {
   HelpCircle,
   Mail,
   FileText,
+  UploadCloud,
   Link,
   MessageSquare,
   User,
@@ -51,6 +52,36 @@ export const AdminSettingsPage: React.FC = () => {
   
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Resume PDF upload (the Worker upload endpoint accepts application/pdf and force-downloads it).
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
+  const MAX_RESUME_BYTES = 10 * 1024 * 1024;
+
+  const handleResumeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (resumeInputRef.current) resumeInputRef.current.value = "";
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      setMessage({ text: "Resume must be a PDF file.", type: "error" });
+      return;
+    }
+    if (file.size > MAX_RESUME_BYTES) {
+      setMessage({ text: "Resume PDF must be under 10 MB.", type: "error" });
+      return;
+    }
+    setUploadingResume(true);
+    try {
+      const url = await uploadFile(file, "resume", `resume-${Date.now()}.pdf`);
+      setResumeUrl(url);
+      setMessage({ text: "Resume uploaded — remember to Save settings to publish it.", type: "success" });
+    } catch (err) {
+      console.error("Resume upload failed:", err);
+      setMessage({ text: "Resume upload failed. Please try again.", type: "error" });
+    } finally {
+      setUploadingResume(false);
+    }
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -369,18 +400,57 @@ export const AdminSettingsPage: React.FC = () => {
               />
             </div>
 
-            {/* Resume URL */}
-            <div className="space-y-1.5">
+            {/* Resume / CV — upload a PDF (stored on R2, served as a download) or paste a URL */}
+            <div className="space-y-2">
               <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
                 <FileText size={11} className="text-text-secondary" />
-                Resume Resource Link / URL
+                Resume / CV (PDF)
               </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => resumeInputRef.current?.click()}
+                  disabled={uploadingResume}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-background border border-border hover:border-accent text-text-primary hover:text-accent rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <UploadCloud size={13} />
+                  <span>{uploadingResume ? "Uploading…" : resumeUrl && resumeUrl !== "#" ? "Replace PDF" : "Upload PDF"}</span>
+                </button>
+                {resumeUrl && resumeUrl !== "#" && (
+                  <>
+                    <a
+                      href={resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-border hover:border-accent text-text-secondary hover:text-accent rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors"
+                    >
+                      <FileText size={13} />
+                      <span>View</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setResumeUrl("")}
+                      className="px-3 py-2.5 border border-border hover:border-red-500 hover:text-red-500 text-text-secondary rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </>
+                )}
+                <input
+                  ref={resumeInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleResumeFile}
+                  aria-label="Upload resume PDF"
+                  className="hidden"
+                />
+              </div>
               <input
                 type="text"
                 value={resumeUrl}
                 onChange={(e) => setResumeUrl(e.target.value)}
                 className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
-                placeholder="e.g. # or enterprise resume url"
+                placeholder="…or paste a resume URL (optional)"
               />
             </div>
           </div>

@@ -109,6 +109,13 @@ export const UsesPage: React.FC = () => {
                       <p className="text-[11px] font-medium text-text-secondary uppercase tracking-widest">
                         {category.subtitle}
                       </p>
+                      {/* Collapsed preview: show the tool names so recruiters can scan without opening. */}
+                      {!isOpen && category.items.length > 0 && (
+                        <p className="text-[11px] font-medium text-text-secondary/80 leading-relaxed pt-1 pr-4">
+                          {category.items.slice(0, 5).map((i) => i.name).join(" · ")}
+                          {category.items.length > 5 ? ` · +${category.items.length - 5} more` : ""}
+                        </p>
+                      )}
                     </div>
                     <div className="text-text-secondary group-hover:text-accent transition-colors p-1.5 rounded-full hover:bg-surface">
                       {isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
