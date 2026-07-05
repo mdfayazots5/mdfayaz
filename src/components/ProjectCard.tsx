@@ -39,7 +39,8 @@ interface ProjectCardProps {
 
 /** Desktop (pointer devices) can hover to reveal; touch devices tap to reveal. */
 const canHover = () =>
-  typeof window !== "undefined" && window.matchMedia("(hover: hover) and (min-width: 768px)").matches;
+  typeof window !== "undefined" &&
+  window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)").matches;
 
 const openDetail = (id: string | number) => {
   window.location.hash = `#project/${id}`;
@@ -49,6 +50,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
   const [hovered, setHovered] = React.useState(false);
   const [tapped, setTapped] = React.useState(false);
   const show = hovered || tapped;
+
+  React.useEffect(() => {
+    const closeWhenAnotherOpens = (event: Event) => {
+      const activeId = (event as CustomEvent<string | number>).detail;
+      if (String(activeId) !== String(project.id)) {
+        setTapped(false);
+      }
+    };
+    window.addEventListener("project-card:preview", closeWhenAnotherOpens);
+    return () => window.removeEventListener("project-card:preview", closeWhenAnotherOpens);
+  }, [project.id]);
 
   const category = project.type || project.category || (project.roleType === "creator" ? "personal" : "company");
   const timeline =
@@ -67,6 +79,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
     } else if (tapped) {
       openDetail(project.id);
     } else {
+      window.dispatchEvent(new CustomEvent("project-card:preview", { detail: project.id }));
       setTapped(true);
     }
   };

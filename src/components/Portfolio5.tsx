@@ -56,7 +56,8 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
   // #4 — pointer-capable desktop devices auto-open the nav menus on hover.
   const canHover = () =>
-    typeof window !== "undefined" && window.matchMedia("(hover: hover) and (min-width: 768px)").matches;
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)").matches;
 
   const openMenuOnHover = (which: "about" | "work") => {
     if (!canHover()) return;

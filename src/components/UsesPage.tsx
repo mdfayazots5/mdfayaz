@@ -12,6 +12,10 @@ export const UsesPage: React.FC = () => {
   const [reloadKey, setReloadKey] = useState(0);
   const [openId, setOpenId] = useState<string | null>(null);
 
+  const canHoverPreview = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)").matches;
+
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -81,15 +85,16 @@ export const UsesPage: React.FC = () => {
                 <div
                   key={category.id}
                   id={`uses-section-${category.id}`}
-                  onMouseEnter={() => setOpenId(category.id)}
-                  onFocus={() => setOpenId(category.id)}
+                  onMouseEnter={() => {
+                    if (canHoverPreview()) setOpenId(category.id);
+                  }}
                   className={`rounded-2xl border transition-all overflow-hidden ${
                     isOpen ? "bg-surface border-accent/35 shadow-sm" : "bg-surface/70 border-border hover:border-text-secondary/30"
                   }`}
                 >
                   <button
                     type="button"
-                    onClick={() => setOpenId(isOpen ? null : category.id)}
+                    onClick={() => setOpenId((current) => (current === category.id ? null : category.id))}
                     className="w-full flex items-center justify-between text-left cursor-pointer group focus:outline-none px-4 md:px-5 py-4"
                   >
                     <div className="space-y-0.5">

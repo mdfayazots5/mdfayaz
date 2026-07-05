@@ -12,6 +12,10 @@ export const FaqPage: React.FC = () => {
   const [reloadKey, setReloadKey] = useState(0);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
+  const canHoverPreview = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)").matches;
+
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -73,15 +77,16 @@ export const FaqPage: React.FC = () => {
               return (
                 <div
                   key={faq.id || idx}
-                  onMouseEnter={() => setExpandedIndex(idx)}
-                  onFocus={() => setExpandedIndex(idx)}
+                  onMouseEnter={() => {
+                    if (canHoverPreview()) setExpandedIndex(idx);
+                  }}
                   className={`border rounded-2xl transition-all duration-300 overflow-hidden bg-surface ${
                     isOpen ? "border-accent/40 shadow-md shadow-accent/5" : "border-border hover:border-text-secondary/30"
                   }`}
                 >
                   <button
                     type="button"
-                    onClick={() => setExpandedIndex(isOpen ? null : idx)}
+                    onClick={() => setExpandedIndex((current) => (current === idx ? null : idx))}
                     className="w-full px-5 md:px-6 py-5 flex items-center justify-between text-left gap-4 cursor-pointer hover:bg-background/25 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">

@@ -16,6 +16,10 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
   const [reloadKey, setReloadKey] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const canHoverPreview = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)").matches;
+
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -96,15 +100,16 @@ export const PrivacyPage: React.FC<PrivacyPageProps> = ({ onBack }) => {
                   <div
                     key={section.id}
                     id={section.id}
-                    onMouseEnter={() => setExpandedId(section.id)}
-                    onFocus={() => setExpandedId(section.id)}
+                    onMouseEnter={() => {
+                      if (canHoverPreview()) setExpandedId(section.id);
+                    }}
                     className={`border rounded-xl overflow-hidden transition-all ${
                       isOpen ? "border-accent/40 bg-background/30" : "border-border bg-surface hover:border-text-secondary/30"
                     }`}
                   >
                     <button
                       type="button"
-                      onClick={() => setExpandedId(isOpen ? null : section.id)}
+                      onClick={() => setExpandedId((current) => (current === section.id ? null : section.id))}
                       className="w-full px-4 sm:px-5 py-4 flex items-center justify-between gap-4 text-left cursor-pointer"
                     >
                       <h3 className="text-base sm:text-lg font-luxury font-bold text-text-primary leading-tight">

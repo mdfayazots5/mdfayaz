@@ -9,6 +9,27 @@ interface ServiceCardProps {
 export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
   const [expanded, setExpanded] = React.useState(false);
 
+  React.useEffect(() => {
+    const closeWhenAnotherOpens = (event: Event) => {
+      const activeId = (event as CustomEvent<number>).detail;
+      if (activeId !== service.id) {
+        setExpanded(false);
+      }
+    };
+    window.addEventListener("service-card:preview", closeWhenAnotherOpens);
+    return () => window.removeEventListener("service-card:preview", closeWhenAnotherOpens);
+  }, [service.id]);
+
+  const toggleExpanded = () => {
+    setExpanded((current) => {
+      const next = !current;
+      if (next) {
+        window.dispatchEvent(new CustomEvent("service-card:preview", { detail: service.id }));
+      }
+      return next;
+    });
+  };
+
   const renderIcon = (iconName: string) => {
     const IconComponent = (Icons as any)[iconName];
     if (IconComponent) {
@@ -24,11 +45,11 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
       id={`service-card-${service.id}`}
       tabIndex={0}
       aria-expanded={expanded}
-      onClick={() => setExpanded((value) => !value)}
+      onClick={toggleExpanded}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          setExpanded((value) => !value);
+          toggleExpanded();
         }
       }}
       className={`flex flex-col h-full bg-surface border border-border rounded-xl p-4 md:p-5 hover:border-accent/55 focus:border-accent/55 hover:shadow-md focus:shadow-md outline-none transition-all duration-300 text-left cursor-pointer ${
