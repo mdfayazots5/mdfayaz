@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { getFaqItems, createFaqItem, updateFaqItem, deleteFaqItem } from "../../services/api";
 import { FaqItem } from "../../models/portfolio.model";
-import { Plus, Edit2, Trash2, HelpCircle, RefreshCw, X, FolderMinus, AlertCircle } from "lucide-react";
+import { Plus, Edit2, Trash2, HelpCircle, X } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
+import { PublishToggle } from "./PublishToggle";
 
 export const AdminFaqPage: React.FC = () => {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deletingProgress, setDeletingProgress] = useState(false);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   
   // Modal state
@@ -23,6 +25,8 @@ export const AdminFaqPage: React.FC = () => {
   const [category, setCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [isCustomCategory, setIsCustomCategory] = useState(false);
+
+  useModalScrollLock(isModalOpen);
 
   const fetchFaqs = async () => {
     setLoading(true);
@@ -126,6 +130,25 @@ export const AdminFaqPage: React.FC = () => {
     }
   };
 
+  const handleTogglePublish = async (faq: FaqItem) => {
+    const next = faq.published === false;
+    setTogglingId(faq.id);
+    setMessage(null);
+    try {
+      await updateFaqItem(faq.id, { ...faq, published: next });
+      setFaqs((prev) => prev.map((f) => (f.id === faq.id ? { ...f, published: next } : f)));
+      setMessage({
+        text: next ? "FAQ published — now visible on the portal." : "FAQ unpublished — hidden from the portal.",
+        type: "success",
+      });
+    } catch (err) {
+      setMessage({ text: "Failed to update publish state.", type: "error" });
+    } finally {
+      setTogglingId(null);
+      setTimeout(() => setMessage(null), 4000);
+    }
+  };
+
   const handleTriggerDelete = (id: number) => {
     setDeletingId(id);
     setMessage(null);
@@ -155,10 +178,7 @@ export const AdminFaqPage: React.FC = () => {
     }
   };
 
-  const filteredFaqs = faqs.filter(faq => {
-    if (selectedCategory === "all") return true;
-    return faq.category === selectedCategory;
-  });
+  const filteredFaqs = faqs;
 
   if (loading) {
     return <LoadingScreen />;
@@ -177,14 +197,6 @@ export const AdminFaqPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={fetchFaqs}
-            className="p-3 border border-border hover:border-accent bg-surface hover:text-accent rounded-xl cursor-pointer transition-colors"
-            title="Refresh database"
-          >
-            <RefreshCw size={14} />
-          </button>
-          
           <button
             id="admin-new-faq-btn"
             onClick={handleOpenCreateModal}
@@ -208,33 +220,6 @@ export const AdminFaqPage: React.FC = () => {
           {message.text}
         </div>
       )}
-
-      {/* Category Pills Filters */}
-      <div className="flex flex-wrap gap-2 pb-2 border-b border-border">
-        <button
-          onClick={() => setSelectedCategory("all")}
-          className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-            selectedCategory === "all"
-              ? "bg-text-primary text-background"
-              : "bg-surface border border-border text-text-secondary hover:text-text-primary hover:border-accent/40"
-          }`}
-        >
-          Viewing: All
-        </button>
-        {uniqueCategories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-              selectedCategory === cat
-                ? "bg-text-primary text-background"
-                : "bg-surface border border-border text-text-secondary hover:text-text-primary hover:border-accent/40"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
 
       {/* FAQ list Grid / Blocks */}
       {filteredFaqs.length === 0 ? (
@@ -275,6 +260,11 @@ export const AdminFaqPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0 self-end md:self-start">
+                  <PublishToggle
+                    published={faq.published !== false}
+                    busy={togglingId === faq.id}
+                    onToggle={() => handleTogglePublish(faq)}
+                  />
                   <button
                     id={`edit-faq-${faq.id}`}
                     onClick={() => handleOpenEditModal(faq)}
@@ -323,25 +313,30 @@ export const AdminFaqPage: React.FC = () => {
         <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-fade-in">
           <div 
             id="faq-modal-container"
-            className="bg-surface border border-border p-6 md:p-8 rounded-3xl w-full max-w-lg space-y-6 max-h-[90vh] overflow-y-auto shadow-2xl text-left"
+            className="bg-surface border border-border rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl text-left flex flex-col"
           >
-            <div className="flex justify-between items-center pb-4 border-b border-border">
+            <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-border flex justify-between items-center">
               <h3 className="text-base font-luxury font-bold uppercase tracking-wider">
                 {editingFaq ? "Edit FAQ Item" : "Create New FAQ"}
               </h3>
-              <button 
+              <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Close dialog"
+                title="Close"
                 className="p-1 text-text-secondary hover:text-text-primary cursor-pointer border border-border hover:border-accent/40 rounded-xl"
               >
                 <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveFaq} className="space-y-4 text-xs font-semibold">
+            <form onSubmit={handleSaveFaq} className="flex flex-col min-h-0 flex-1">
+              <div data-lenis-prevent className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 md:px-8 py-5 space-y-4 text-xs font-semibold">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Category</label>
                 <select
                   id="faq-category-select"
+                  aria-label="FAQ category"
                   value={category}
                   onChange={handleCategoryChange}
                   className="w-full bg-background border border-border rounded-xl px-4 py-3 text-text-primary font-medium focus:border-accent focus:outline-none cursor-pointer"
@@ -394,7 +389,9 @@ export const AdminFaqPage: React.FC = () => {
                 />
               </div>
 
-              <div className="pt-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
+              </div>
+
+              <div className="shrink-0 px-6 md:px-8 py-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

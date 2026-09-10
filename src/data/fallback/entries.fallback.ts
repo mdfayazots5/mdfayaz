@@ -15,9 +15,14 @@ export const ENTRIES_FALLBACK: Entry[] = [
       "Built secure, high-throughput REST APIs and core business microservices in ASP.NET Core matching architectural repository patterns.",
       "Participated directly in agile ceremonies, allocating tasks to 5 developers, performing strict code reviews, and driving fast deployment cycles."
     ],
-    tech: ["ASP.NET Core", "Web API", "SQL Server", "Web-based UI"],
-    achievements: [],
-    companyName: "Revalsys Technologies",
+    tech: ["ASP.NET Core", "Web API", "EF Core", "SQL Server", "Angular", "Clean Architecture"],
+    achievements: [
+      "Coordinated a 5-developer delivery flow across registration, doctor search, scheduling, and prescription modules.",
+      "Reduced scheduling friction by designing automatic availability checks and collision-free booking flows.",
+      "Improved maintainability by aligning REST APIs with repository and layered architecture patterns."
+    ],
+    companyId: 1,
+    companyName: "Revalsys Technologies Pvt Ltd",
     role: "Team Lead + Dot Net Developer",
     teamSize: 5,
     startDate: "Feb 2023",
@@ -25,6 +30,7 @@ export const ENTRIES_FALLBACK: Entry[] = [
     featured: false,
     displayOrder: 1,
     color: "#0EA5E9",
+    caseStudyUrl: "https://mdfayaz.pages.dev/#project/1",
     icon: "🏥"
   },
   {
@@ -40,9 +46,14 @@ export const ENTRIES_FALLBACK: Entry[] = [
       "Designed custom checklist engines managing post-offer document validation, occupational health clearances, and IT onboarding triggers.",
       "Delivered scalable RESTful endpoints and highly indexed relational database structures in ASP.NET Core and SQL Server."
     ],
-    tech: ["ASP.NET Core", "Web API", "SQL Server"],
-    achievements: [],
-    companyName: "Revalsys Technologies",
+    tech: ["ASP.NET Core", "Web API", "EF Core", "SQL Server", "Angular", "RBAC"],
+    achievements: [
+      "Mapped recruitment, consultant handoff, interview feedback, offer-letter, and onboarding workflows into one HRMS pipeline.",
+      "Improved operational visibility with role-based filters and centralized feedback tracking for hiring stakeholders.",
+      "Designed checklist-driven onboarding flows to reduce manual document validation and follow-up work."
+    ],
+    companyId: 1,
+    companyName: "Revalsys Technologies Pvt Ltd",
     role: "Team Lead + Dot Net Developer",
     teamSize: 5,
     startDate: "Jan 2024",
@@ -50,6 +61,7 @@ export const ENTRIES_FALLBACK: Entry[] = [
     featured: false,
     displayOrder: 2,
     color: "#8B5CF6",
+    caseStudyUrl: "https://mdfayaz.pages.dev/#project/2",
     icon: "👥"
   },
   {
@@ -65,99 +77,130 @@ export const ENTRIES_FALLBACK: Entry[] = [
       "Configured and integrated Firebase Cloud Messaging (FCM) system pipelines delivering transactional push notifications across Web, Android, and iOS channels.",
       "Crafted backend API pathways and optimized relational database queries, maintaining sub-120ms execution times under heavy traffic loads."
     ],
-    tech: ["ASP.NET Core", "Web API", "SQL Server", "Firebase Cloud Messaging (FCM)"],
-    achievements: [],
-    companyName: "Revalsys Technologies",
+    tech: ["ASP.NET Core", "Web API", "EF Core", "SQL Server", "Firebase Cloud Messaging (FCM)", "Mobile Push"],
+    achievements: [
+      "Reduced marketplace data gaps by introducing standardized vehicle inspection checklists and structured seller inputs.",
+      "Kept high-traffic catalog interactions responsive through optimized relational queries and focused API paths.",
+      "Enabled transactional Web, Android, and iOS push notifications through Firebase Cloud Messaging integration."
+    ],
+    companyId: 1,
+    companyName: "Revalsys Technologies Pvt Ltd",
     role: "Dot Net Developer",
     startDate: "Sep 2024",
     endDate: "May 2026",
     featured: false,
     displayOrder: 3,
     color: "#10B981",
+    caseStudyUrl: "https://mdfayaz.pages.dev/#project/3",
     icon: "⚡"
   },
   {
     id: 4,
     type: "personal",
-    title: "PulseTrack",
-    tagline: "Lightweight uptime and service monitoring for small teams",
-    description: "PulseTrack is a self-hosted monitoring tool for tracking API and service uptime, with configurable health checks and real-time alerts. Built to give small teams visibility into their infrastructure without relying on expensive third-party monitoring platforms.",
-    status: "In Development",
-    categoryTag: "Monitoring Tool",
-    tech: ["ASP.NET Core", "SQL Server", "SignalR"],
+    title: "Coolzo",
+    tagline: "Premium AC service & field-operations platform",
+    description: "Coolzo (CoolElite) is an end-to-end platform for premium AC service businesses — spanning online booking, smart technician dispatch, on-site field workflow, invoicing, and Annual Maintenance Contracts. Customers book and track jobs like a premium delivery, while technicians run the full on-site flow from a mobile app.",
+    status: "Live",
+    categoryTag: "Field Service SaaS",
+    tech: ["ASP.NET Core", "Angular", "EF Core", "SQL Server", "PostgreSQL", "Firebase FCM"],
     features: [
-      "HTTP and database health checks with custom intervals",
-      "Real-time alerting via email and webhook",
-      "Public status pages for transparency"
+      "Booking-to-invoice lifecycle with smart technician dispatch and live job tracking",
+      "Mobile field workflow: GPS check-in, checklists, photos, e-signature, and on-site payment",
+      "Role-based admin portal with AMC automation, inventory, and billing across 15+ roles"
     ],
-    audience: "Engineering teams running small-scale infrastructure",
-    icon: "Activity",
-    featured: false,
+    audience: "Premium AC service companies and their field teams",
+    liveUrl: "https://www.coolzo.in/",
+    repoUrl: "https://github.com/mdfayazots5/Coolzo",
+    caseStudyUrl: "https://mdfayaz.pages.dev/#project/4",
+    icon: "Snowflake",
+    featured: true,
     displayOrder: 4,
-    color: "#0EA5E9",
-    achievements: []
+    color: "#1B2A4A",
+    achievements: [
+      "Designed a booking-to-invoice service lifecycle covering customers, technicians, admins, inventory, payments, and AMC workflows.",
+      "Built role-based operations across 15+ business roles for field-service teams.",
+      "Added technician mobile workflows for GPS check-in, checklists, photos, e-signature, and on-site payment."
+    ]
   },
   {
     id: 5,
     type: "personal",
-    title: "LinkFolio",
-    tagline: "A customizable link-in-bio page for creators and freelancers",
-    description: "LinkFolio lets users build a personal landing page with custom links, themes, and click analytics. Designed for creators and freelancers who want a clean, branded hub for their online presence.",
+    title: "GoWithFlow",
+    tagline: "Grow Together — live spoken-language practice",
+    description: "GoWithFlow is a collaborative speaking-practice platform. Learners join live sessions with a join code, read scripts aloud, and receive pronunciation and grammar feedback from voice analysis — then repractice their mistakes. Progress is tracked with streaks, badges, and improvement analytics.",
     status: "Live",
-    categoryTag: "Web App",
-    tech: ["React", "ASP.NET Core", "SQL Server"],
+    categoryTag: "EdTech · Speaking",
+    tech: [".NET 8", "Angular", "SignalR", "EF Core", "SQL Server", "PostgreSQL"],
     features: [
-      "Drag-and-drop link organization",
-      "Click and visitor analytics",
-      "Multiple theme presets with custom branding"
+      "Real-time live speaking sessions with join codes and turn-taking (SignalR)",
+      "Voice analysis with pronunciation and grammar mistake tracking, plus guided repractice",
+      "Progress dashboard with streaks, badges, and grammar improvement trends"
     ],
-    audience: "Creators, freelancers, and small businesses",
-    icon: "Link2",
-    featured: false,
+    audience: "Language learners building spoken fluency together",
+    liveUrl: "https://gowithflow-ui.pages.dev/",
+    caseStudyUrl: "https://mdfayaz.pages.dev/#project/5",
+    icon: "Mic",
+    featured: true,
     displayOrder: 5,
     color: "#8B5CF6",
-    achievements: []
+    achievements: [
+      "Designed real-time speaking sessions with join codes and turn-taking using SignalR.",
+      "Built a feedback loop for pronunciation, grammar mistakes, repractice, streaks, and badges.",
+      "Structured progress analytics so learners can see repeat mistakes and measurable improvement."
+    ]
   },
   {
     id: 6,
     type: "personal",
-    title: "TaskRelay",
-    tagline: "Visual workflow automation for repetitive business tasks",
-    description: "TaskRelay is a workflow automation tool that lets users chain together API calls, conditions, and scheduled jobs through a visual builder. Aimed at small businesses looking to automate routine processes without writing code.",
-    status: "Private Beta",
-    categoryTag: "Automation Platform",
-    tech: ["ASP.NET Core", "Angular", "Hangfire"],
+    title: "Family First",
+    tagline: "All-in-one family coordination & care platform",
+    description: "FamilyFirst is a family-management PWA that brings tasks, attendance, rewards, a shared calendar, medical records, safety, and elder care into one app. Each member gets a role-tailored experience — parents, children, teachers, and elders — with photo-verified chores and smart reminders.",
+    status: "In Development",
+    categoryTag: "Family PWA",
+    tech: [".NET 8", "React 19", "TypeScript", "EF Core", "SQL Server", "Firebase FCM", "AWS S3"],
     features: [
-      "Drag-and-drop workflow builder",
-      "Scheduled and event-triggered runs",
-      "Built-in connectors for common APIs"
+      "Task, attendance, and reward system with photo-verified chores",
+      "Shared calendar, medical vault, and safety modules for the whole family",
+      "Role-based experiences for parents, children, teachers, and elders"
     ],
-    audience: "Small businesses automating manual workflows",
-    icon: "Workflow",
+    audience: "Families coordinating daily tasks, care, and schedules",
+    caseStudyUrl: "https://mdfayaz.pages.dev/#project/6",
+    icon: "HeartHandshake",
     featured: false,
     displayOrder: 6,
     color: "#10B981",
-    achievements: []
+    achievements: [
+      "Modeled role-specific experiences for parents, children, teachers, and elders in a single family PWA.",
+      "Designed photo-verified task workflows, shared calendar coordination, medical vault, and safety modules.",
+      "Planned cloud-backed media storage and push notification flows for daily family coordination."
+    ]
   },
   {
     id: 7,
     type: "personal",
-    title: "NotesVault",
-    tagline: "Secure notes and code snippet manager for developers",
-    description: "NotesVault is a personal notes and code snippet manager with end-to-end encryption, tagging, and full-text search. Built for developers who want a private space to store reference material and reusable code.",
-    status: "Completed",
-    categoryTag: "Productivity Tool",
-    tech: ["ASP.NET Core", "Angular", "SQL Server"],
+    title: "Portfolio CMS",
+    tagline: "This site — a self-serve portfolio with a headless CMS",
+    description: "The portfolio you're reading: a React 19 site with an admin CMS backed by a Cloudflare Worker and R2 storage. It's backend-optional — content is served from the R2 CMS in production and falls back to local seed data — so every section is editable without a redeploy.",
+    status: "Live",
+    categoryTag: "Portfolio · CMS",
+    tech: ["React 19", "TypeScript", "Tailwind CSS", "Cloudflare Workers", "R2", "CI/CD"],
     features: [
-      "End-to-end encrypted storage",
-      "Syntax-highlighted code snippets",
-      "Tag-based organization and full-text search"
+      "Self-serve admin CMS for projects, services, and site content",
+      "Cloudflare Worker API + R2 storage, backend-optional with local fallback",
+      "Recruiter-focused minimal design with automated OG image generation"
     ],
-    audience: "Developers and individuals managing personal references",
-    icon: "Lock",
+    audience: "Recruiters and collaborators evaluating my work",
+    liveUrl: "https://mdfayaz.pages.dev",
+    repoUrl: "https://github.com/mdfayazots5/FayazMd",
+    caseStudyUrl: "https://mdfayaz.pages.dev/#project/7",
+    icon: "LayoutDashboard",
     featured: false,
     displayOrder: 7,
-    color: "#3B82F6",
-    achievements: []
+    color: "#0EA5E9",
+    achievements: [
+      "Built a self-serve admin CMS so portfolio content can be updated without redeploying the frontend.",
+      "Connected Cloudflare Worker APIs to R2 JSON storage with authenticated mutations and public read endpoints.",
+      "Added media upload, theme selection, SEO metadata, and fallback data paths for resilient content delivery."
+    ]
   }
 ];

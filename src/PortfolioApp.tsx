@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { ReactLenis, useLenis } from "lenis/react";
 import { usePortfolioData } from "./hooks/usePortfolioData";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { ErrorFallback } from "./components/ErrorFallback";
@@ -20,6 +21,8 @@ import { AdminPrivacyPage } from "./components/admin/AdminPrivacyPage";
 import { AdminAboutPage } from "./components/admin/AdminAboutPage";
 import { AdminSettingsPage } from "./components/admin/AdminSettingsPage";
 import { AdminServicesPage } from "./components/admin/AdminServicesPage";
+import { AdminCompaniesPage } from "./components/admin/AdminCompaniesPage";
+import { AdminMediaPage } from "./components/admin/AdminMediaPage";
 
 const AdminPlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div className="bg-surface p-12 rounded-3xl border border-border text-center space-y-4 animate-fade-in text-left max-w-xl mx-auto my-12">
@@ -62,6 +65,7 @@ function AdminRouteWrapper({ children, activeSub }: { children: React.ReactNode;
 function PortfolioRouter() {
   const [hash, setHash] = useState(() => window.location.hash);
   const { data, loading, error } = usePortfolioData(5);
+  const lenis = useLenis();
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -71,10 +75,12 @@ function PortfolioRouter() {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // Scroll back to top on any hash routing transitions
+  // Scroll back to top on any hash routing transitions (via Lenis so it doesn't fight the
+  // smooth-scroll target; falls back to native when Lenis isn't ready yet).
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [hash]);
+    if (lenis) lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo(0, 0);
+  }, [hash, lenis]);
 
   const normalized = hash.toLowerCase();
 
@@ -129,6 +135,9 @@ function PortfolioRouter() {
     } else if (normalized === "#admin/services") {
       activeSub = "services";
       componentToRender = <AdminServicesPage />;
+    } else if (normalized === "#admin/companies") {
+      activeSub = "companies";
+      componentToRender = <AdminCompaniesPage />;
     } else if (normalized === "#admin/uses") {
       activeSub = "uses";
       componentToRender = <AdminUsesPage />;
@@ -141,6 +150,9 @@ function PortfolioRouter() {
     } else if (normalized === "#admin/settings") {
       activeSub = "settings";
       componentToRender = <AdminSettingsPage />;
+    } else if (normalized === "#admin/media") {
+      activeSub = "media";
+      componentToRender = <AdminMediaPage />;
     } else {
       // Match query for edit ID parameter
       const editMatch = hash.match(/^#admin\/entries\/([^/]+)\/edit$/i);
@@ -167,18 +179,24 @@ function PortfolioRouter() {
       }
     }
 
+    // NOTE: a stable key (not `hash`) keeps the AdminLayout shell — sidebar, header, nav —
+    // mounted across sub-route changes. Previously `key={hash}` remounted the entire shell on
+    // every sidebar click, which flashed a full-screen loader and felt like a page refresh (#8).
+    // Only the inner page content swaps now.
     return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={hash}
-          initial={{ opacity: 0, scale: 0.99 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.99 }}
-          transition={{ duration: 0.25 }}
-        >
-          <AdminRouteWrapper activeSub={activeSub}>{componentToRender}</AdminRouteWrapper>
-        </motion.div>
-      </AnimatePresence>
+      <AdminRouteWrapper activeSub={activeSub}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={hash}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+          >
+            {componentToRender}
+          </motion.div>
+        </AnimatePresence>
+      </AdminRouteWrapper>
     );
   }
 
@@ -212,9 +230,23 @@ function PortfolioRouter() {
 }
 
 export default function PortfolioApp() {
+  // #2 — Lenis smooth momentum scroll. Reduced-motion users get instant scrolling.
+  const prefersReducedMotion =
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   return (
-    <ThemeProvider>
-      <PortfolioRouter />
-    </ThemeProvider>
+    <ReactLenis
+      root
+      options={{
+        lerp: 0.09,
+        smoothWheel: !prefersReducedMotion,
+        wheelMultiplier: 1,
+        touchMultiplier: 1.5,
+      }}
+    >
+      <ThemeProvider>
+        <PortfolioRouter />
+      </ThemeProvider>
+    </ReactLenis>
   );
 }

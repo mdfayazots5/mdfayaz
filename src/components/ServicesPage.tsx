@@ -3,7 +3,7 @@ import { Sparkles, HelpCircle, Layers } from "lucide-react";
 import { Service } from "../models/portfolio.model";
 import { getServices } from "../services/api";
 import { ServiceCard } from "./ServiceCard";
-import { ServiceDetailModal } from "./ServiceDetailModal";
+import { SectionLoader, SectionError } from "./SectionState";
 
 interface ServicesPageProps {
   showOnlyGrid?: boolean;
@@ -12,25 +12,26 @@ interface ServicesPageProps {
 export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false }) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
+    setLoading(true);
+    setError(false);
     getServices()
       .then((data) => {
         if (isMounted) {
-          // Sort active services first, then inactive, then displayOrder ascending
-          const sorted = [...(data || [])].sort((a, b) => {
-            if (a.status === "Active" && b.status !== "Active") return -1;
-            if (a.status !== "Active" && b.status === "Active") return 1;
-            return (a.displayOrder || 0) - (b.displayOrder || 0);
-          });
-          setServices(sorted);
+          // Only Active services are published to the portal; sort by displayOrder.
+          const visible = (data || [])
+            .filter((s) => s.status === "Active")
+            .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+          setServices(visible);
         }
       })
       .catch((err) => {
         console.error("Failed to fetch services in public page:", err);
+        if (isMounted) setError(true);
       })
       .finally(() => {
         if (isMounted) {
@@ -41,36 +42,23 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false
     return () => {
       isMounted = false;
     };
-  }, []);
-
-  const handleOpenDetails = (service: Service) => {
-    setSelectedService(service);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseDetails = () => {
-    setIsModalOpen(false);
-    setSelectedService(null);
-  };
+  }, [reloadKey]);
 
   if (loading) {
-    return (
-      <div className="min-h-[40vh] flex items-center justify-center bg-background select-none">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-text-secondary">Retrieving expertise nodes...</span>
-        </div>
-      </div>
-    );
+    return <SectionLoader label="Retrieving expertise nodes..." />;
   }
 
-  const activeCount = services.filter((s) => s.status === "Active").length;
+  if (error) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} />;
+  }
+
+  const activeCount = services.length;
   const totalCount = services.length;
 
   if (showOnlyGrid) {
     return (
       <div className="animate-fade-in w-full">
-        <main className="max-w-7xl mx-auto px-6 md:px-8 py-8">
+        <main className="max-w-7xl mx-auto px-0 py-6 md:py-8">
           {services.length === 0 ? (
             <div className="p-16 text-center border border-dashed border-border rounded-3xl bg-surface/20 max-w-sm mx-auto space-y-4">
               <HelpCircle className="w-8 h-8 text-text-secondary/50 mx-auto" />
@@ -78,25 +66,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false
               <p className="text-xs text-text-secondary leading-relaxed">No custom consulting services or expertise domains are configured at the moment.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {services.map((service) => (
-                <ServiceCard 
-                  key={service.id} 
-                  service={service} 
-                  onViewDetails={handleOpenDetails} 
-                />
+                <ServiceCard key={service.id} service={service} />
               ))}
             </div>
           )}
         </main>
-
-        {selectedService && (
-          <ServiceDetailModal
-            service={selectedService}
-            isOpen={isModalOpen}
-            onClose={handleCloseDetails}
-          />
-        )}
       </div>
     );
   }
@@ -104,7 +80,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false
   return (
     <div id="services-section" className="bg-background min-h-screen pb-24">
       {/* Header section matching the #products header design */}
-      <header className="relative py-24 lg:py-32 px-8 lg:px-24 bg-surface/40 border-b border-border text-center overflow-hidden flex flex-col items-center">
+      <header className="relative py-24 lg:py-32 px-5 md:px-8 lg:px-24 bg-surface/40 border-b border-border text-center overflow-hidden flex flex-col items-center">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
           <span className="text-[20vw] font-luxury font-black text-text-secondary/15 select-none uppercase">EXPERTISE</span>
         </div>
@@ -149,7 +125,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false
       </header>
 
       {/* Grid containing services */}
-      <main className="max-w-7xl mx-auto px-6 md:px-8 pt-16">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-10 md:pt-16">
         {services.length === 0 ? (
           <div className="p-16 text-center border border-dashed border-border rounded-3xl bg-surface/20 max-w-sm mx-auto space-y-4">
             <HelpCircle className="w-8 h-8 text-text-secondary/50 mx-auto" />
@@ -157,26 +133,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ showOnlyGrid = false
             <p className="text-xs text-text-secondary leading-relaxed">No custom consulting services or expertise domains are configured at the moment.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {services.map((service) => (
-              <ServiceCard 
-                key={service.id} 
-                service={service} 
-                onViewDetails={handleOpenDetails} 
-              />
+              <ServiceCard key={service.id} service={service} />
             ))}
           </div>
         )}
       </main>
-
-      {/* Details View modal layer */}
-      {selectedService && (
-        <ServiceDetailModal
-          service={selectedService}
-          isOpen={isModalOpen}
-          onClose={handleCloseDetails}
-        />
-      )}
     </div>
   );
 };

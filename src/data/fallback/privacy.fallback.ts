@@ -4,7 +4,7 @@ export const PRIVACY_FALLBACK: PrivacySection[] = [
   {
     id: "privacy-section-1",
     title: "1. What We Collect",
-    body: "We collect basic account and usage information needed to run JassSpace, such as profile details, sign-in status, and messages you submit through forms."
+    body: "We collect basic account and usage information needed to run this portfolio website, such as profile details, sign-in status, and messages you submit through forms."
   },
   {
     id: "privacy-section-2",

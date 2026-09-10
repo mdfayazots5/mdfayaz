@@ -14,7 +14,6 @@ import {
   Edit2, 
   Trash2, 
   Wrench, 
-  RefreshCw, 
   ChevronUp, 
   ChevronDown, 
   X, 
@@ -25,6 +24,8 @@ import {
   Tag
 } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
+import { PublishToggle } from "./PublishToggle";
 
 export const AdminUsesPage: React.FC = () => {
   const [categories, setCategories] = useState<UsesCategory[]>([]);
@@ -46,10 +47,13 @@ export const AdminUsesPage: React.FC = () => {
   const [itemDescription, setItemDescription] = useState("");
   const [itemTag, setItemTag] = useState("");
 
+  useModalScrollLock(isCatModalOpen || isItemModalOpen);
+
   const [submitting, setSubmitting] = useState(false);
 
   // Deletion locks
   const [purgatoryCatId, setPurgatoryCatId] = useState<string | null>(null);
+  const [togglingCatId, setTogglingCatId] = useState<string | null>(null);
   const [purgatoryItemId, setPurgatoryItemId] = useState<{ catId: string; itemID: string } | null>(null);
 
   const fetchCategories = async () => {
@@ -86,19 +90,6 @@ export const AdminUsesPage: React.FC = () => {
   // PERSIST CURRENT FULL STATE (For Up/Down category and item swaps)
   const persistCategoriesState = async (newList: UsesCategory[]) => {
     setCategories(newList);
-    // Write local storage for instant sync in sandbox local mode
-    localStorage.setItem("local_uses", JSON.stringify(newList));
-    // Fallback/Remote sync on swaps (for each category that changed its metadata, we can trigger individual updates, or the state stays local)
-    const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL;
-    if (API_BASE_URL) {
-      try {
-        // In real backend environments, we may have a reorder endpoint or update single items. We perform a best effort update:
-        // Updating categories elements is enough to keep remote synced
-        console.log("Remotely updating categories order order on the back-end registry on swap");
-      } catch (err) {
-        console.warn("Remote uses ordering sync warned:", err);
-      }
-    }
   };
 
   // CATEGORY OPERATIONS
@@ -167,6 +158,22 @@ export const AdminUsesPage: React.FC = () => {
       showToast("Error deleting category.", "error");
     } finally {
       setPurgatoryCatId(null);
+    }
+  };
+
+  const handleToggleCatPublish = async (cat: UsesCategory) => {
+    const next = cat.published === false;
+    setTogglingCatId(cat.id);
+    try {
+      await updateUsesCategory(cat.id, { ...cat, published: next });
+      await persistCategoriesState(
+        categories.map((c) => (c.id === cat.id ? { ...c, published: next } : c))
+      );
+      showToast(next ? "Category published to the portal." : "Category unpublished — hidden from the portal.");
+    } catch (err) {
+      showToast("Failed to update publish state.", "error");
+    } finally {
+      setTogglingCatId(null);
     }
   };
 
@@ -327,14 +334,6 @@ export const AdminUsesPage: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={fetchCategories}
-            className="p-3 border border-border bg-surface hover:border-accent hover:text-accent rounded-xl cursor-pointer transition-colors"
-            title="Refresh workbench"
-          >
-            <RefreshCw size={14} />
-          </button>
-          
-          <button
             id="admin-new-category-btn"
             onClick={handleOpenCreateCat}
             className="inline-flex items-center gap-2 px-5 py-3 bg-text-primary text-background hover:bg-accent hover:text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all duration-300 shadow-md cursor-pointer"
@@ -427,6 +426,12 @@ export const AdminUsesPage: React.FC = () => {
                         <ChevronDown size={13} />
                       </button>
                     </div>
+
+                    <PublishToggle
+                      published={cat.published !== false}
+                      busy={togglingCatId === cat.id}
+                      onToggle={() => handleToggleCatPublish(cat)}
+                    />
 
                     <button
                       id={`add-item-btn-${cat.id}`}
@@ -579,21 +584,25 @@ export const AdminUsesPage: React.FC = () => {
         <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-fade-in">
           <div 
             id="cat-modal-container"
-            className="bg-surface border border-border p-6 md:p-8 rounded-3xl w-full max-w-md space-y-6 max-h-[90vh] overflow-y-auto shadow-2xl text-left"
+            className="bg-surface border border-border rounded-3xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl text-left flex flex-col"
           >
-            <div className="flex justify-between items-center pb-4 border-b border-border">
+            <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-border flex justify-between items-center">
               <h3 className="text-base font-luxury font-bold uppercase tracking-wider">
                 {editingCat ? "Edit Category Stack" : "Create Uses Category"}
               </h3>
-              <button 
+              <button
+                type="button"
                 onClick={() => setIsCatModalOpen(false)}
+                aria-label="Close dialog"
+                title="Close"
                 className="p-1 text-text-secondary hover:text-text-primary cursor-pointer border border-border hover:border-accent/40 rounded-xl"
               >
                 <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveCat} className="space-y-4 text-xs font-semibold">
+            <form onSubmit={handleSaveCat} className="flex flex-col min-h-0 flex-1">
+              <div data-lenis-prevent className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 md:px-8 py-5 space-y-4 text-xs font-semibold">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Category Title (ALL-CAPS)</label>
                 <input
@@ -619,7 +628,9 @@ export const AdminUsesPage: React.FC = () => {
                 />
               </div>
 
-              <div className="pt-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
+              </div>
+
+              <div className="shrink-0 px-6 md:px-8 py-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
                 <button
                   type="button"
                   onClick={() => setIsCatModalOpen(false)}
@@ -645,21 +656,25 @@ export const AdminUsesPage: React.FC = () => {
         <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-fade-in">
           <div 
             id="item-modal-container"
-            className="bg-surface border border-border p-6 md:p-8 rounded-3xl w-full max-w-md space-y-6 max-h-[90vh] overflow-y-auto shadow-2xl text-left"
+            className="bg-surface border border-border rounded-3xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl text-left flex flex-col"
           >
-            <div className="flex justify-between items-center pb-4 border-b border-border">
+            <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-border flex justify-between items-center">
               <h3 className="text-base font-luxury font-bold uppercase tracking-wider">
                 {editingItem ? "Edit item metadata" : "Add Tech/Equipment Item"}
               </h3>
-              <button 
+              <button
+                type="button"
                 onClick={() => setIsItemModalOpen(false)}
+                aria-label="Close dialog"
+                title="Close"
                 className="p-1 text-text-secondary hover:text-text-primary cursor-pointer border border-border hover:border-accent/40 rounded-xl"
               >
                 <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveItem} className="space-y-4 text-xs font-semibold">
+            <form onSubmit={handleSaveItem} className="flex flex-col min-h-0 flex-1">
+              <div data-lenis-prevent className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 md:px-8 py-5 space-y-4 text-xs font-semibold">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Item Name</label>
                 <input
@@ -698,7 +713,9 @@ export const AdminUsesPage: React.FC = () => {
                 />
               </div>
 
-              <div className="pt-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
+              </div>
+
+              <div className="shrink-0 px-6 md:px-8 py-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider">
                 <button
                   type="button"
                   onClick={() => setIsItemModalOpen(false)}

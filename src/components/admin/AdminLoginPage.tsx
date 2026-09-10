@@ -45,6 +45,7 @@ export const AdminLoginPage: React.FC = () => {
       {/* Top Floating Controls */}
       <div className="absolute top-8 left-8 right-8 flex justify-between items-center">
         <button
+          type="button"
           onClick={handleBackToPublic}
           className="inline-flex items-center gap-2 group text-xs font-bold uppercase tracking-widest text-text-secondary hover:text-accent transition-colors duration-300 cursor-pointer"
         >
@@ -54,6 +55,7 @@ export const AdminLoginPage: React.FC = () => {
 
         {/* Custom High-Contrast Admin Theme Toggle */}
         <button
+          type="button"
           onClick={toggleTheme}
           className="p-2 rounded-xl border border-border hover:border-accent/40 bg-surface text-text-primary hover:text-accent cursor-pointer transition-all duration-300 outline-none flex items-center gap-1.5"
           title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
@@ -73,7 +75,7 @@ export const AdminLoginPage: React.FC = () => {
       </div>
 
       {/* Centered Login Card */}
-      <div className="w-full max-w-md bg-surface p-10 md:p-12 rounded-[2.5rem] border border-border shadow-2xl shadow-text-secondary/5 space-y-8">
+      <div className="w-full max-w-md bg-surface p-6 sm:p-10 md:p-12 rounded-[2.5rem] border border-border shadow-2xl shadow-text-secondary/5 space-y-8">
         <div className="text-center space-y-3">
           <div className="mx-auto w-12 h-12 bg-accent/10 border border-accent/20 rounded-2xl flex items-center justify-center text-accent">
             <Shield size={24} />

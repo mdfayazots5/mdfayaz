@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { getServices, createService, updateService, deleteService } from "../../services/api";
 import { Service } from "../../models/portfolio.model";
-import { Plus, Edit2, Trash2, RefreshCw, X, Layers, Search, ListPlus, ArrowUpDown } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Layers, ListPlus, ArrowUpDown } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
+import { useModalScrollLock } from "../../hooks/useModalScrollLock";
+import { PublishToggle } from "./PublishToggle";
 
 // Common clean lucide icon list for portfolio selection
 const AVAILABLE_ICONS = ["Server", "Code", "Database", "Globe", "Layers", "Cpu", "Shield", "Terminal", "AppWindow", "Activity", "Briefcase", "Sparkles", "TrendingUp", "Zap"];
@@ -10,9 +12,9 @@ const AVAILABLE_ICONS = ["Server", "Code", "Database", "Globe", "Layers", "Cpu",
 export const AdminServicesPage: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deletingProgress, setDeletingProgress] = useState(false);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   // Form / Modal states
@@ -28,6 +30,8 @@ export const AdminServicesPage: React.FC = () => {
   const [status, setStatus] = useState<"Active" | "Inactive">("Active");
   const [displayOrder, setDisplayOrder] = useState<number>(1);
   const [highlights, setHighlights] = useState<string[]>([""]);
+
+  useModalScrollLock(isModalOpen);
 
   const fetchServices = async () => {
     setLoading(true);
@@ -170,6 +174,26 @@ export const AdminServicesPage: React.FC = () => {
     }
   };
 
+  // For Services, "Active" IS the published state on the portal.
+  const handleTogglePublish = async (service: Service) => {
+    const nextStatus: "Active" | "Inactive" = service.status === "Active" ? "Inactive" : "Active";
+    setTogglingId(service.id);
+    setMessage(null);
+    try {
+      await updateService(service.id, { ...service, status: nextStatus });
+      setServices((prev) => prev.map((s) => (s.id === service.id ? { ...s, status: nextStatus } : s)));
+      setMessage({
+        text: nextStatus === "Active" ? "Service published to the portal." : "Service unpublished — hidden from the portal.",
+        type: "success",
+      });
+    } catch (err) {
+      setMessage({ text: "Failed to update publish state.", type: "error" });
+    } finally {
+      setTogglingId(null);
+      setTimeout(() => setMessage(null), 4000);
+    }
+  };
+
   // Sort services: Active first, then inactive, secondary sort on displayOrder ascending
   const sortedServices = [...services].sort((a, b) => {
     if (a.status === "Active" && b.status !== "Active") return -1;
@@ -177,13 +201,7 @@ export const AdminServicesPage: React.FC = () => {
     return (a.displayOrder || 0) - (b.displayOrder || 0);
   });
 
-  const filteredServices = sortedServices.filter(s => {
-    const matchesQuery = 
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesQuery;
-  });
+  const filteredServices = sortedServices;
 
   if (loading) {
     return <LoadingScreen />;
@@ -202,14 +220,6 @@ export const AdminServicesPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 self-stretch sm:self-auto justify-between sm:justify-start">
-          <button
-            onClick={fetchServices}
-            className="p-3 border border-border bg-surface hover:text-accent rounded-xl cursor-pointer transition-colors"
-            title="Refresh database"
-          >
-            <RefreshCw size={14} />
-          </button>
-          
           <button
             id="admin-new-service-btn"
             onClick={handleOpenCreateModal}
@@ -234,22 +244,15 @@ export const AdminServicesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Filter and Search controllers */}
+      {/* Sort summary */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-surface border border-border p-3.5 rounded-2xl">
         <div className="flex items-center gap-2 px-3 py-1 bg-background border border-border/70 rounded-xl select-none text-[10px] uppercase font-mono font-bold text-text-secondary">
           <ArrowUpDown size={11} />
           <span>Priority sorted: Active offerings first</span>
         </div>
 
-        <div className="relative w-full sm:w-72">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search specialties, taglines..."
-            className="w-full bg-background border border-border focus:border-accent rounded-xl text-xs font-medium pl-10 pr-4 py-3 focus:outline-none transition-colors"
-          />
+        <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary px-3">
+          Showing {filteredServices.length} service offerings
         </div>
       </div>
 
@@ -345,6 +348,11 @@ export const AdminServicesPage: React.FC = () => {
                           </div>
                         ) : (
                           <div className="flex items-center justify-end gap-2.5">
+                            <PublishToggle
+                              published={service.status === "Active"}
+                              busy={togglingId === service.id}
+                              onToggle={() => handleTogglePublish(service)}
+                            />
                             <button
                               id={`edit-serv-${service.id}`}
                               onClick={() => handleOpenEditModal(service)}
@@ -428,6 +436,11 @@ export const AdminServicesPage: React.FC = () => {
                       </div>
                     ) : (
                       <>
+                        <PublishToggle
+                          published={service.status === "Active"}
+                          busy={togglingId === service.id}
+                          onToggle={() => handleTogglePublish(service)}
+                        />
                         <button
                           onClick={() => handleOpenEditModal(service)}
                           className="flex-1 py-2.5 border border-border hover:border-accent bg-background text-text-primary text-center hover:text-accent font-bold text-[10px] uppercase tracking-wider rounded-xl cursor-pointer"
@@ -455,21 +468,25 @@ export const AdminServicesPage: React.FC = () => {
         <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-fade-in select-none">
           <div 
             id="service-modal-container"
-            className="bg-surface border border-border p-6 md:p-8 rounded-3xl w-full max-w-xl space-y-6 max-h-[90vh] overflow-y-auto shadow-2xl text-left"
+            className="bg-surface border border-border rounded-3xl w-full max-w-xl max-h-[90vh] overflow-hidden shadow-2xl text-left flex flex-col"
           >
-            <div className="flex justify-between items-center pb-4 border-b border-border">
+            <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 border-b border-border flex justify-between items-center">
               <h3 className="text-base font-luxury font-bold uppercase tracking-wider">
                 {editingService ? "Update Services Offer" : "Spawn New Consulting Area"}
               </h3>
-              <button 
+              <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
+                aria-label="Close dialog"
+                title="Close"
                 className="p-1 text-text-secondary hover:text-text-primary cursor-pointer border border-border hover:border-accent/40 rounded-xl"
               >
                 <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveService} className="space-y-4 text-xs font-semibold">
+            <form onSubmit={handleSaveService} className="flex flex-col min-h-0 flex-1">
+              <div data-lenis-prevent className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 md:px-8 py-5 space-y-4 text-xs font-semibold">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Service Name *</label>
@@ -488,6 +505,7 @@ export const AdminServicesPage: React.FC = () => {
                   <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Display order *</label>
                   <input
                     id="service-displayOrder-input"
+                    aria-label="Display order"
                     type="number"
                     required
                     min={1}
@@ -529,6 +547,7 @@ export const AdminServicesPage: React.FC = () => {
                   <label className="text-[10px] font-mono uppercase tracking-widest text-text-secondary">Visual theme Icon</label>
                   <select
                     id="service-icon-select"
+                    aria-label="Visual theme icon"
                     value={icon}
                     onChange={(e) => setIcon(e.target.value)}
                     className="w-full bg-background border border-border rounded-xl px-4 py-3 text-text-primary font-medium focus:border-accent focus:outline-none cursor-pointer"
@@ -603,7 +622,9 @@ export const AdminServicesPage: React.FC = () => {
               </div>
 
               {/* Action buttons */}
-              <div className="pt-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider select-none">
+              </div>
+
+              <div className="shrink-0 px-6 md:px-8 py-4 border-t border-border flex justify-end gap-3 font-mono font-bold text-[10px] uppercase tracking-wider select-none">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

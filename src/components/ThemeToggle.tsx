@@ -9,20 +9,22 @@ export const ThemeToggle: React.FC = () => {
     <button
       id="theme-toggle-btn"
       onClick={toggleTheme}
-      className="p-1 px-2.5 rounded-full border border-white/20 hover:border-white/40 cursor-pointer transition-all duration-300 outline-none flex items-center justify-center bg-white/5 hover:bg-white/15"
+      className="p-1 px-2.5 rounded-full border border-current/25 hover:border-current/50 cursor-pointer transition-all duration-300 outline-none flex items-center justify-center hover:bg-current/10"
       title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
       aria-label="Toggle theme"
     >
+      {/* Colors inherit from the header via currentColor: white on the blend-mode hero,
+          text-primary on the solid scrolled header and in the light dropdown. */}
       <span className="flex items-center gap-1.5">
         {theme === "light" ? (
           <>
-            <Moon size={11} className="text-white" />
-            <span className="text-[9px] font-bold uppercase tracking-wider text-white">Dark</span>
+            <Moon size={11} className="text-current" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-current">Dark</span>
           </>
         ) : (
           <>
-            <Sun size={11} className="text-white" />
-            <span className="text-[9px] font-bold uppercase tracking-wider text-white">Light</span>
+            <Sun size={11} className="text-current" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-current">Light</span>
           </>
         )}
       </span>

@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { getSiteSettings, updateSiteSettings } from "../../services/api";
-import { SiteSettings } from "../../models/portfolio.model";
+import React, { useEffect, useRef, useState } from "react";
+import { getSiteSettings, updateSiteSettings, uploadFile } from "../../services/api";
+import { SiteSettings, ThemeSet } from "../../models/portfolio.model";
+import { normalizeThemeSet } from "../../config/theme-sets";
+import { ThemeSetPicker } from "../ThemeSetPicker";
+import { useTheme } from "../ThemeProvider";
 import { LoadingScreen } from "../LoadingScreen";
 import { 
   Save,
@@ -12,21 +15,25 @@ import {
   HelpCircle,
   Mail,
   FileText,
+  UploadCloud,
   Link,
   MessageSquare,
-  Download,
-  Upload,
   User,
   MapPin,
   Briefcase,
   Calendar,
   Plane,
-  BookOpen
+  BookOpen,
+  Palette
 } from "lucide-react";
 
 export const AdminSettingsPage: React.FC = () => {
+  const { setThemeSet: applyThemeSet } = useTheme();
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Site-wide default palette for first-time visitors (persisted to R2).
+  const [defaultThemeSet, setDefaultThemeSet] = useState<ThemeSet>("slate-classic");
   
   // Flat state fields
   const [name, setName] = useState("");
@@ -46,63 +53,34 @@ export const AdminSettingsPage: React.FC = () => {
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Backup handlers
-  const handleExportBackup = () => {
-    const keys = ["local_projects", "local_faq", "local_uses", "local_privacy", "local_about", "local_settings"];
-    const backupData: Record<string, any> = {};
-    keys.forEach(key => {
-      const rawVal = localStorage.getItem(key);
-      backupData[key] = rawVal ? JSON.parse(rawVal) : null;
-    });
-    backupData["_backupTimestamp"] = new Date().toISOString();
+  // Resume PDF upload (the Worker upload endpoint accepts application/pdf and force-downloads it).
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
+  const MAX_RESUME_BYTES = 10 * 1024 * 1024;
 
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    const dateStr = new Date().toISOString().slice(0, 10);
-    downloadAnchor.setAttribute("download", `portfolio-data-backup-${dateStr}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    showToast("Backup JSON file downloaded successfully.");
-  };
-
-  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (resumeInputRef.current) resumeInputRef.current.value = "";
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-        
-        // Validation check
-        const requiredKeys = ["local_projects", "local_faq", "local_uses", "local_privacy", "local_about", "local_settings"];
-        const missingKeys = requiredKeys.filter((key) => !(key in parsed));
-        
-        if (missingKeys.length > 0) {
-          throw new Error(`Missing required data modules: ${missingKeys.join(", ")}`);
-        }
-
-        // Write parsed values to localStorage
-        requiredKeys.forEach((key) => {
-          if (parsed[key]) {
-            localStorage.setItem(key, JSON.stringify(parsed[key]));
-          }
-        });
-
-        showToast("Data backup successfully restored! Reloading...");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
-      } catch (err: any) {
-        console.error(err);
-        showToast(`Restore rejected: ${err.message || "Invalid backup schema"}`, "error");
-      }
-    };
-    reader.readAsText(file);
-    // Reset file input target value so the same file can be uploaded again
-    e.target.value = "";
+    if (file.type !== "application/pdf") {
+      setMessage({ text: "Resume must be a PDF file.", type: "error" });
+      return;
+    }
+    if (file.size > MAX_RESUME_BYTES) {
+      setMessage({ text: "Resume PDF must be under 10 MB.", type: "error" });
+      return;
+    }
+    setUploadingResume(true);
+    try {
+      const url = await uploadFile(file, "resume", `resume-${Date.now()}.pdf`);
+      setResumeUrl(url);
+      setMessage({ text: "Resume uploaded — remember to Save settings to publish it.", type: "success" });
+    } catch (err) {
+      console.error("Resume upload failed:", err);
+      setMessage({ text: "Resume upload failed. Please try again.", type: "error" });
+    } finally {
+      setUploadingResume(false);
+    }
   };
 
   useEffect(() => {
@@ -121,7 +99,8 @@ export const AdminSettingsPage: React.FC = () => {
           setContactEmail(data.contactEmail || "");
           setResumeUrl(data.resumeUrl || "");
           setTagline(data.tagline || "");
-          
+          setDefaultThemeSet(normalizeThemeSet(data.themeSet));
+
           // Map object to list of pairs
           const pairsList = Object.entries(data.socialLinks || {}).map(([key, value]) => ({
             platform: key.charAt(0).toUpperCase() + key.slice(1),
@@ -196,7 +175,13 @@ export const AdminSettingsPage: React.FC = () => {
           dob: socialObj.dob || "",
           mobile: socialObj.mobile || "",
           ...socialObj
-        }
+        },
+        // Preserve admin-managed media (owned by the Media page). Both pages PUT the full
+        // SiteSettings object, so carrying these through prevents a settings save from wiping
+        // an uploaded profile image / hero background.
+        profileImage: settings.profileImage,
+        heroBackground: settings.heroBackground,
+        themeSet: defaultThemeSet
       };
 
       const success = await updateSiteSettings(updatedPayload);
@@ -370,6 +355,27 @@ export const AdminSettingsPage: React.FC = () => {
           </label>
         </section>
 
+        {/* Theme Set — site-wide default palette for first-time visitors */}
+        <section className="bg-surface p-6 rounded-2xl border border-border space-y-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-border/60">
+            <Palette className="text-accent" size={16} />
+            <h3 className="text-sm font-bold uppercase tracking-wider">Default Theme Set</h3>
+          </div>
+          <p className="text-[11px] text-text-secondary -mt-2">
+            The palette first-time visitors see. Returning visitors keep their own chosen theme.
+            Selecting one here previews it live and saves it as the site default.
+          </p>
+          <ThemeSetPicker
+            value={defaultThemeSet}
+            onChange={(ts) => {
+              setDefaultThemeSet(ts);
+              applyThemeSet(ts); // live preview for the admin
+            }}
+            showHeader={false}
+            className="max-w-md"
+          />
+        </section>
+
         {/* Core Parameters Section */}
         <section className="bg-surface p-6 rounded-2xl border border-border space-y-6">
           <div className="flex items-center gap-2 pb-3 border-b border-border/60">
@@ -394,18 +400,57 @@ export const AdminSettingsPage: React.FC = () => {
               />
             </div>
 
-            {/* Resume URL */}
-            <div className="space-y-1.5">
+            {/* Resume / CV — upload a PDF (stored on R2, served as a download) or paste a URL */}
+            <div className="space-y-2">
               <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
                 <FileText size={11} className="text-text-secondary" />
-                Resume Resource Link / URL
+                Resume / CV (PDF)
               </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => resumeInputRef.current?.click()}
+                  disabled={uploadingResume}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-background border border-border hover:border-accent text-text-primary hover:text-accent rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <UploadCloud size={13} />
+                  <span>{uploadingResume ? "Uploading…" : resumeUrl && resumeUrl !== "#" ? "Replace PDF" : "Upload PDF"}</span>
+                </button>
+                {resumeUrl && resumeUrl !== "#" && (
+                  <>
+                    <a
+                      href={resumeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 border border-border hover:border-accent text-text-secondary hover:text-accent rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors"
+                    >
+                      <FileText size={13} />
+                      <span>View</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setResumeUrl("")}
+                      className="px-3 py-2.5 border border-border hover:border-red-500 hover:text-red-500 text-text-secondary rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </>
+                )}
+                <input
+                  ref={resumeInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleResumeFile}
+                  aria-label="Upload resume PDF"
+                  className="hidden"
+                />
+              </div>
               <input
                 type="text"
                 value={resumeUrl}
                 onChange={(e) => setResumeUrl(e.target.value)}
                 className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
-                placeholder="e.g. # or enterprise resume url"
+                placeholder="…or paste a resume URL (optional)"
               />
             </div>
           </div>
@@ -534,48 +579,6 @@ export const AdminSettingsPage: React.FC = () => {
         </div>
 
       </form>
-
-      {/* Backup & Restore Section */}
-      <section className="bg-surface p-6 rounded-2xl border border-border space-y-6 mt-8">
-        <div className="flex items-center gap-2 pb-3 border-b border-border/60">
-          <Download className="text-accent" size={16} />
-          <h3 className="text-sm font-bold uppercase tracking-wider">Backup & Restore</h3>
-        </div>
-
-        <p className="text-xs text-text-secondary leading-relaxed max-w-2xl font-sans text-left">
-          Export your entire portfolio CMS content (including all local project registries, FAQs, Uses, Privacy policies, About profiles, and general settings) as a single portable JSON file, or restore a previous snapshot instantly.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
-          {/* Export Action */}
-          <button
-            type="button"
-            onClick={handleExportBackup}
-            className="w-full sm:w-auto px-5 py-3 border border-border bg-background hover:bg-surface hover:border-accent/40 text-text-primary hover:text-accent rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-          >
-            <Download size={13} />
-            <span>Export Portfolio Backup</span>
-          </button>
-
-          {/* Import Action */}
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImportBackup}
-              id="import-backup-file-input"
-              className="hidden"
-            />
-            <label
-              htmlFor="import-backup-file-input"
-              className="w-full sm:w-auto px-5 py-3 border border-border bg-background hover:bg-surface hover:border-accent/40 text-text-primary hover:text-accent rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-colors"
-            >
-              <Upload size={13} />
-              <span>Import Restore File</span>
-            </label>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

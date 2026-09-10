@@ -3,7 +3,8 @@ import { motion } from "motion/react";
 import { Activity, Code, Layers } from "lucide-react";
 import { Entry } from "../models/portfolio.model";
 import { getEntries } from "../services/api";
-import { ProductCard } from "./ProductCard";
+import { ProjectCard } from "./ProjectCard";
+import { SectionLoader, SectionError } from "./SectionState";
 
 interface ProductsPageProps {
   showOnlyGrid?: boolean;
@@ -12,14 +13,20 @@ interface ProductsPageProps {
 export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false }) => {
   const [products, setProducts] = React.useState<Entry[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(false);
+  const [reloadKey, setReloadKey] = React.useState(0);
 
   React.useEffect(() => {
     let isMounted = true;
+    setLoading(true);
+    setError(false);
     getEntries()
       .then((data) => {
         if (isMounted) {
-          // Filter to personal entries only
-          const personalEntries = data.filter((item) => item.type === "personal");
+          // Filter to published personal entries only (absent flag = published)
+          const personalEntries = data.filter(
+            (item) => item.type === "personal" && item.published !== false
+          );
           // Sort products by displayOrder ascending
           const sorted = [...personalEntries].sort((a, b) => {
             const orderA = a.displayOrder !== undefined ? a.displayOrder : a.id;
@@ -28,6 +35,9 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
           });
           setProducts(sorted);
         }
+      })
+      .catch(() => {
+        if (isMounted) setError(true);
       })
       .finally(() => {
         if (isMounted) {
@@ -38,17 +48,14 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   if (loading) {
-    return (
-      <div className="min-h-[40vh] flex items-center justify-center bg-background select-none">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-text-secondary">Sourcing dynamic products...</span>
-        </div>
-      </div>
-    );
+    return <SectionLoader label="Sourcing dynamic products..." />;
+  }
+
+  if (error) {
+    return <SectionError onRetry={() => setReloadKey((k) => k + 1)} />;
   }
 
   // Calculate stats for the stat card
@@ -60,7 +67,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
   if (showOnlyGrid) {
     return (
       <div className="animate-fade-in w-full">
-        <main className="max-w-7xl mx-auto px-6 md:px-8 py-8">
+        <main className="max-w-7xl mx-auto px-0 py-6 md:py-8">
           {products.length === 0 ? (
             <div className="p-16 text-center border border-dashed border-border rounded-3xl bg-surface/20 max-w-md mx-auto space-y-4">
               <Activity className="w-8 h-8 text-text-secondary/50 mx-auto" />
@@ -68,9 +75,9 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
               <p className="text-xs text-text-secondary leading-relaxed">No side projects are currently published. Launch the administrative CMS gateway to register modern apps immediately.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <div className="space-y-5">
+              {products.map((product, idx) => (
+                <ProjectCard key={product.id} project={product} index={idx} />
               ))}
             </div>
           )}
@@ -82,7 +89,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
   return (
     <div id="products-section" className="bg-background min-h-screen pb-24">
       {/* Products Header Section */}
-      <header className="relative py-24 lg:py-32 px-8 lg:px-24 bg-surface/40 border-b border-border text-center overflow-hidden flex flex-col items-center">
+      <header className="relative py-24 lg:py-32 px-5 md:px-8 lg:px-24 bg-surface/40 border-b border-border text-center overflow-hidden flex flex-col items-center">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
           <span className="text-[22vw] font-luxury font-black text-text-secondary/15 select-none">DESIGNS</span>
         </div>
@@ -142,7 +149,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
       </header>
 
       {/* Grid Section */}
-      <main className="max-w-7xl mx-auto px-6 md:px-8 pt-16">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-10 md:pt-16">
         {products.length === 0 ? (
           <div className="p-16 text-center border border-dashed border-border rounded-3xl bg-surface/20 max-w-md mx-auto space-y-4">
             <Activity className="w-8 h-8 text-text-secondary/50 mx-auto" />
@@ -150,9 +157,9 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ showOnlyGrid = false
             <p className="text-xs text-text-secondary leading-relaxed">No side projects are currently published. Launch the administrative CMS gateway to register modern apps immediately.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="space-y-5 max-w-5xl mx-auto">
+            {products.map((product, idx) => (
+              <ProjectCard key={product.id} project={product} index={idx} />
             ))}
           </div>
         )}

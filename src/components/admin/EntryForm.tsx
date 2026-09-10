@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getEntries, createEntry, updateEntry } from "../../services/api";
-import { Entry } from "../../models/portfolio.model";
+import { getEntry, createEntry, updateEntry, getCompanies } from "../../services/api";
+import { Entry, CompanyProfile } from "../../models/portfolio.model";
 import { ArrowLeft, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 import { LoadingScreen } from "../LoadingScreen";
 
@@ -31,6 +31,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
   const [videoUrl, setVideoUrl] = useState("");
 
   // Company Specific Fields
+  const [companyId, setCompanyId] = useState<number | undefined>(undefined);
+  const [companies, setCompanies] = useState<CompanyProfile[]>([]);
   const [companyName, setCompanyName] = useState("");
   const [role, setRole] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -44,14 +46,24 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
   const [coverImage, setCoverImage] = useState("");
   const [displayOrder, setDisplayOrder] = useState<number>(0);
 
+  // Load the Company Master for the company selector.
+  useEffect(() => {
+    let alive = true;
+    getCompanies()
+      .then((data) => alive && setCompanies(data || []))
+      .catch(() => alive && setCompanies([]));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (!isEditMode) return;
 
     let isMounted = true;
     async function loadEntryDetails() {
       try {
-        const entries = await getEntries();
-        const found = entries.find(e => String(e.id) === String(entryId));
+        const found = await getEntry(entryId!);
         if (found && isMounted) {
           setType(found.type);
           setTitle(found.title || "");
@@ -82,6 +94,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
           setCaseStudyUrl(found.caseStudyUrl || "");
           setVideoUrl(found.videoUrl || "");
 
+          setCompanyId(found.companyId);
           setCompanyName(found.companyName || "");
           setRole(found.role || "");
           setStartDate(found.startDate || "");
@@ -183,6 +196,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
       caseStudyUrl: caseStudyUrl.trim() || undefined,
       videoUrl: videoUrl.trim() || undefined,
       ...(type === "company" ? {
+        companyId: companyId !== undefined ? Number(companyId) : undefined,
         companyName: companyName.trim(),
         role: role.trim(),
         startDate: startDate.trim(),
@@ -278,9 +292,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-surface p-8 sm:p-10 rounded-3xl border border-border space-y-8">
+      <form onSubmit={handleSubmit} className="bg-surface p-5 sm:p-8 md:p-10 rounded-3xl border border-border space-y-8">
         {/* Core Settings Block */}
-        <div className="bg-background/40 p-6 rounded-2xl border border-border/60 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-background/40 p-4 sm:p-6 rounded-2xl border border-border/60 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1.5">
             <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--color-accent)] block">
               Entry Type *
@@ -367,8 +381,44 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
             <h3 className="text-xs font-bold uppercase tracking-widest text-text-primary">
               🏢 Corporate Context Parameters
             </h3>
+
+            {/* Company Master link — pick a company you've added, or type a name below. */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
+                Company (from Company Master)
+              </label>
+              <select
+                aria-label="Company from Company Master"
+                value={companyId ?? ""}
+                onChange={(e) => {
+                  const id = e.target.value ? Number(e.target.value) : undefined;
+                  setCompanyId(id);
+                  const sel = companies.find((c) => c.id === id);
+                  if (sel) {
+                    setCompanyName(sel.name);
+                    if (!role.trim()) setRole(sel.role || "");
+                    if (!startDate.trim()) setStartDate(sel.startDate || "");
+                    if (!endDate.trim()) setEndDate(sel.endDate || "");
+                  }
+                }}
+                className="w-full px-4 py-3 bg-background border border-border focus:border-accent rounded-xl text-xs font-medium focus:outline-none transition-colors cursor-pointer"
+              >
+                <option value="">— None / custom name —</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              {companies.length === 0 && (
+                <p className="text-[10px] text-text-secondary">
+                  No companies yet — add them in <span className="text-accent font-bold">Admin → Companies</span>.
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
                     Company Name *
@@ -395,7 +445,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
                     Start Timeline *
@@ -441,8 +491,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
               🛠️ Creator / Niche Product Parameters
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1.5 col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1.5 sm:col-span-2">
                   <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
                     Target Audience / Segment
                   </label>
@@ -468,7 +518,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary block">
                     Product Status *
@@ -705,8 +755,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entryId }) => {
           </div>
         </div>
 
-        {/* Submit Actions Button Toolbar */}
-        <div className="pt-6 border-t border-border flex flex-col sm:flex-row gap-3 justify-end">
+        {/* Submit Actions Button Toolbar — flush inline footer on mobile (the layout reserves
+            space for the fixed tab bar), and a sticky footer on desktop for long-form reach. */}
+        <div className="md:sticky md:bottom-0 z-30 -mx-5 sm:-mx-8 md:-mx-10 -mb-5 sm:-mb-8 md:-mb-10 px-5 sm:px-8 md:px-10 py-5 mt-2 bg-surface/95 backdrop-blur-md border-t border-border rounded-b-3xl shadow-[0_-8px_24px_-14px_rgba(0,0,0,0.35)] flex flex-col sm:flex-row gap-3 justify-end">
           <button
             type="button"
             onClick={handleBack}

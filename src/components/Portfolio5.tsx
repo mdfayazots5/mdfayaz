@@ -1,19 +1,24 @@
 import React from "react";
 import { motion } from "motion/react";
+import { useLenis } from "lenis/react";
 import { PortfolioData } from "../models/portfolio.model";
 import { ProjectCard } from "./ProjectCard";
 import { ContactForm } from "./ContactForm";
 
 import { UsesPage } from "./UsesPage";
+import { HomePage } from "./HomePage";
 import { AboutPage } from "./AboutPage";
 import { PrivacyPage } from "./PrivacyPage";
 import { FaqPage } from "./FaqPage";
 import { ProductsPage } from "./ProductsPage";
 import { ServicesPage } from "./ServicesPage";
-import { Github, Linkedin, BookOpen, User, Wrench, Mail, Shield, HelpCircle, ChevronDown, Sparkles, Lock, Briefcase, Package } from "lucide-react";
+import { ProjectDetailPage } from "./ProjectDetailPage";
+import { WorkExperience } from "./WorkExperience";
+import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Briefcase, FileText } from "lucide-react";
+import { useTheme } from "./ThemeProvider";
 import { ThemeToggle } from "./ThemeToggle";
-import { SiteSettings } from "../models/portfolio.model";
-import { getSiteSettings } from "../services/api";
+import { SiteSettings, CompanyProfile } from "../models/portfolio.model";
+import { getSiteSettings, getCompanies, isAuthenticated } from "../services/api";
 
 interface Portfolio5Props {
   data: PortfolioData;
@@ -21,25 +26,104 @@ interface Portfolio5Props {
 
 export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const { master } = data;
+  const { applyAdminDefault } = useTheme();
 
-  const [activeTab, setActiveTab] = React.useState<"about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services">("about");
+  const [activeTab, setActiveTab] = React.useState<"home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "project">("home");
+  const [projectId, setProjectId] = React.useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [isWorkDropdownOpen, setIsWorkDropdownOpen] = React.useState(false);
   const [workSubTab, setWorkSubTab] = React.useState<"company" | "personal" | "products" | "services">("personal");
-  const [selectedCategoryTag, setSelectedCategoryTag] = React.useState<string>("All");
   const [settings, setSettings] = React.useState<SiteSettings | null>(null);
+  const [companies, setCompanies] = React.useState<CompanyProfile[]>([]);
+  const [scrolled, setScrolled] = React.useState(false);
+  const [navHidden, setNavHidden] = React.useState(false);
+  const hoverTimeout = React.useRef<number | null>(null);
+  const brandClickRef = React.useRef({ count: 0, lastAt: 0 });
+  const lenis = useLenis();
+
+  // Jump to top on tab switches (pushState doesn't fire hashchange, so we do it here).
+  const scrollTopInstant = () => {
+    if (lenis) lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  };
+
+  // #1 — track scroll so the fixed header can (a) swap from blend-mode transparency to a
+  // solid, always-legible blurred bar once the user leaves the very top, and (b) hide when
+  // scrolling down and reappear when scrolling up, keeping content unobstructed while reading.
+  const lastScrollY = React.useRef(0);
+  React.useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 24);
+      // Only start hiding past a small threshold so the top of the page always shows the nav.
+      if (y > 120 && y > lastScrollY.current) setNavHidden(true);
+      else if (y < lastScrollY.current) setNavHidden(false);
+      lastScrollY.current = y;
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // #4 — pointer-capable desktop devices auto-open the nav menus on hover.
+  const canHover = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)").matches;
+
+  const openMenuOnHover = (which: "about" | "work") => {
+    if (!canHover()) return;
+    if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+    setIsDropdownOpen(which === "about");
+    setIsWorkDropdownOpen(which === "work");
+  };
+
+  const scheduleHoverClose = () => {
+    if (!canHover()) return;
+    if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = window.setTimeout(() => {
+      setIsDropdownOpen(false);
+      setIsWorkDropdownOpen(false);
+    }, 180);
+  };
+
+  const cancelHoverClose = () => {
+    if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+  };
+
+  const handleBrandClick = () => {
+    const now = Date.now();
+    const recent = now - brandClickRef.current.lastAt < 900;
+    brandClickRef.current = {
+      count: recent ? brandClickRef.current.count + 1 : 1,
+      lastAt: now,
+    };
+
+    setIsDropdownOpen(false);
+    setIsWorkDropdownOpen(false);
+
+    if (brandClickRef.current.count >= 3) {
+      brandClickRef.current = { count: 0, lastAt: 0 };
+      window.location.hash = isAuthenticated() ? "#admin" : "#admin/login";
+      return;
+    }
+
+    handleNavClick("home");
+  };
 
   // Dynamic Metadata Sync Helper
   const updatePageMetadata = (tab: string) => {
     let titleSet = "Mohammed Fayaz | .NET Full Stack Developer";
-    let descSet = "Mohammed Fayaz — .NET Full Stack Developer with 3+ years building scalable healthcare, HRMS and SaaS applications using ASP.NET Core, Angular and SQL Server.";
+    let descSet = "Mohammed Fayaz - .NET Full Stack Developer building scalable enterprise systems with ASP.NET Core, Angular, SQL Server, EF Core, and cloud-ready architecture.";
 
     if (tab === "work") {
       titleSet = "Work | Mohammed Fayaz";
       descSet = "Healthcare, HRMS, and marketplace platform projects by Mohammed Fayaz.";
+    } else if (tab === "about") {
+      titleSet = "About | Mohammed Fayaz";
+      descSet = "Learn more about Mohammed Fayaz, his .NET, Angular, SQL Server, EF Core, and enterprise architecture experience.";
     } else if (tab === "products") {
-      titleSet = "Products | Mohammed Fayaz";
-      descSet = "Curated showcase of side projects and self-hosted tools created by Mohammed Fayaz.";
+      titleSet = "Projects | Mohammed Fayaz";
+      descSet = "Curated showcase of personal projects and self-hosted tools built by Mohammed Fayaz.";
     } else if (tab === "services") {
       titleSet = "Services | Mohammed Fayaz";
       descSet = "Explore Mohammed Fayaz's technical software development services and areas of consulting expertise.";
@@ -72,8 +156,13 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     getSiteSettings().then((result) => {
       if (isMounted) {
         setSettings(result);
+        // First-time visitors inherit the admin-selected default palette.
+        applyAdminDefault(result?.themeSet);
       }
     });
+    getCompanies()
+      .then((result) => isMounted && setCompanies(result || []))
+      .catch(() => isMounted && setCompanies([]));
     return () => {
       isMounted = false;
     };
@@ -83,7 +172,10 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   React.useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase().replace("#", "");
-      if (hash === "" || hash === "about") {
+      if (hash === "" || hash === "home") {
+        setActiveTab("home");
+        updatePageMetadata("home");
+      } else if (hash === "about") {
         setActiveTab("about");
         updatePageMetadata("about");
       } else if (hash === "work" || hash === "company") {
@@ -114,6 +206,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       } else if (hash === "contact") {
         setActiveTab("contact");
         updatePageMetadata("contact");
+      } else if (hash.startsWith("project/")) {
+        setProjectId(hash.slice("project/".length));
+        setActiveTab("project");
       } else if (hash.startsWith("admin")) {
         // Handled by top-level Admin router
       } else {
@@ -131,7 +226,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     };
   }, []);
 
-  const handleNavClick = (tab: "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "personal" | "company", targetId?: string) => {
+  const handleNavClick = (tab: "home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "personal" | "company", targetId?: string) => {
     setIsDropdownOpen(false);
     setIsWorkDropdownOpen(false);
 
@@ -139,25 +234,25 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       setActiveTab("work");
       setWorkSubTab("products");
       window.history.pushState(null, "", "#products");
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata("products");
     } else if (tab === "services") {
       setActiveTab("work");
       setWorkSubTab("services");
       window.history.pushState(null, "", "#services");
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata("services");
     } else if (tab === "personal") {
       setActiveTab("work");
       setWorkSubTab("personal");
       window.history.pushState(null, "", "#personal");
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata("work");
     } else if (tab === "company") {
       setActiveTab("work");
       setWorkSubTab("company");
       window.history.pushState(null, "", "#work");
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata("work");
     } else {
       setActiveTab(tab as any);
@@ -165,7 +260,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         setWorkSubTab("company");
       }
       window.history.pushState(null, "", `#${tab}`);
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      scrollTopInstant();
       updatePageMetadata(tab as any);
     }
 
@@ -173,64 +268,78 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       setTimeout(() => {
         const el = document.getElementById(targetId);
         if (el) {
-          el.scrollIntoView({ behavior: "smooth" });
+          if (lenis) lenis.scrollTo(el, { offset: -80 });
+          else el.scrollIntoView({ behavior: "smooth" });
         }
       }, 100);
     }
   };
 
+  const contactEmail = settings?.contactEmail || master.candidate.email;
+  const contactPhone = settings?.socialLinks?.mobile || master.candidate.phone || "";
+  const contactPhoneHref = contactPhone ? `tel:${contactPhone.replace(/[^\d+]/g, "")}` : "";
+
   return (
-    <div className="min-h-screen bg-background text-text-primary selection:bg-accent selection:text-accent-foreground">
-      {/* Minimal Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] px-8 py-8 flex justify-between items-center mix-blend-difference text-white select-none">
-        <span 
-          className="text-lg font-luxury font-bold tracking-tighter cursor-pointer"
-          onClick={() => {
-            setIsDropdownOpen(false);
-            setIsWorkDropdownOpen(false);
-            handleNavClick("about");
-          }}
+    <div className="app-canvas min-h-screen text-text-primary selection:bg-accent selection:text-accent-foreground">
+      {/* Minimal Navigation — transparent (blend) at top, solid blurred bar once scrolled (#1) */}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-[100] px-5 md:px-8 py-5 md:py-7 flex justify-between items-center select-none transition-[transform,background-color,color] duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+          navHidden && !isDropdownOpen && !isWorkDropdownOpen ? "-translate-y-full" : "translate-y-0"
+        } ${
+          scrolled
+            ? "bg-background/80 backdrop-blur-md border-b border-border text-text-primary"
+            : "mix-blend-difference text-white"
+        }`}
+      >
+        <button
+          type="button"
+          className="group relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-current/50 font-mono text-sm font-bold tracking-tight overflow-hidden cursor-pointer transition-all duration-300 hover:border-accent hover:text-accent hover:-translate-y-0.5 hover:shadow-[0_6px_20px_-8px_rgba(0,0,0,0.4)]"
+          onClick={handleBrandClick}
+          aria-label="Mohammed Fayaz — home"
         >
-          MF.
-        </span>
-        <div className="flex gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
-          <ThemeToggle />
-          <div className="relative">
-            <button 
+          {/* accent sheen that sweeps across on hover */}
+          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-accent/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+          <span className="relative leading-none">MF</span>
+        </button>
+        <div className="flex gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
+          <div
+            className="relative"
+            onMouseEnter={() => openMenuOnHover("about")}
+            onMouseLeave={scheduleHoverClose}
+          >
+            <button
               id="nav-about-dropdown-btn"
               onClick={() => {
                 setIsWorkDropdownOpen(false);
                 setIsDropdownOpen(!isDropdownOpen);
-              }} 
-              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["about", "uses", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
+              }}
+              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["home", "about", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
-              <span>About</span>
-              <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 text-white/50"}`} />
+              <span>Home</span>
+              <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
-          <div className="relative">
-            <button 
+          <div
+            className="relative"
+            onMouseEnter={() => openMenuOnHover("work")}
+            onMouseLeave={scheduleHoverClose}
+          >
+            <button
               id="nav-work-dropdown-btn"
               onClick={() => {
                 setIsDropdownOpen(false);
                 setIsWorkDropdownOpen(!isWorkDropdownOpen);
-              }} 
-              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || activeTab === "work" ? "text-accent" : "hover:text-accent"}`}
+              }}
+              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || ["work", "uses", "project"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
               <span>Work</span>
-              <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 text-white/50"}`} />
+              <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
-          <button 
-            onClick={() => {
-              setIsDropdownOpen(false);
-              setIsWorkDropdownOpen(false);
-              handleNavClick("contact");
-            }} 
-            className={`cursor-pointer transition-colors ${activeTab === "contact" ? "text-accent" : "hover:text-accent"}`}
-          >
-            Contact
-          </button>
+
+          {/* Light/Dark theme control — inherits currentColor so it reads on both the
+              blend-mode hero (white) and the solid scrolled bar (text-primary). */}
+          <ThemeToggle />
         </div>
       </nav>
 
@@ -242,15 +351,15 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         exit={{ opacity: 0, y: -15 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        {activeTab === "about" && (
-          <AboutPage master={master} handleNavClick={handleNavClick} />
+        {activeTab === "home" && (
+          <HomePage master={master} handleNavClick={handleNavClick} />
         )}
 
         {activeTab === "work" && (
           /* Work / Projects Tab View with Sub Tabs */
           <div className="bg-background min-h-screen">
             {/* Dedicated Work Header */}
-            <header className="py-24 lg:py-32 px-8 lg:px-24 bg-surface/40 text-center relative overflow-hidden flex flex-col items-center border-b border-border">
+            <header className="py-24 lg:py-32 px-5 md:px-8 lg:px-24 bg-surface/40 text-center relative overflow-hidden flex flex-col items-center border-b border-border">
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
                 <span className="text-[25vw] font-luxury font-black text-text-secondary/15 select-none">WORK</span>
               </div>
@@ -259,7 +368,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   C# / .NET / FULL-STACK
                 </span>
                 <h1 className="text-4xl lg:text-6xl font-luxury font-light tracking-tighter leading-tight text-text-primary">
-                  Shipped Systems
+                  Work &amp; Experience
                 </h1>
                 <p className="text-sm md:text-base text-text-secondary font-medium max-w-xl mx-auto leading-relaxed">
                   Clean, production-ready enterprise solutions and independent software packages made accessible with robust architecture and quick recruiter scanning.
@@ -268,9 +377,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
             </header>
 
             {/* Under-header Content Page Container */}
-            <div className="max-w-5xl mx-auto px-6 md:px-8 pt-8">
+            <div className="max-w-5xl mx-auto px-4 md:px-8 pt-8">
 
-              {/* Sub-filtering pills / Segmented Page Embeds */}
+              {/* Segmented Page Embeds */}
               {(() => {
                 if (workSubTab === "products") {
                   return <ProductsPage showOnlyGrid={true} />;
@@ -282,57 +391,24 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 const activeEntries = (master.projects || []).filter(
                   (p: any) => p.type === workSubTab || p.category === workSubTab
                 );
-                const availableTags = [
-                  "All",
-                  ...Array.from(
-                    new Set(
-                      activeEntries
-                        .map((p: any) => p.categoryTag || p.domain)
-                        .filter(Boolean)
-                    )
-                  )
-                ];
-                const filteredEntries =
-                  selectedCategoryTag === "All"
-                    ? activeEntries
-                    : activeEntries.filter(
-                        (p: any) =>
-                          (p.categoryTag || p.domain) === selectedCategoryTag
-                      );
+
+                // Company experience is grouped under company header cards; personal is a flat list.
+                if (workSubTab === "company") {
+                  return <WorkExperience entries={activeEntries} companies={companies} />;
+                }
 
                 return (
-                  <>
-                    {availableTags.length > 2 && (
-                      <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-2xl mx-auto px-4">
-                        {availableTags.map((tag: any) => (
-                          <button
-                            key={tag}
-                            onClick={() => setSelectedCategoryTag(tag)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
-                              selectedCategoryTag === tag
-                                ? "bg-accent text-accent-foreground shadow-sm"
-                                : "bg-surface text-text-secondary hover:text-text-primary border border-border"
-                            }`}
-                          >
-                            {tag}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Recruiter-First Simple/Professional Projects List */}
-                    <div className="space-y-10 py-12">
-                      {filteredEntries.map((project: any, idx: number) => (
-                        <ProjectCard key={project.id} project={project} index={idx} />
-                      ))}
-                    </div>
-                  </>
+                  <div className="space-y-5 py-10">
+                    {activeEntries.map((project: any, idx: number) => (
+                      <ProjectCard key={project.id} project={project} index={idx} />
+                    ))}
+                  </div>
                 );
               })()}
             </div>
 
             {/* Resume Call To Action Bar */}
-            <section className="py-16 px-8 lg:px-24 bg-surface/70 text-center rounded-3xl max-w-5xl mx-auto mb-24 border border-border shadow-sm space-y-6">
+            <section className="py-16 px-5 md:px-8 lg:px-24 bg-surface/70 text-center rounded-3xl max-w-5xl mx-auto mb-24 border border-border shadow-sm space-y-6">
               <span className="text-[10px] font-bold text-accent uppercase tracking-[0.4em] block">HAVE A VACANCY?</span>
               <h3 className="text-2xl md:text-3xl font-luxury font-medium leading-snug">Let's connect to review enterprise solution needs</h3>
               <p className="text-xs md:text-sm text-text-secondary max-w-md mx-auto leading-relaxed">
@@ -340,7 +416,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <button
-                  onClick={() => handleNavClick("about")}
+                  onClick={() => handleNavClick("home")}
                   className="px-6 py-3 bg-surface border border-border text-text-primary hover:text-accent text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer"
                 >
                   Return to Profile Overview
@@ -356,13 +432,26 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
           </div>
         )}
 
+        {activeTab === "about" && <AboutPage handleNavClick={handleNavClick} />}
+
         {activeTab === "uses" && <UsesPage />}
 
         {activeTab === "products" && <ProductsPage />}
 
         {activeTab === "services" && <ServicesPage />}
 
-        {activeTab === "privacy" && <PrivacyPage onBack={() => handleNavClick("about")} />}
+        {activeTab === "project" && (() => {
+          const proj = (master.projects || []).find((p: any) => String(p.id) === String(projectId));
+          return (
+            <ProjectDetailPage
+              project={proj}
+              onBack={() => handleNavClick(proj?.type === "personal" ? "products" : "company")}
+              onContact={() => handleNavClick("contact")}
+            />
+          );
+        })()}
+
+        {activeTab === "privacy" && <PrivacyPage onBack={() => handleNavClick("home")} />}
 
         {activeTab === "faq" && <FaqPage />}
 
@@ -379,7 +468,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
-                onClick={() => handleNavClick("about")}
+                onClick={() => handleNavClick("home")}
                 className="px-6 py-2.5 bg-accent text-accent-foreground text-[10px] uppercase font-bold tracking-widest rounded-xl hover:bg-opacity-80 transition-all cursor-pointer"
               >
                 Return to profile
@@ -390,7 +479,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
         {activeTab === "contact" && (
           <div className="bg-background min-h-[90vh] pt-36 pb-16">
-            <div className="max-w-4xl mx-auto space-y-16 px-8 select-none">
+            <div className="max-w-4xl mx-auto space-y-16 px-5 md:px-8 select-none">
               <div className="space-y-6 text-center">
                 <span className="text-[10px] font-bold text-accent uppercase tracking-[0.6em] block">SECURE CONTACT HUB</span>
                 <h2 className="text-4xl lg:text-5xl font-luxury font-light tracking-tighter leading-none text-text-primary">
@@ -400,15 +489,27 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                   ESTABLISHED CHANNELS & PIPELINES
                 </p>
               </div>
-              <ContactForm candidateEmail={settings?.contactEmail || master.candidate.email} />
+              <ContactForm candidateEmail={contactEmail} />
             </div>
           </div>
         )}
 
         {/* Contact Section */}
-        {(activeTab === "about" || activeTab === "work") && (
-          <section id="contact" className="py-24 lg:py-36 px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
-            <div className="max-w-4xl mx-auto space-y-16">
+        {activeTab === "home" && (
+          <section id="contact" className="py-12 md:py-24 lg:py-36 px-5 md:px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
+            <div className="md:hidden max-w-sm mx-auto space-y-5">
+              <h2 className="text-2xl font-luxury font-semibold tracking-tight leading-tight text-text-primary">
+                Ready to talk about a role or project?
+              </h2>
+              <button
+                onClick={() => handleNavClick("contact")}
+                className="w-full px-5 py-3 bg-text-primary hover:bg-accent text-background hover:text-accent-foreground text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer"
+              >
+                Open Contact Form
+              </button>
+            </div>
+
+            <div className="hidden md:block max-w-4xl mx-auto space-y-16">
               <div className="space-y-6">
                 <span className="text-[10px] font-bold text-accent uppercase tracking-[0.6em] block">SECURE CONTACT</span>
                 <h2 className="text-4xl lg:text-6xl font-luxury font-light tracking-tighter leading-none text-text-primary">
@@ -420,83 +521,166 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               </div>
 
               {/* Embedded Contact Form Component */}
-              <ContactForm candidateEmail={settings?.contactEmail || master.candidate.email} />
+              <ContactForm candidateEmail={contactEmail} />
 
-              <div className="pt-8 flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16 border-t border-border max-w-2xl mx-auto text-text-primary">
-                <div className="text-center md:text-left">
+              <div className="pt-8 flex justify-center items-center border-t border-border max-w-2xl mx-auto text-text-primary">
+                <div className="text-center">
                   <span className="text-[9px] font-bold text-text-secondary uppercase tracking-widest block mb-1">Direct Correspondence</span>
-                  <a href={`mailto:${settings?.contactEmail || master.candidate.email}`} className="text-lg font-luxury font-medium text-text-primary hover:text-accent transition-colors border-b border-border hover:border-accent pb-0.5">
-                    {settings?.contactEmail || master.candidate.email}
+                  <a href={`mailto:${contactEmail}`} className="text-lg font-luxury font-medium text-text-primary hover:text-accent transition-colors border-b border-border hover:border-accent pb-0.5">
+                    {contactEmail}
                   </a>
-                </div>
-                <div className="h-px w-8 md:h-10 md:w-px bg-border" />
-                <div className="text-center md:text-left">
-                  <span className="text-[9px] font-bold text-text-secondary uppercase tracking-widest block mb-1">Secure Telephone Link</span>
-                  <p className="text-lg font-luxury font-medium text-text-primary tracking-wider font-sans select-all">{settings?.socialLinks.mobile || master.candidate.phone}</p>
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* Footer */}
-        <footer className="py-16 px-8 lg:px-24 border-t border-border bg-background select-none">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex flex-col items-center md:items-start gap-2">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-luxury font-bold tracking-tighter text-text-primary">MF.</span>
-                <span className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.25em]">© {new Date().getFullYear()}</span>
-                <a 
-                  id="admin-login-lock-btn"
-                  href="#admin/login" 
-                  className="text-text-secondary hover:text-accent p-1.5 rounded-lg hover:bg-surface/65 transition-colors cursor-pointer"
-                  title="Administrative Gateway Client"
+        {/* Footer — extra bottom space holds the oversized brand watermark below the content. */}
+        <footer className="relative overflow-hidden pt-16 pb-20 md:pb-28 px-5 md:px-8 lg:px-24 border-t border-border bg-background select-none">
+          {/* Oversized brand watermark — faint, smoke-like, rising from the bottom below the
+              footer content (clipped at the bottom edge; fades upward). Sits behind everything (z-0). */}
+          {(() => {
+            const words = (settings?.name || master.candidate.name).trim().split(/\s+/).filter(Boolean);
+            const lastWord = words[words.length - 1] || "Fayaz";
+            const firstLine = words.length > 1 ? words.slice(0, -1).join(" ") : lastWord;
+            const secondLine = words.length > 1 ? lastWord : "";
+            const mask =
+              "[mask-image:linear-gradient(to_top,black_45%,transparent)] [-webkit-mask-image:linear-gradient(to_top,black_45%,transparent)]";
+            const base =
+              "pointer-events-none absolute inset-x-0 z-0 select-none font-luxury font-black tracking-tighter text-text-primary/[0.06]";
+            return (
+              <>
+                {/* Mobile: last name only, single line */}
+                <span
+                  aria-hidden="true"
+                  className={`${base} ${mask} -bottom-[0.24em] text-center whitespace-nowrap leading-none text-[27vw] md:hidden`}
                 >
-                  <Lock size={11} />
-                </a>
+                  {lastWord}
+                </span>
+                {/* Desktop: full name across two lines */}
+                <span
+                  aria-hidden="true"
+                  className={`${base} ${mask} -bottom-[0.12em] hidden md:flex flex-col items-center text-center whitespace-nowrap leading-[0.8] md:text-[12vw]`}
+                >
+                  <span>{firstLine}</span>
+                  {secondLine && <span>{secondLine}</span>}
+                </span>
+              </>
+            );
+          })()}
+
+          <div className="relative z-10 max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 md:gap-6 gap-y-8">
+              {/* Brand block */}
+              <div className="col-span-2 md:col-span-1 flex flex-col gap-4">
+                <span className="text-lg font-luxury font-bold tracking-tighter text-text-primary">
+                  {settings?.name || master.candidate.name}
+                </span>
+                <p className="text-[11px] text-text-secondary leading-relaxed max-w-xs font-medium">
+                  A .NET full-stack developer building scalable, production-ready systems from database to UI.
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <a
+                    href={settings?.socialLinks?.linkedin || master.candidate.linkedin}
+                    target="_blank" rel="noreferrer" id="footer-linkedin-link" aria-label="LinkedIn"
+                    className="w-11 h-11 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors inline-flex items-center justify-center"
+                  >
+                    <Linkedin size={14} />
+                  </a>
+                  <a
+                    href={settings?.socialLinks?.github || master.candidate.github}
+                    target="_blank" rel="noreferrer" id="footer-github-link" aria-label="GitHub"
+                    className="w-11 h-11 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors inline-flex items-center justify-center"
+                  >
+                    <Github size={14} />
+                  </a>
+                  {(settings?.blog || master.candidate.blog) && (
+                    <a
+                      href={settings?.blog || master.candidate.blog}
+                      target="_blank" rel="noreferrer" id="footer-blog-link" aria-label="Blog"
+                      className="w-11 h-11 rounded-lg border border-border text-text-secondary hover:text-accent hover:border-accent/50 transition-colors inline-flex items-center justify-center"
+                    >
+                      <BookOpen size={14} />
+                    </a>
+                  )}
+                </div>
               </div>
-              <p className="text-[9px] font-bold text-text-secondary uppercase tracking-widest">{settings?.name || master.candidate.name}</p>
+
+              {/* Explore column */}
+              <div className="flex flex-col gap-2.5">
+                <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Explore</span>
+                <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
+                  {[
+                    { label: "Home", tab: "home" as const },
+                    { label: "About", tab: "about" as const },
+                    { label: "Experience", tab: "company" as const },
+                    { label: "Projects", tab: "products" as const },
+                  ].map((l) => (
+                    <button
+                      key={l.label}
+                      onClick={() => handleNavClick(l.tab)}
+                      className="text-left hover:text-accent transition-colors w-fit"
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Info column */}
+              <div className="flex flex-col gap-2.5">
+                <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Info</span>
+                <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
+                  {[
+                    { label: "Uses", tab: "uses" as const },
+                    { label: "FAQ", tab: "faq" as const },
+                    { label: "Privacy Policy", tab: "privacy" as const },
+                  ].map((l) => (
+                    <button
+                      key={l.label}
+                      onClick={() => handleNavClick(l.tab)}
+                      className="text-left hover:text-accent transition-colors w-fit"
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contact column */}
+              <div className="col-span-2 md:col-span-1 flex flex-col gap-2.5">
+                <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Contact</span>
+                {/* Mobile: flow items horizontally so they fill the full width (no empty gap).
+                    Desktop: stack vertically like the other columns. */}
+                <div className="flex flex-row flex-wrap items-center gap-x-6 gap-y-1.5 md:flex-col md:items-start md:gap-1.5 text-[11px] font-semibold text-text-secondary">
+                  <button onClick={() => handleNavClick("contact")} className="text-left hover:text-accent transition-colors w-fit">
+                    Start a conversation
+                  </button>
+                  <a href={`mailto:${contactEmail}`} className="hover:text-accent transition-colors break-all">
+                    {contactEmail}
+                  </a>
+                  {contactPhone && (
+                    <a href={contactPhoneHref} className="hover:text-accent transition-colors w-fit">
+                      {contactPhone}
+                    </a>
+                  )}
+                  <span className="text-text-secondary/80 uppercase tracking-[0.15em] text-[10px]">
+                    {(settings?.location || master.candidate.location)}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="text-[9px] font-bold text-text-secondary uppercase tracking-[0.3em] font-sans text-center">
-              {(settings?.location || master.candidate.location).toUpperCase()}
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-[11px] font-semibold text-text-secondary">
-              <a 
-                href={settings?.socialLinks.linkedin || master.candidate.linkedin} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface text-text-secondary hover:text-accent transition-all duration-300 ease-out"
-                id="footer-linkedin-link"
-              >
-                <Linkedin size={13} className="text-text-secondary group-hover:text-accent transition-colors duration-300" />
-                <span className="font-bold uppercase tracking-[0.2em] text-[10px]">LinkedIn</span>
-              </a>
-
-              <a 
-                href={settings?.socialLinks.github || master.candidate.github} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface text-text-secondary hover:text-accent transition-all duration-300 ease-out"
-                id="footer-github-link"
-              >
-                <Github size={13} className="text-text-secondary group-hover:text-accent transition-colors duration-300" />
-                <span className="font-bold uppercase tracking-[0.2em] text-[10px]">GitHub</span>
-              </a>
-
-              {(settings?.blog || master.candidate.blog) && (
-                <a
-                  href={settings?.blog || master.candidate.blog}
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface text-text-secondary hover:text-accent transition-all duration-300 ease-out"
-                  id="footer-blog-link"
-                >
-                  <BookOpen size={13} className="text-text-secondary group-hover:text-accent transition-colors duration-300" />
-                  <span className="font-bold uppercase tracking-[0.2em] text-[10px]">Technical Blog</span>
-                </a>
-              )}
+            {/* Bottom bar */}
+            <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-bold text-text-secondary uppercase tracking-[0.2em]">
+                  © {new Date().getFullYear()} {settings?.name || master.candidate.name}. All rights reserved.
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-text-secondary/80 uppercase tracking-[0.2em]">
+                Built with React, Tailwind &amp; .NET
+              </span>
             </div>
           </div>
         </footer>
@@ -505,17 +689,37 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       {/* Dropdown Overlay for About navigation tab */}
       {isDropdownOpen && (
         <>
-          {/* Invisible backdrop to capture click outsides */}
-          <div 
+          {/* Invisible backdrop to capture outside clicks. z BELOW the nav (#3) so the nav
+              buttons stay clickable while a menu is open — previously it sat above the nav and
+              swallowed the first tap on Work. */}
+          <div
             id="nav-dropdown-backdrop"
-            className="fixed inset-0 z-[140] bg-transparent" 
-            onClick={() => setIsDropdownOpen(false)} 
+            className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-[2px] md:bg-transparent md:backdrop-blur-none"
+            onClick={() => setIsDropdownOpen(false)}
           />
-          <div 
+          <div
             id="nav-about-dropdown"
+            onMouseEnter={cancelHoverClose}
+            onMouseLeave={scheduleHoverClose}
             className="fixed top-20 right-4 md:right-16 lg:right-24 z-[150] w-[290px] md:w-[320px] bg-surface border border-border rounded-[28px] shadow-2xl p-4 text-left select-none text-text-primary"
           >
             <div className="flex flex-col gap-1">
+              <button
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  handleNavClick("home");
+                }}
+                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
+              >
+                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
+                  <User size={15} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Home</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Profile overview, skills, and experience</p>
+                </div>
+              </button>
+
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
@@ -524,59 +728,11 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <User size={15} />
+                  <FileText size={15} />
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">About</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Learn about Fayaz and his mission</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  handleNavClick("uses");
-                }}
-                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
-              >
-                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Wrench size={15} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Uses</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Tools, gear, and software I use daily</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  handleNavClick("services");
-                }}
-                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
-              >
-                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Sparkles size={15} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Services</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">My technical expertise and offerings</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsDropdownOpen(false);
-                  handleNavClick("contact");
-                }}
-                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
-              >
-                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Mail size={15} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Contact</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Get in touch with Fayaz</p>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Background, skills, and experience details</p>
                 </div>
               </button>
 
@@ -612,23 +768,6 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 </div>
               </button>
 
-              <div className="border-t border-border mt-2 pt-2.5 px-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <a 
-                    id="admin-dropdown-lock-btn"
-                    href="#admin/login" 
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="inline-flex items-center gap-1.5 text-[9px] font-bold text-text-secondary hover:text-accent uppercase tracking-wider transition-colors cursor-pointer"
-                  >
-                    <Lock size={10} />
-                    <span>Admin Access</span>
-                  </a>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">Theme</span>
-                  <ThemeToggle />
-                </div>
-              </div>
             </div>
           </div>
         </>
@@ -637,30 +776,32 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       {/* Dropdown Overlay for Work navigation tab */}
       {isWorkDropdownOpen && (
         <>
-          {/* Invisible backdrop to capture click outsides */}
-          <div 
+          {/* Invisible backdrop — z below nav so nav stays clickable while open (#3). */}
+          <div
             id="nav-work-dropdown-backdrop"
-            className="fixed inset-0 z-[140] bg-transparent" 
-            onClick={() => setIsWorkDropdownOpen(false)} 
+            className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-[2px] md:bg-transparent md:backdrop-blur-none"
+            onClick={() => setIsWorkDropdownOpen(false)}
           />
-          <div 
+          <div
             id="nav-work-dropdown"
+            onMouseEnter={cancelHoverClose}
+            onMouseLeave={scheduleHoverClose}
             className="fixed top-20 right-4 md:right-10 lg:right-16 z-[150] w-[290px] md:w-[320px] bg-surface border border-border rounded-[28px] shadow-2xl p-4 text-left select-none text-text-primary"
           >
             <div className="flex flex-col gap-1">
               <button
                 onClick={() => {
                   setIsWorkDropdownOpen(false);
-                  handleNavClick("personal");
+                  handleNavClick("company");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Wrench size={15} />
+                  <Briefcase size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Projects</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Custom tools and priority boards</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Experience</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Companies I've worked with and shipped for</p>
                 </div>
               </button>
 
@@ -672,27 +813,27 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Package size={15} />
+                  <Wrench size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Products</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Our ready-to-deploy software packages</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Projects</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Personal builds and side projects I own</p>
                 </div>
               </button>
 
               <button
                 onClick={() => {
                   setIsWorkDropdownOpen(false);
-                  handleNavClick("services");
+                  handleNavClick("uses");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Sparkles size={15} />
+                  <Wrench size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Services</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">SaaS design and specialized consulting</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Uses</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Tools, gear, and software I use daily</p>
                 </div>
               </button>
             </div>

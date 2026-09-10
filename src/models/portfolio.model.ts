@@ -79,6 +79,19 @@ export interface PortfolioData {
   master: MasterData;
 }
 
+export interface EducationItem {
+  id: string;
+  qualification: string;
+  institution: string;
+  period: string;
+}
+
+export interface PersonalDetail {
+  id: string;
+  label: string;
+  value: string;
+}
+
 export interface AboutProfile {
   tagline: string;
   architectBio: string;
@@ -91,6 +104,8 @@ export interface AboutProfile {
     period: string;
     description: string;
   }[];
+  personalDetails: PersonalDetail[];
+  education: EducationItem[];
 }
 
 export interface FaqItem {
@@ -98,6 +113,7 @@ export interface FaqItem {
   question: string;
   answer: string;
   category: string;
+  published?: boolean;   // absent/true = live on portal; false = hidden draft
 }
 
 export interface UsesItem {
@@ -112,12 +128,14 @@ export interface UsesCategory {
   name: string;
   subtitle?: string;
   items: UsesItem[];
+  published?: boolean;   // absent/true = live on portal; false = hidden draft
 }
 
 export interface PrivacySection {
   id: string;
   title: string;
   body: string;
+  published?: boolean;   // absent/true = live on portal; false = hidden draft
 }
 
 export interface SiteSettings {
@@ -137,7 +155,29 @@ export interface SiteSettings {
   };
   resumeUrl: string;
   tagline: string;
+
+  // Admin-managed media (R2 public URLs). Optional — absence means "no image / default look".
+  // If `mobile` is absent, the UI falls back to `desktop`.
+  profileImage?: { desktop?: string; mobile?: string };
+  heroBackground?: { desktop?: string; mobile?: string };
+
+  // Admin-selected default palette for first-time visitors. Optional — absence means
+  // "slate-classic". A returning visitor's local preference (localStorage) overrides this.
+  themeSet?: ThemeSet;
 }
+
+/**
+ * Curated visual palette variants. `mode` (light/dark) controls brightness;
+ * `ThemeSet` controls palette personality. Rendered purely via CSS variables —
+ * see `data-theme-set` in `ThemeProvider` and the palette blocks in `src/index.css`.
+ * Metadata (labels, descriptions, swatches) lives in `src/config/theme-sets.ts`.
+ */
+export type ThemeSet =
+  | "slate-classic"
+  | "ivory-teal"
+  | "copper-soft-paper"
+  | "dusty-lilac-receipt"
+  | "soft-sage-receipt";
 
 export interface Product {
   id: number;
@@ -167,7 +207,8 @@ export interface Entry {
   achievements: string[];    // quantified impact, e.g. "Led a team of 5"
 
   // company-specific (present when type === 'company')
-  companyName?: string;
+  companyId?: number;        // links to a CompanyProfile in the Company Master
+  companyName?: string;      // denormalized name (kept for back-compat / display)
   role?: string;
   teamSize?: number;
   startDate?: string;
@@ -190,6 +231,7 @@ export interface Entry {
 
   featured: boolean;
   displayOrder: number;
+  published?: boolean;   // absent/true = live on portal; false = hidden draft
 }
 
 export interface Service {
@@ -200,6 +242,24 @@ export interface Service {
   highlights: string[];   // 2-4 bullet points for the detail modal
   icon: string;           // lucide-react icon name
   status: 'Active' | 'Inactive';
+  displayOrder: number;
+}
+
+/**
+ * A company/employer record ("Company Master"). Experiences (Entry with type 'company')
+ * link to one of these via `companyId`, so the Work page can group projects under the
+ * company they were built at.
+ */
+export interface CompanyProfile {
+  id: number;
+  name: string;
+  role: string;          // your title at this company
+  location: string;      // office / address
+  startDate: string;     // join date, e.g. "Feb 2023"
+  endDate: string;       // "Present" or leaving date
+  description?: string;  // short blurb about the company / your tenure
+  website?: string;
+  logo?: string;         // optional logo URL (R2)
   displayOrder: number;
 }
 
