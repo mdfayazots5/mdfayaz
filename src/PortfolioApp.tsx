@@ -78,7 +78,10 @@ function PortfolioRouter() {
 
   // Scroll back to top on any hash routing transitions (via Lenis so it doesn't fight the
   // smooth-scroll target; falls back to native when Lenis isn't ready yet).
+  // Admin routes only — public routes own their scroll policy in Portfolio5 (top on new
+  // navigation, restore on Back/Forward). Running this for public hashes would undo restoration.
   useEffect(() => {
+    if (!hash.toLowerCase().startsWith("#admin")) return;
     if (lenis) lenis.scrollTo(0, { immediate: true });
     else window.scrollTo(0, 0);
   }, [hash, lenis]);

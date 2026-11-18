@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { useLenis } from "lenis/react";
+import { useModalScrollLock } from "../hooks/useModalScrollLock";
 import { PortfolioData } from "../models/portfolio.model";
 import { ProjectCard } from "./ProjectCard";
 import { ContactForm } from "./ContactForm";
@@ -40,12 +41,43 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
   const hoverTimeout = React.useRef<number | null>(null);
   const brandClickRef = React.useRef({ count: 0, lastAt: 0 });
   const lenis = useLenis();
+  // Ref so long-lived listeners (hashchange, registered once) always see the live Lenis instance.
+  const lenisRef = React.useRef(lenis);
+  lenisRef.current = lenis;
+
+  // ---- Scroll policy (single owner for public routes) ------------------------------------------
+  // New navigation → top. Back/Forward → restore the position saved on that history entry.
+  // Positions live in `history.state.scrollY` (written ~150ms after scrolling settles), so they
+  // survive Back/Forward and reloads; the browser's own restoration is disabled to avoid fights.
+  const saveTimer = React.useRef<number | null>(null);
+
+  const scrollToY = (y: number) => {
+    const l = lenisRef.current;
+    if (l) {
+      l.resize();
+      l.scrollTo(y, { immediate: true, force: true });
+    } else {
+      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+    }
+  };
+
+  const saveScrollNow = () => {
+    if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveTimer.current = null;
+    try {
+      window.history.replaceState({ ...(window.history.state || {}), scrollY: window.scrollY }, "");
+    } catch {
+      // replaceState can throw if rate-limited; position memory is best-effort.
+    }
+  };
+
+  const cancelPendingSave = () => {
+    if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveTimer.current = null;
+  };
 
   // Jump to top on tab switches (pushState doesn't fire hashchange, so we do it here).
-  const scrollTopInstant = () => {
-    if (lenis) lenis.scrollTo(0, { immediate: true });
-    else window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-  };
+  const scrollTopInstant = () => scrollToY(0);
 
   // #1 — track scroll so the fixed header can (a) swap from blend-mode transparency to a
   // solid, always-legible blurred bar once the user leaves the very top, and (b) hide when
@@ -59,16 +91,29 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       if (y > 120 && y > lastScrollY.current) setNavHidden(true);
       else if (y < lastScrollY.current) setNavHidden(false);
       lastScrollY.current = y;
+      // Remember this entry's position once scrolling settles (debounced: replaceState is rate-limited).
+      if (saveTimer.current) window.clearTimeout(saveTimer.current);
+      saveTimer.current = window.setTimeout(saveScrollNow, 150);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelPendingSave();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
   }, []);
 
   // #4 — pointer-capable desktop devices auto-open the nav menus on hover.
   const canHover = () =>
     typeof window !== "undefined" &&
     window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)").matches;
+
+  // Mobile/touch: freeze the page behind an open nav menu (desktop hover menus never lock).
+  useModalScrollLock((isDropdownOpen || isWorkDropdownOpen) && !canHover());
 
   const openMenuOnHover = (which: "about" | "work") => {
     if (!canHover()) return;
@@ -218,10 +263,19 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
         setActiveTab("project");
       } else if (hash.startsWith("admin")) {
         // Handled by top-level Admin router
+        return;
       } else {
         setActiveTab("404");
         updatePageMetadata("404");
       }
+
+      // Fires for Back/Forward, reloads and `location.hash = …` links (even to the same hash).
+      // A saved position means we're returning to a visited entry → restore it; otherwise → top.
+      // Wait two frames so the new tab has rendered and Lenis knows the new page height.
+      cancelPendingSave();
+      const saved = window.history.state?.scrollY;
+      const target = typeof saved === "number" ? saved : 0;
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollToY(target)));
     };
 
     window.addEventListener("hashchange", handleHashChange);
@@ -233,9 +287,11 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     };
   }, []);
 
-  const handleNavClick = (tab: "home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "personal" | "company", targetId?: string) => {
+  const handleNavClick = (tab: "home" | "about" | "work" | "uses" | "privacy" | "faq" | "contact" | "404" | "products" | "services" | "personal" | "company") => {
     setIsDropdownOpen(false);
     setIsWorkDropdownOpen(false);
+    // Store where the reader was on the page they're leaving, so Back returns them there.
+    saveScrollNow();
 
     if (tab === "products") {
       setActiveTab("work");
@@ -269,16 +325,6 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       window.history.pushState(null, "", `#${tab}`);
       scrollTopInstant();
       updatePageMetadata(tab as any);
-    }
-
-    if (targetId) {
-      setTimeout(() => {
-        const el = document.getElementById(targetId);
-        if (el) {
-          if (lenis) lenis.scrollTo(el, { offset: -80 });
-          else el.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 100);
     }
   };
 
