@@ -105,6 +105,18 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
   React.useEffect(() => {
     if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+    // Lenis keeps gliding ~1s after the wheel stops, so the debounced save may not have run yet when
+    // the reader clicks a link. Save immediately on any press, before the navigation leaves this entry.
+    const saveOnIntent = (e: Event) => {
+      if (e instanceof KeyboardEvent && e.key !== "Enter" && e.key !== " ") return;
+      saveScrollNow();
+    };
+    document.addEventListener("pointerdown", saveOnIntent, { capture: true, passive: true });
+    document.addEventListener("keydown", saveOnIntent, { capture: true });
+    return () => {
+      document.removeEventListener("pointerdown", saveOnIntent, { capture: true });
+      document.removeEventListener("keydown", saveOnIntent, { capture: true });
+    };
   }, []);
 
   // #4 — pointer-capable desktop devices auto-open the nav menus on hover.
@@ -275,7 +287,43 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
       cancelPendingSave();
       const saved = window.history.state?.scrollY;
       const target = typeof saved === "number" ? saved : 0;
-      requestAnimationFrame(() => requestAnimationFrame(() => scrollToY(target)));
+      // The incoming page may render in stages (loading state → content → images), so the document can
+      // be too short at first and the browser clamps the scroll. Retry each frame until we land, for up
+      // to 3s — but stop the moment the reader scrolls themselves, so we never fight them.
+      const startedAt = performance.now();
+      let userTookOver = false;
+      const stop = () => {
+        userTookOver = true;
+      };
+      const opts = { capture: true, passive: true, once: true } as const;
+      window.addEventListener("wheel", stop, opts);
+      window.addEventListener("touchstart", stop, opts);
+      window.addEventListener("keydown", stop, opts);
+      const cleanup = () => {
+        window.removeEventListener("wheel", stop, opts);
+        window.removeEventListener("touchstart", stop, opts);
+        window.removeEventListener("keydown", stop, opts);
+      };
+      const attempt = () => {
+        if (userTookOver) return cleanup();
+        if (target === 0) {
+          scrollToY(0);
+        } else {
+          // Native instant scroll with Lenis paused: Lenis can clamp to a cached page height that lags
+          // a page that just grew. stop() → set → start() makes Lenis adopt the real position.
+          const l = lenisRef.current;
+          l?.stop();
+          window.scrollTo({ top: target, behavior: "instant" as ScrollBehavior });
+          l?.resize();
+          l?.start();
+        }
+        if (Math.abs(window.scrollY - target) > 2 && performance.now() - startedAt < 3000) {
+          requestAnimationFrame(attempt);
+        } else {
+          cleanup();
+        }
+      };
+      requestAnimationFrame(attempt);
     };
 
     window.addEventListener("hashchange", handleHashChange);
