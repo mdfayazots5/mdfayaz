@@ -14,7 +14,7 @@ import { ProductsPage } from "./ProductsPage";
 import { ServicesPage } from "./ServicesPage";
 import { ProjectDetailPage } from "./ProjectDetailPage";
 import { WorkExperience } from "./WorkExperience";
-import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Briefcase, FileText } from "lucide-react";
+import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDown, Briefcase, FileText, Mail } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { ThemeToggle } from "./ThemeToggle";
 import { SiteSettings, CompanyProfile } from "../models/portfolio.model";
@@ -313,9 +313,12 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 setIsWorkDropdownOpen(false);
                 setIsDropdownOpen(!isDropdownOpen);
               }}
-              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["home", "about", "privacy", "faq"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
+              className={`cursor-pointer uppercase py-2 transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["home", "about", "work", "project", "products"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
-              <span>Home</span>
+              {/* `uppercase` must sit on the <button>: browser UA styles reset text-transform on
+                  buttons, so it does not inherit from the nav wrapper. -mr cancels the trailing
+                  letter-spacing so the chevron gap matches gap-1.5. */}
+              <span className="-mr-[0.3em]">Explore</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
@@ -330,9 +333,9 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 setIsDropdownOpen(false);
                 setIsWorkDropdownOpen(!isWorkDropdownOpen);
               }}
-              className={`cursor-pointer transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || ["work", "uses", "project"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
+              className={`cursor-pointer uppercase py-2 transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || ["uses", "faq", "privacy", "contact"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
             >
-              <span>Work</span>
+              <span className="-mr-[0.3em]">Info</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
@@ -609,7 +612,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               {/* Explore column */}
               <div className="flex flex-col gap-2.5">
                 <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Explore</span>
-                <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
+                <div className="flex flex-col text-[11px] font-semibold text-text-secondary">
                   {[
                     { label: "Home", tab: "home" as const },
                     { label: "About", tab: "about" as const },
@@ -619,7 +622,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                     <button
                       key={l.label}
                       onClick={() => handleNavClick(l.tab)}
-                      className="text-left hover:text-accent transition-colors w-fit"
+                      className="text-left py-1 hover:text-accent transition-colors w-fit"
                     >
                       {l.label}
                     </button>
@@ -630,7 +633,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               {/* Info column */}
               <div className="flex flex-col gap-2.5">
                 <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Info</span>
-                <div className="flex flex-col gap-1.5 text-[11px] font-semibold text-text-secondary">
+                <div className="flex flex-col text-[11px] font-semibold text-text-secondary">
                   {[
                     { label: "Uses", tab: "uses" as const },
                     { label: "FAQ", tab: "faq" as const },
@@ -639,7 +642,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                     <button
                       key={l.label}
                       onClick={() => handleNavClick(l.tab)}
-                      className="text-left hover:text-accent transition-colors w-fit"
+                      className="text-left py-1 hover:text-accent transition-colors w-fit"
                     >
                       {l.label}
                     </button>
@@ -652,19 +655,19 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 <span className="text-[10px] font-bold text-text-primary uppercase tracking-[0.25em]">Contact</span>
                 {/* Mobile: flow items horizontally so they fill the full width (no empty gap).
                     Desktop: stack vertically like the other columns. */}
-                <div className="flex flex-row flex-wrap items-center gap-x-6 gap-y-1.5 md:flex-col md:items-start md:gap-1.5 text-[11px] font-semibold text-text-secondary">
-                  <button onClick={() => handleNavClick("contact")} className="text-left hover:text-accent transition-colors w-fit">
+                <div className="flex flex-row flex-wrap items-center gap-x-6 md:flex-col md:items-start text-[11px] font-semibold text-text-secondary">
+                  <button onClick={() => handleNavClick("contact")} className="text-left py-1 hover:text-accent transition-colors w-fit">
                     Start a conversation
                   </button>
-                  <a href={`mailto:${contactEmail}`} className="hover:text-accent transition-colors break-all">
+                  <a href={`mailto:${contactEmail}`} className="py-1 hover:text-accent transition-colors break-all">
                     {contactEmail}
                   </a>
                   {contactPhone && (
-                    <a href={contactPhoneHref} className="hover:text-accent transition-colors w-fit">
+                    <a href={contactPhoneHref} className="py-1 hover:text-accent transition-colors w-fit">
                       {contactPhone}
                     </a>
                   )}
-                  <span className="text-text-secondary/80 uppercase tracking-[0.15em] text-[10px]">
+                  <span className="py-1 text-text-secondary/80 uppercase tracking-[0.15em] text-[10px]">
                     {(settings?.location || master.candidate.location)}
                   </span>
                 </div>
@@ -739,35 +742,34 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  handleNavClick("privacy");
+                  handleNavClick("company");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Shield size={15} />
+                  <Briefcase size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Privacy Policy</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">See how we handle your data</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Experience</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Companies I've worked with and shipped for</p>
                 </div>
               </button>
 
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  handleNavClick("faq");
+                  handleNavClick("products");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
               >
                 <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <HelpCircle size={15} />
+                  <Wrench size={15} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">FAQ</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Common questions and answers</p>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Projects</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Personal builds and side projects I own</p>
                 </div>
               </button>
-
             </div>
           </div>
         </>
@@ -792,38 +794,6 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
               <button
                 onClick={() => {
                   setIsWorkDropdownOpen(false);
-                  handleNavClick("company");
-                }}
-                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
-              >
-                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Briefcase size={15} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Experience</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Companies I've worked with and shipped for</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsWorkDropdownOpen(false);
-                  handleNavClick("products");
-                }}
-                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
-              >
-                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
-                  <Wrench size={15} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Projects</h4>
-                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Personal builds and side projects I own</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsWorkDropdownOpen(false);
                   handleNavClick("uses");
                 }}
                 className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
@@ -834,6 +804,54 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 <div>
                   <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Uses</h4>
                   <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Tools, gear, and software I use daily</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsWorkDropdownOpen(false);
+                  handleNavClick("faq");
+                }}
+                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
+              >
+                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
+                  <HelpCircle size={15} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">FAQ</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Common questions and answers</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsWorkDropdownOpen(false);
+                  handleNavClick("privacy");
+                }}
+                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
+              >
+                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
+                  <Shield size={15} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Privacy Policy</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">See how we handle your data</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsWorkDropdownOpen(false);
+                  handleNavClick("contact");
+                }}
+                className="group flex items-start gap-3 p-2.5 rounded-2xl hover:bg-surface/80 transition-all duration-300 cursor-pointer text-left w-full"
+              >
+                <div className="p-2 bg-accent/10 rounded-xl text-accent group-hover:bg-accent/20 transition-colors shrink-0">
+                  <Mail size={15} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-text-primary group-hover:text-accent transition-colors leading-normal uppercase tracking-wider">Contact</h4>
+                  <p className="text-[10px] text-text-secondary leading-normal font-medium mt-0.5">Start a conversation or send a message</p>
                 </div>
               </button>
             </div>
