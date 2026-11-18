@@ -4,7 +4,7 @@ import { readJson, updateCollection } from '../utils/store';
 import { prefixedId } from '../utils/id';
 import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
-import { jsonResponse, errorResponse, notFoundResponse, PUBLIC_CACHE } from '../response';
+import { jsonResponse, errorResponse, notFoundResponse, publicJsonResponse } from '../response';
 
 const EDITABLE_CATEGORY_FIELDS: readonly (keyof UsesCategory)[] = ['name', 'subtitle', 'published'];
 const EDITABLE_ITEM_FIELDS: readonly (keyof UsesItem)[] = ['name', 'description', 'tag'];
@@ -12,7 +12,7 @@ const EDITABLE_ITEM_FIELDS: readonly (keyof UsesItem)[] = ['name', 'description'
 export async function handleGetUses(request: Request, env: Env): Promise<Response> {
   try {
     const uses = await readJson<UsesCategory[]>(env, R2_KEYS.USES, []);
-    return jsonResponse(request, env, uses, 200, PUBLIC_CACHE);
+    return await publicJsonResponse(request, env, uses);
   } catch (error) {
     return errorResponse(request, env, `Failed to read uses: ${(error as Error).message}`, 500);
   }

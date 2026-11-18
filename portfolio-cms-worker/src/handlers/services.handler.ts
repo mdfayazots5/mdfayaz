@@ -4,7 +4,7 @@ import { readJson, updateCollection } from '../utils/store';
 import { nextNumericId } from '../utils/id';
 import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
-import { jsonResponse, errorResponse, notFoundResponse, PUBLIC_CACHE } from '../response';
+import { jsonResponse, errorResponse, notFoundResponse, publicJsonResponse } from '../response';
 
 const EDITABLE_SERVICE_FIELDS: readonly (keyof Service)[] = [
   'name', 'tagline', 'description', 'highlights', 'icon', 'status', 'displayOrder',
@@ -13,7 +13,7 @@ const EDITABLE_SERVICE_FIELDS: readonly (keyof Service)[] = [
 export async function handleGetServices(request: Request, env: Env): Promise<Response> {
   try {
     const services = await readJson<Service[]>(env, R2_KEYS.SERVICES, []);
-    return jsonResponse(request, env, services, 200, PUBLIC_CACHE);
+    return await publicJsonResponse(request, env, services);
   } catch (error) {
     return errorResponse(request, env, `Failed to read services: ${(error as Error).message}`, 500);
   }

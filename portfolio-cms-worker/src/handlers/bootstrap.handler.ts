@@ -1,7 +1,7 @@
 import type { Env, Entry, Service, CompanyProfile, AboutProfile, SiteSettings } from '../types';
 import { R2_KEYS } from '../types';
 import { readJson } from '../utils/store';
-import { jsonResponse, errorResponse, PUBLIC_CACHE } from '../response';
+import { errorResponse, publicJsonResponse } from '../response';
 import { DEFAULT_SETTINGS } from './settings.handler';
 import { DEFAULT_ABOUT } from './about.handler';
 
@@ -19,7 +19,7 @@ export async function handleGetBootstrap(request: Request, env: Env): Promise<Re
       readJson<Service[]>(env, R2_KEYS.SERVICES, []),
       readJson<CompanyProfile[]>(env, R2_KEYS.COMPANIES, []),
     ]);
-    return jsonResponse(request, env, { settings, entries, about, services, companies }, 200, PUBLIC_CACHE);
+    return await publicJsonResponse(request, env, { settings, entries, about, services, companies });
   } catch (error) {
     return errorResponse(request, env, `Failed to read bootstrap: ${(error as Error).message}`, 500);
   }

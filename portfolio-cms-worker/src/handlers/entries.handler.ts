@@ -4,7 +4,7 @@ import { readJson, updateCollection } from '../utils/store';
 import { nextNumericId } from '../utils/id';
 import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
-import { jsonResponse, errorResponse, notFoundResponse, PUBLIC_CACHE } from '../response';
+import { jsonResponse, errorResponse, notFoundResponse, publicJsonResponse } from '../response';
 
 // Fields a client is allowed to set/change on an Entry. `id` is server-owned.
 const EDITABLE_ENTRY_FIELDS: readonly (keyof Entry)[] = [
@@ -17,7 +17,7 @@ const EDITABLE_ENTRY_FIELDS: readonly (keyof Entry)[] = [
 export async function handleGetEntries(request: Request, env: Env): Promise<Response> {
   try {
     const entries = await readJson<Entry[]>(env, R2_KEYS.ENTRIES, []);
-    return jsonResponse(request, env, entries, 200, PUBLIC_CACHE);
+    return await publicJsonResponse(request, env, entries);
   } catch (error) {
     return errorResponse(request, env, `Failed to read entries: ${(error as Error).message}`, 500);
   }
@@ -29,7 +29,7 @@ export async function handleGetEntry(request: Request, env: Env, id: string): Pr
     const entries = await readJson<Entry[]>(env, R2_KEYS.ENTRIES, []);
     const entry = entries.find((item) => item.id === numericId);
     if (!entry) return notFoundResponse(request, env, 'Entry');
-    return jsonResponse(request, env, entry, 200, PUBLIC_CACHE);
+    return await publicJsonResponse(request, env, entry);
   } catch (error) {
     return errorResponse(request, env, `Failed to read entry: ${(error as Error).message}`, 500);
   }
