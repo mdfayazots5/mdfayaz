@@ -107,6 +107,9 @@ export interface SiteSettings {
   heroBackground?: { desktop?: string; mobile?: string };
   // Admin-selected default palette for first-time visitors. Optional; absence = "slate-classic".
   themeSet?: string;
+  // Home page copy. Optional; empty = frontend defaults. `{years}` is replaced with yearsExperience.
+  hiringStrengths?: string[];
+  credibilityNotes?: { title: string; desc: string }[];
 }
 
 export interface LoginRequest { username: string; password: string; }

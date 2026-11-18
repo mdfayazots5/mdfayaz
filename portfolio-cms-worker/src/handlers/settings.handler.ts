@@ -18,6 +18,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
   profileImage: { desktop: '', mobile: '' },
   heroBackground: { desktop: '', mobile: '' },
   themeSet: 'slate-classic',
+  hiringStrengths: [],
+  credibilityNotes: [],
 };
 
 export async function handleGetSettings(request: Request, env: Env): Promise<Response> {

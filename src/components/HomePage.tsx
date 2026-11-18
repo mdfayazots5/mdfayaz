@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { PortfolioData, AboutProfile, SiteSettings, Service } from "../models/portfolio.model";
 import { getAboutProfile, getSiteSettings, getServices } from "../services/api";
+import { DEFAULT_HIRING_STRENGTHS, DEFAULT_CREDIBILITY_NOTES, fillYears } from "../config/home-content";
 import { LoadingScreen } from "./LoadingScreen";
 import { SectionError } from "./SectionState";
 
@@ -98,29 +99,13 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
         desc: g.items.join(" · "),
       }));
 
-  const years = Math.floor(parseFloat(settings.yearsExperience));
-  const yearsLabel = Number.isFinite(years) && years > 0 ? `${years}+` : "3+";
-
-  const strengths = [
-    `${yearsLabel} years of production .NET delivery`,
-    "EF Core, SQL Server tuning & clean, layered architecture",
-    "Team-lead experience with code reviews and delivery ownership",
-  ];
-
-  const credibilityNotes = [
-    {
-      title: "Architecture-first delivery",
-      desc: "I architect layered .NET systems around clean APIs, stable data models, and maintainable module boundaries.",
-    },
-    {
-      title: "Testing and review discipline",
-      desc: "I use code reviews, testable service design, and unit-test-friendly patterns to keep production changes controlled.",
-    },
-    {
-      title: "Technical writing",
-      desc: "I document implementation decisions and share notes on full-stack engineering, tools, and delivery practices.",
-    },
-  ];
+  // CMS-managed copy (Admin → Settings → Home Page Copy); defaults until the admin saves some.
+  const cmsStrengths = (settings.hiringStrengths || []).filter((s) => s.trim());
+  const strengths = (cmsStrengths.length ? cmsStrengths : DEFAULT_HIRING_STRENGTHS).map((s) =>
+    fillYears(s, settings.yearsExperience)
+  );
+  const cmsNotes = (settings.credibilityNotes || []).filter((n) => n.title.trim());
+  const credibilityNotes = cmsNotes.length ? cmsNotes : DEFAULT_CREDIBILITY_NOTES;
 
   const openProject = (p: any) => {
     window.location.hash = `#project/${p.id}`;

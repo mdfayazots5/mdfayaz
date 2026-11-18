@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { getSiteSettings, updateSiteSettings, uploadFile } from "../../services/api";
-import { SiteSettings, ThemeSet } from "../../models/portfolio.model";
+import { SiteSettings, ThemeSet, CredibilityNote } from "../../models/portfolio.model";
 import { normalizeThemeSet } from "../../config/theme-sets";
+import { DEFAULT_HIRING_STRENGTHS, DEFAULT_CREDIBILITY_NOTES } from "../../config/home-content";
 import { ThemeSetPicker } from "../ThemeSetPicker";
 import { useTheme } from "../ThemeProvider";
 import { LoadingScreen } from "../LoadingScreen";
@@ -24,7 +25,8 @@ import {
   Calendar,
   Plane,
   BookOpen,
-  Palette
+  Palette,
+  LayoutTemplate
 } from "lucide-react";
 
 export const AdminSettingsPage: React.FC = () => {
@@ -46,7 +48,11 @@ export const AdminSettingsPage: React.FC = () => {
   const [contactEmail, setContactEmail] = useState("");
   const [resumeUrl, setResumeUrl] = useState("");
   const [tagline, setTagline] = useState("");
-  
+
+  // Home page copy: "What I bring" bullets + "Technical proof" cards.
+  const [hiringStrengths, setHiringStrengths] = useState<string[]>([]);
+  const [credibilityNotes, setCredibilityNotes] = useState<CredibilityNote[]>([]);
+
   // Social links as array of pairs for dynamic list editing
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
   
@@ -100,6 +106,9 @@ export const AdminSettingsPage: React.FC = () => {
           setResumeUrl(data.resumeUrl || "");
           setTagline(data.tagline || "");
           setDefaultThemeSet(normalizeThemeSet(data.themeSet));
+          // Prefill with the live defaults when nothing is saved yet, so the editor matches the site.
+          setHiringStrengths(data.hiringStrengths?.length ? data.hiringStrengths : DEFAULT_HIRING_STRENGTHS);
+          setCredibilityNotes(data.credibilityNotes?.length ? data.credibilityNotes : DEFAULT_CREDIBILITY_NOTES);
 
           // Map object to list of pairs
           const pairsList = Object.entries(data.socialLinks || {}).map(([key, value]) => ({
@@ -181,7 +190,11 @@ export const AdminSettingsPage: React.FC = () => {
         // an uploaded profile image / hero background.
         profileImage: settings.profileImage,
         heroBackground: settings.heroBackground,
-        themeSet: defaultThemeSet
+        themeSet: defaultThemeSet,
+        hiringStrengths: hiringStrengths.map((s) => s.trim()).filter(Boolean),
+        credibilityNotes: credibilityNotes
+          .map((n) => ({ title: n.title.trim(), desc: n.desc.trim() }))
+          .filter((n) => n.title)
       };
 
       const success = await updateSiteSettings(updatedPayload);
@@ -468,6 +481,111 @@ export const AdminSettingsPage: React.FC = () => {
               className="w-full px-4 py-3 bg-background border border-border rounded-xl text-xs font-sans focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all leading-relaxed"
               placeholder="e.g. Scalable enterprise systems designed from database to UI — modular."
             />
+          </div>
+        </section>
+
+        {/* Home Page Copy — hiring card bullets + technical proof cards */}
+        <section className="bg-surface p-6 rounded-2xl border border-border space-y-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-border/60">
+            <LayoutTemplate className="text-accent" size={16} />
+            <h3 className="text-sm font-bold uppercase tracking-wider">Home Page Copy</h3>
+          </div>
+
+          {/* What I bring */}
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                "Open to roles" card — What I bring
+              </label>
+              <button
+                type="button"
+                onClick={() => setHiringStrengths((prev) => [...prev, ""])}
+                className="flex items-center gap-1 px-3 py-1.5 border border-border bg-background hover:border-accent/40 text-text-primary hover:text-accent rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer"
+              >
+                <Plus size={12} />
+                <span>Add Bullet</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-text-secondary">
+              Use <code className="font-mono text-accent">{"{years}"}</code> to insert the Years of Experience stat (e.g. "{"{years}"} years of production .NET delivery").
+            </p>
+            {hiringStrengths.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item}
+                  onChange={(e) =>
+                    setHiringStrengths((prev) => prev.map((s, i) => (i === index ? e.target.value : s)))
+                  }
+                  className="flex-1 px-4 py-3 bg-background border border-border rounded-xl text-xs focus:ring-1 focus:ring-accent focus:border-accent outline-none text-text-primary transition-all"
+                  placeholder="e.g. EF Core, SQL Server tuning & clean, layered architecture"
+                />
+                <button
+                  type="button"
+                  onClick={() => setHiringStrengths((prev) => prev.filter((_, i) => i !== index))}
+                  className="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
+                  title="Remove bullet"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Technical proof */}
+          <div className="space-y-3 pt-2">
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-secondary">
+                "Technical proof" cards
+              </label>
+              <button
+                type="button"
+                onClick={() => setCredibilityNotes((prev) => [...prev, { title: "", desc: "" }])}
+                className="flex items-center gap-1 px-3 py-1.5 border border-border bg-background hover:border-accent/40 text-text-primary hover:text-accent rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer"
+              >
+                <Plus size={12} />
+                <span>Add Card</span>
+              </button>
+            </div>
+            {credibilityNotes.map((note, index) => (
+              <div key={index} className="flex items-start gap-2 bg-background p-4 rounded-xl border border-border/60">
+                <div className="flex-1 space-y-2">
+                  <input
+                    type="text"
+                    value={note.title}
+                    onChange={(e) =>
+                      setCredibilityNotes((prev) =>
+                        prev.map((n, i) => (i === index ? { ...n, title: e.target.value } : n))
+                      )
+                    }
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-xs font-bold outline-none text-text-primary focus:ring-1 focus:ring-accent"
+                    placeholder="Card title, e.g. Architecture-first delivery"
+                  />
+                  <textarea
+                    value={note.desc}
+                    onChange={(e) =>
+                      setCredibilityNotes((prev) =>
+                        prev.map((n, i) => (i === index ? { ...n, desc: e.target.value } : n))
+                      )
+                    }
+                    rows={2}
+                    className="w-full px-3 py-2 bg-surface border border-border rounded-lg text-xs outline-none text-text-primary focus:ring-1 focus:ring-accent leading-relaxed"
+                    placeholder="One or two sentences describing the proof point"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCredibilityNotes((prev) => prev.filter((_, i) => i !== index))}
+                  className="p-2 text-text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
+                  title="Remove card"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            ))}
+            <p className="text-[11px] text-text-secondary">
+              Leave a list empty to show the built-in defaults. Three cards fit the desktop grid best.
+            </p>
           </div>
         </section>
 

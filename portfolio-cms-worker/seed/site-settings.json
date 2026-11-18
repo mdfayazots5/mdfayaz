@@ -23,5 +23,24 @@
     "desktop": "",
     "mobile": ""
   },
-  "themeSet": "slate-classic"
+  "themeSet": "slate-classic",
+  "hiringStrengths": [
+    "{years} years of production .NET delivery",
+    "EF Core, SQL Server tuning & clean, layered architecture",
+    "Team-lead experience with code reviews and delivery ownership"
+  ],
+  "credibilityNotes": [
+    {
+      "title": "Architecture-first delivery",
+      "desc": "I architect layered .NET systems around clean APIs, stable data models, and maintainable module boundaries."
+    },
+    {
+      "title": "Testing and review discipline",
+      "desc": "I use code reviews, testable service design, and unit-test-friendly patterns to keep production changes controlled."
+    },
+    {
+      "title": "Technical writing",
+      "desc": "I document implementation decisions and share notes on full-stack engineering, tools, and delivery practices."
+    }
+  ]
 }

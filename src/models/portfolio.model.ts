@@ -164,6 +164,16 @@ export interface SiteSettings {
   // Admin-selected default palette for first-time visitors. Optional — absence means
   // "slate-classic". A returning visitor's local preference (localStorage) overrides this.
   themeSet?: ThemeSet;
+
+  // Home page copy. Optional — absent/empty means the defaults in `src/config/home-content.ts`.
+  // `{years}` in a strength is replaced with the `yearsExperience` stat (e.g. "3+").
+  hiringStrengths?: string[];          // "Open to roles" card → "What I bring" bullets
+  credibilityNotes?: CredibilityNote[]; // "Technical proof" cards
+}
+
+export interface CredibilityNote {
+  title: string;
+  desc: string;
 }
 
 /**

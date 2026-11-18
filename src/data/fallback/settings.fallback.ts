@@ -1,4 +1,5 @@
 import { SiteSettings } from "../../models/portfolio.model";
+import { DEFAULT_HIRING_STRENGTHS, DEFAULT_CREDIBILITY_NOTES } from "../../config/home-content";
 
 export const SETTINGS_FALLBACK: SiteSettings = {
   name: "Mohammed Fayaz",
@@ -19,5 +20,7 @@ export const SETTINGS_FALLBACK: SiteSettings = {
   tagline: "Building scalable enterprise systems with .NET Core & Angular | 3+ years delivering high-performance Healthcare, HRMS, and ERP solutions.",
   profileImage: { desktop: "", mobile: "" },
   heroBackground: { desktop: "", mobile: "" },
-  themeSet: "slate-classic"
+  themeSet: "slate-classic",
+  hiringStrengths: DEFAULT_HIRING_STRENGTHS,
+  credibilityNotes: DEFAULT_CREDIBILITY_NOTES
 };
