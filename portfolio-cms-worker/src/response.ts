@@ -8,9 +8,10 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
 };
 
-// L2: CMS JSON must reflect R2 writes immediately, especially in the admin editor.
-// Browser/edge caching here can make a saved company or entry look like it did not bind.
-export const PUBLIC_CACHE = 'no-store';
+// L2: public CMS JSON may be cached briefly by browsers. The admin editor always requests with
+// `cache: "no-store"` (see src/services/api.ts), so saved changes still appear immediately there;
+// public visitors see edits within ~60s. `Vary: Origin` (cors.ts) keeps CORS responses separate.
+export const PUBLIC_CACHE = 'public, max-age=60, stale-while-revalidate=600';
 const NO_STORE = 'no-store';
 
 export function jsonResponse<T>(

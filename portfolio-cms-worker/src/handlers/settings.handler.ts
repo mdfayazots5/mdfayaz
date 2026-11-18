@@ -3,7 +3,7 @@ import { R2_KEYS } from '../types';
 import { readJson, writeJson } from '../utils/store';
 import { jsonResponse, errorResponse, PUBLIC_CACHE } from '../response';
 
-const DEFAULT_SETTINGS: SiteSettings = {
+export const DEFAULT_SETTINGS: SiteSettings = {
   name: '',
   role: '',
   location: '',

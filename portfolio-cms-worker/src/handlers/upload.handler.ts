@@ -54,16 +54,21 @@ export async function handleUpload(request: Request, env: Env): Promise<Response
       },
     });
 
-    const url = `${env.R2_PUBLIC_URL}/${key}`;
+    // Served via this Worker's /media route (R2 binding) instead of the rate-limited r2.dev URL.
+    const url = `${new URL(request.url).origin}/media/${key}`;
     return jsonResponse(request, env, { url }, 201);
   } catch (error) {
     return errorResponse(request, env, `Failed to upload file: ${(error as Error).message}`, 500);
   }
 }
 
+/** Accepts a bare key, a legacy r2.dev URL, or a `<worker>/media/<key>` URL and returns the key. */
 function stripPublicUrlPrefix(value: string, env: Env): string {
   const prefix = `${env.R2_PUBLIC_URL}/`;
-  return value.startsWith(prefix) ? value.slice(prefix.length) : value;
+  if (value.startsWith(prefix)) return value.slice(prefix.length);
+  const mediaIdx = value.indexOf('/media/assets/');
+  if (mediaIdx !== -1) return value.slice(mediaIdx + '/media/'.length);
+  return value;
 }
 
 export async function handleDeleteUpload(request: Request, env: Env, key: string): Promise<Response> {

@@ -42,6 +42,8 @@ import {
 import { handleGetAbout, handleUpdateAbout } from './handlers/about.handler';
 import { handleGetSettings, handleUpdateSettings } from './handlers/settings.handler';
 import { handleUpload, handleDeleteUpload } from './handlers/upload.handler';
+import { handleGetBootstrap } from './handlers/bootstrap.handler';
+import { handleGetMedia } from './handlers/media.handler';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'DELETE']);
 
@@ -61,6 +63,14 @@ async function route(request: Request, env: Env, segments: string[], method: str
   if (method === 'GET' && segments.length === 1 && segments[0] === 'health') {
     const r2Ok = await checkR2(env);
     return jsonResponse(request, env, { status: r2Ok ? 'ok' : 'degraded', r2: r2Ok }, r2Ok ? 200 : 503);
+  }
+
+  // Public, read-only: combined home payload + uploaded media.
+  if (method === 'GET' && segments.length === 1 && segments[0] === 'bootstrap') {
+    return handleGetBootstrap(request, env);
+  }
+  if (method === 'GET' && segments[0] === 'media' && segments.length >= 2) {
+    return handleGetMedia(request, env, segments.slice(1).map(decodeURIComponent).join('/'));
   }
 
   if (method === 'POST' && segments[0] === 'auth' && segments[1] === 'login') {

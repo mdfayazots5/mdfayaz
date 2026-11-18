@@ -3,7 +3,7 @@ import { R2_KEYS } from '../types';
 import { readJson, writeJson } from '../utils/store';
 import { jsonResponse, errorResponse, PUBLIC_CACHE } from '../response';
 
-const DEFAULT_ABOUT: AboutProfile = {
+export const DEFAULT_ABOUT: AboutProfile = {
   tagline: '',
   architectBio: '',
   leadBio: '',
