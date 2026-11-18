@@ -51,7 +51,7 @@ Keep these layers strictly isolated. A change to one layer should not force edit
 | --- | --- | --- |
 | **Model / Domain** | `src/models/portfolio.model.ts` | All TypeScript interfaces (`Entry`, `Service`, `Project`, `AboutProfile`, `SiteSettings`, …). Single source of type truth. |
 | **Seed data** | `src/data/fallback/*.fallback.ts`, `portfolio-cms-worker/seed/*.json` | Source material for initial R2 migration/seeding only. Runtime content comes from the Worker/R2 API. |
-| **Service / API** | `src/services/api.ts` | All persistence. CRUD for entries, services, FAQ, uses, privacy, about, settings + auth. |
+| **Service / API** | `src/services/api.ts` | All persistence. CRUD for entries, services, FAQ, uses, privacy, about, settings + auth; `/bootstrap` load + content snapshot. |
 | **Data hook** | `src/hooks/usePortfolioData.ts` | Bridges the API layer into React (`{ data, loading, error }`). |
 | **Presentation** | `src/components/*.tsx` | Pure rendering. Public site + `components/admin/*` CMS. One component = one concern (e.g. `ProjectCard`, `ServiceCard`). |
 | **Composition** | `src/PortfolioApp.tsx`, `Portfolio5.tsx` | Routing, section assembly, theme. |
@@ -67,7 +67,15 @@ The app is **R2-backed for CMS content**. `src/services/api.ts` is the gatekeepe
 
 - `VITE_API_BASE_URL` is required for public content, admin CRUD, and media uploads.
 - All CMS reads and writes go through the Cloudflare Worker API backed by R2 JSON objects.
-- `localStorage` is allowed only for client-local state such as `admin_session` and theme preference.
+- `localStorage` is allowed only for client-local state such as `admin_session` and theme preference,
+  plus the versioned public-content snapshot (`portfolio_snapshot_v1`) managed solely by `api.ts`.
+  The snapshot is a stale-while-revalidate cache, never the source of truth: public pages render from
+  it instantly, `/bootstrap` refreshes it in the background, admin routes never read it, and every CMS
+  mutation clears it.
+- Public home content loads via `loadPublicContent()` → Worker `GET /bootstrap` (settings, entries, about,
+  services, companies in one request), which seeds the in-memory read cache for the individual getters.
+- Uploaded media is served from the Worker's `GET /media/<key>` route; legacy `pub-*.r2.dev` URLs are
+  rewritten to it in `api.ts`.
 - `src/data/fallback/*.fallback.ts` and `portfolio-cms-worker/seed/*.json` are migration/seed sources, not runtime fallbacks.
 
 **Conventions when extending the API:**
