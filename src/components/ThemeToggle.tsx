@@ -9,12 +9,11 @@ export const ThemeToggle: React.FC = () => {
     <button
       id="theme-toggle-btn"
       onClick={toggleTheme}
-      className="p-1 px-2.5 rounded-full border border-current/25 hover:border-current/50 cursor-pointer transition-all duration-300 outline-none flex items-center justify-center hover:bg-current/10"
+      className="px-3 py-2 rounded-full cursor-pointer transition-colors duration-200 flex items-center justify-center hover:bg-text-primary/[0.06] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
       title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
       aria-label="Toggle theme"
     >
-      {/* Colors inherit from the header via currentColor: white on the blend-mode hero,
-          text-primary on the solid scrolled header and in the light dropdown. */}
+      {/* Rendered as the last segment of the nav's glass capsule; colour inherits text-primary. */}
       <span className="flex items-center gap-1.5">
         {theme === "light" ? (
           <>

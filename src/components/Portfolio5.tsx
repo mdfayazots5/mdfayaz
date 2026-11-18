@@ -328,25 +328,33 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     }
   };
 
+  // Apple-style "liquid glass" surface for nav controls: translucent theme background, strong blur +
+  // saturation, hairline edge, soft drop shadow and a top inner highlight for the glossy rim.
+  const glass = `border border-text-primary/10 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_32px_-12px_rgba(15,23,42,0.35),inset_0_1px_0_rgba(255,255,255,0.45)] transition-colors duration-300 ${
+    scrolled ? "bg-background/75" : "bg-background/45"
+  }`;
+  const navItem = (active: boolean) =>
+    `cursor-pointer uppercase flex items-center gap-1.5 px-3.5 md:px-4 py-2 rounded-full transition-colors duration-200 ${
+      active ? "bg-accent/12 text-accent" : "hover:bg-text-primary/[0.06] hover:text-accent"
+    }`;
+
   const contactEmail = settings?.contactEmail || master.candidate.email;
   const contactPhone = settings?.socialLinks?.mobile || master.candidate.phone || "";
   const contactPhoneHref = contactPhone ? `tel:${contactPhone.replace(/[^\d+]/g, "")}` : "";
 
   return (
     <div className="app-canvas min-h-screen text-text-primary selection:bg-accent selection:text-accent-foreground">
-      {/* Minimal Navigation — transparent (blend) at top, solid blurred bar once scrolled (#1) */}
+      {/* Navigation — "liquid glass" controls floating over the page. Frosted, theme-token surfaces
+          stay legible on any hero photo (the old mix-blend-difference inverted colours: the blue
+          accent rendered orange on light images). Glass firms up slightly once scrolled. */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-[100] px-5 md:px-8 py-5 md:py-7 flex justify-between items-center select-none transition-[transform,background-color,color] duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+        className={`fixed top-0 left-0 right-0 z-[100] px-4 md:px-8 py-4 md:py-6 flex justify-between items-center select-none text-text-primary transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
           navHidden && !isDropdownOpen && !isWorkDropdownOpen ? "-translate-y-full" : "translate-y-0"
-        } ${
-          scrolled
-            ? "bg-background/80 backdrop-blur-md border-b border-border text-text-primary"
-            : "mix-blend-difference text-white"
         }`}
       >
         <button
           type="button"
-          className="group relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-current/50 font-mono text-sm font-bold tracking-tight overflow-hidden cursor-pointer transition-all duration-300 hover:border-accent hover:text-accent hover:-translate-y-0.5 hover:shadow-[0_6px_20px_-8px_rgba(0,0,0,0.4)]"
+          className={`${glass} group relative inline-flex h-11 w-11 items-center justify-center rounded-2xl font-mono text-sm font-bold tracking-tight overflow-hidden cursor-pointer transition-all duration-300 hover:text-accent hover:-translate-y-0.5`}
           onClick={handleBrandClick}
           aria-label="Mohammed Fayaz — home"
         >
@@ -354,7 +362,7 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
           <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-accent/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
           <span className="relative leading-none">MF</span>
         </button>
-        <div className="flex gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-[0.3em] items-center">
+        <div className={`${glass} flex items-center gap-0.5 rounded-full p-1.5 text-[10px] font-bold uppercase tracking-[0.2em]`}>
           <div
             className="relative"
             onMouseEnter={() => openMenuOnHover("about")}
@@ -366,12 +374,12 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 setIsWorkDropdownOpen(false);
                 setIsDropdownOpen(!isDropdownOpen);
               }}
-              className={`cursor-pointer uppercase py-2 transition-colors flex items-center gap-1.5 ${isDropdownOpen || ["home", "about", "work", "project", "products"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
+              className={navItem(isDropdownOpen || ["home", "about", "work", "project", "products"].includes(activeTab))}
             >
               {/* `uppercase` must sit on the <button>: browser UA styles reset text-transform on
                   buttons, so it does not inherit from the nav wrapper. -mr cancels the trailing
                   letter-spacing so the chevron gap matches gap-1.5. */}
-              <span className="-mr-[0.3em]">Explore</span>
+              <span className="-mr-[0.2em]">Explore</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
@@ -386,15 +394,15 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
                 setIsDropdownOpen(false);
                 setIsWorkDropdownOpen(!isWorkDropdownOpen);
               }}
-              className={`cursor-pointer uppercase py-2 transition-colors flex items-center gap-1.5 ${isWorkDropdownOpen || ["uses", "faq", "privacy", "contact"].includes(activeTab) ? "text-accent" : "hover:text-accent"}`}
+              className={navItem(isWorkDropdownOpen || ["uses", "faq", "privacy", "contact"].includes(activeTab))}
             >
-              <span className="-mr-[0.3em]">Info</span>
+              <span className="-mr-[0.2em]">Info</span>
               <ChevronDown size={11} className={`transition-transform duration-300 ${isWorkDropdownOpen ? "rotate-180" : "rotate-0 opacity-50"}`} />
             </button>
           </div>
 
-          {/* Light/Dark theme control — inherits currentColor so it reads on both the
-              blend-mode hero (white) and the solid scrolled bar (text-primary). */}
+          {/* Hairline divider, then the theme control as the capsule's last segment. */}
+          <span aria-hidden="true" className="mx-1 h-5 w-px bg-text-primary/15" />
           <ThemeToggle />
         </div>
       </nav>
