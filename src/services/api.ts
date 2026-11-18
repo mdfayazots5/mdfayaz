@@ -9,8 +9,47 @@ function requireApiBaseUrl(): string {
   return API_BASE_URL;
 }
 
+/** Seconds-since-epoch `exp` from a JWT payload, or null if the token isn't a readable JWT. */
+function tokenExpiry(token: string): number | null {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return typeof payload?.exp === "number" ? payload.exp : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The stored admin JWT, or null when absent/expired (expired tokens are cleared). */
 function getSessionToken(): string | null {
-  return localStorage.getItem("admin_session");
+  const token = localStorage.getItem("admin_session");
+  if (!token) return null;
+  const exp = tokenExpiry(token);
+  if (exp !== null && exp * 1000 <= Date.now()) {
+    localStorage.removeItem("admin_session");
+    try {
+      sessionStorage.setItem("admin_session_expired", "1");
+    } catch {
+      // ignore
+    }
+    return null;
+  }
+  return token;
+}
+
+/** True on CMS admin routes. Admin reads are authenticated (drafts included) and never cached. */
+function onAdminRoute(): boolean {
+  return typeof window !== "undefined" && window.location.hash.toLowerCase().startsWith("#admin");
+}
+
+/** The Worker rejected our token (expired/revoked): clear it and send the admin back to login. */
+function handleSessionExpired(): void {
+  localStorage.removeItem("admin_session");
+  try {
+    sessionStorage.setItem("admin_session_expired", "1");
+  } catch {
+    // ignore
+  }
+  if (onAdminRoute()) window.location.hash = "#admin/login";
 }
 
 function authHeaders(): Record<string, string> {
@@ -19,6 +58,7 @@ function authHeaders(): Record<string, string> {
 }
 
 async function parseJsonResponse<T>(response: Response, path: string): Promise<T> {
+  if (response.status === 401 && path !== "/auth/login") handleSessionExpired();
   if (!response.ok) {
     let detail = response.statusText;
     try {
@@ -55,8 +95,13 @@ function rewriteMediaUrls(json: string): string {
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const baseUrl = requireApiBaseUrl();
   const isRead = !init?.method || init.method === "GET";
+  // Public reads: browser cache + ETag revalidation (Worker sends `no-cache`, so every use is checked).
+  // Admin reads: authenticated (drafts included) and never cached.
+  // `/bootstrap` is always the public view so drafts can never reach the public cache/snapshot.
+  const adminRead = isRead && onAdminRoute() && path !== "/bootstrap";
   const cache: RequestCache = isRead && !isAdminContext() ? "default" : "no-store";
-  const response = await fetch(`${baseUrl}${path}`, { cache, ...init });
+  const headers = adminRead ? { ...authHeaders(), ...(init?.headers as Record<string, string>) } : init?.headers;
+  const response = await fetch(`${baseUrl}${path}`, { cache, ...init, headers });
   if (!isRead || !response.ok || response.status === 204) {
     return parseJsonResponse<T>(response, path);
   }
@@ -106,7 +151,9 @@ async function deleteJson<T>(path: string): Promise<T> {
  */
 const readCache = new Map<string, Promise<unknown>>();
 
-function cachedGet<T>(key: string, loader: () => Promise<T>): Promise<T> {
+function cachedGet<T>(path: string, loader: () => Promise<T>): Promise<T> {
+  // Admin views include drafts, public views don't — keep them in separate cache slots.
+  const key = onAdminRoute() ? `admin:${path}` : path;
   const hit = readCache.get(key);
   if (hit) return hit as Promise<T>;
   const pending = loader().catch((err) => {
@@ -229,6 +276,26 @@ export function loadPublicContent(): Promise<PublicContent> {
   return publicContent;
 }
 
+/**
+ * Long-open tabs: when a visitor comes back to the tab, re-check content (an ETag 304 when nothing
+ * changed) so CMS edits appear without a manual reload. Throttled to once per 30s.
+ */
+let lastVisibleCheck = Date.now();
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible" || onAdminRoute() || !publicContent) return;
+    if (Date.now() - lastVisibleCheck < 30_000) return;
+    lastVisibleCheck = Date.now();
+    const before = JSON.stringify(readContentSnapshot());
+    fetchPublicContent()
+      .then((fresh) => {
+        publicContent = Promise.resolve(fresh);
+        if (JSON.stringify(fresh) !== before) contentListeners.forEach((cb) => cb(fresh));
+      })
+      .catch((err) => console.warn("Content re-check failed:", err));
+  });
+}
+
 /** Subscribe to fresh content arriving after a snapshot render. Returns an unsubscribe fn. */
 export function onContentRefresh(cb: (content: PublicContent) => void): () => void {
   contentListeners.add(cb);
@@ -252,15 +319,29 @@ export async function login(username: string, password: string): Promise<boolean
       password,
     });
     const token =
-      typeof data === "string"
-        ? data
-        : data.token || data.jwt || data.accessToken || data.id_token || JSON.stringify(data);
-    if (!token) return false;
+      typeof data === "string" ? data : data.token || data.jwt || data.accessToken || data.id_token;
+    if (!token) throw new Error("Login response did not include a token");
     localStorage.setItem("admin_session", token);
+    try {
+      sessionStorage.removeItem("admin_session_expired");
+    } catch {
+      // ignore
+    }
     return true;
   } catch (error) {
     console.warn("Remote login failed:", error);
     localStorage.removeItem("admin_session");
+    return false;
+  }
+}
+
+/** True once after the admin session expired (then cleared) — lets the login page explain why. */
+export function consumeSessionExpiredNotice(): boolean {
+  try {
+    const flagged = sessionStorage.getItem("admin_session_expired") === "1";
+    sessionStorage.removeItem("admin_session_expired");
+    return flagged;
+  } catch {
     return false;
   }
 }

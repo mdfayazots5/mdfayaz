@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Shield, Key, User, ArrowLeft, Sun, Moon } from "lucide-react";
-import { login, isAuthenticated } from "../../services/api";
+import { login, isAuthenticated, consumeSessionExpiredNotice } from "../../services/api";
 import { useTheme } from "../ThemeProvider";
 
 export const AdminLoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() =>
+    consumeSessionExpiredNotice() ? "Your session expired. Please sign in again." : null
+  );
   const [loading, setLoading] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
