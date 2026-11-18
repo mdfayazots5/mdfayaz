@@ -499,41 +499,33 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
 
         {/* Contact Section */}
         {activeTab === "home" && (
-          <section id="contact" className="py-12 md:py-24 lg:py-36 px-5 md:px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
+          <section id="contact" className="py-14 md:py-20 lg:py-24 px-5 md:px-8 lg:px-24 text-center bg-surface/30 border-t border-border relative">
             <div className="md:hidden max-w-sm mx-auto space-y-5">
               <h2 className="text-2xl font-luxury font-semibold tracking-tight leading-tight text-text-primary">
                 Ready to talk about a role or project?
               </h2>
               <button
                 onClick={() => handleNavClick("contact")}
-                className="w-full px-5 py-3 bg-text-primary hover:bg-accent text-background hover:text-accent-foreground text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer"
+                className="w-full px-5 py-3 bg-text-primary hover:bg-accent text-background hover:text-accent-foreground text-xs font-bold tracking-widest uppercase transition-colors duration-300 rounded-xl cursor-pointer"
               >
                 Open Contact Form
               </button>
             </div>
 
-            <div className="hidden md:block max-w-4xl mx-auto space-y-16">
+            <div className="hidden md:block max-w-4xl mx-auto space-y-12">
               <div className="space-y-6">
-                <span className="text-[10px] font-bold text-accent uppercase tracking-[0.6em] block">SECURE CONTACT</span>
+                <span className="text-xs font-bold text-accent uppercase tracking-[0.25em] block">SECURE CONTACT</span>
                 <h2 className="text-4xl lg:text-6xl font-luxury font-light tracking-tighter leading-none text-text-primary">
                   Let's build something <br /> timeless together.
                 </h2>
-                <p className="text-xs text-text-secondary uppercase tracking-widest">
+                <p className="text-sm text-text-secondary uppercase tracking-widest">
                   ESTABLISHED CHANNELS & PIPELINES
                 </p>
               </div>
 
-              {/* Embedded Contact Form Component */}
+              {/* Embedded Contact Form Component. The direct email lives in the footer's
+                  Contact column, so it is not repeated here. */}
               <ContactForm candidateEmail={contactEmail} />
-
-              <div className="pt-8 flex justify-center items-center border-t border-border max-w-2xl mx-auto text-text-primary">
-                <div className="text-center">
-                  <span className="text-[9px] font-bold text-text-secondary uppercase tracking-widest block mb-1">Direct Correspondence</span>
-                  <a href={`mailto:${contactEmail}`} className="text-lg font-luxury font-medium text-text-primary hover:text-accent transition-colors border-b border-border hover:border-accent pb-0.5">
-                    {contactEmail}
-                  </a>
-                </div>
-              </div>
             </div>
           </section>
         )}
