@@ -1,5 +1,6 @@
 import React from "react";
-import * as Icons from "lucide-react";
+import { HelpCircle, Check, Users, ExternalLink } from "lucide-react";
+import { CmsIcon } from "./CmsIcon";
 import { Entry } from "../models/portfolio.model";
 
 interface ProductCardProps {
@@ -9,12 +10,7 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Safe dynamic lucide-react icon rendering
   const renderIcon = (iconName: string) => {
-    const IconComponent = (Icons as any)[iconName];
-    if (IconComponent) {
-      return <IconComponent className="w-8 h-8 text-accent" />;
-    }
-    // Fallback if not found
-    return <Icons.HelpCircle className="w-8 h-8 text-accent" />;
+    return <CmsIcon name={iconName} fallback={HelpCircle} className="w-8 h-8 text-accent" />;
   };
 
   const statusColors: Record<string, string> = {
@@ -42,6 +38,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             src={coverImage}
             alt={displayTitle}
             referrerPolicy="no-referrer"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover select-none"
           />
         ) : (
@@ -104,7 +102,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <ul className="space-y-1.5">
               {product.features.slice(0, 3).map((feat, idx) => (
                 <li key={idx} className="flex items-start gap-2">
-                  <Icons.Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                   <span className="text-xs text-text-secondary leading-normal font-medium">{feat}</span>
                 </li>
               ))}
@@ -117,7 +115,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="px-6 md:px-8 pb-6 md:pb-8 pt-4 border-t border-border/40 bg-background/20 flex items-center justify-between gap-4">
         {/* Audience metadata */}
         <div className="flex items-center gap-1.5 text-text-secondary max-w-[70%]">
-          <Icons.Users size={12} className="text-text-secondary/70 shrink-0" />
+          <Users size={12} className="text-text-secondary/70 shrink-0" />
           <span className="text-[11px] font-medium leading-tight truncate" title={product.audience}>
             {product.audience}
           </span>
@@ -132,7 +130,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             className="flex items-center gap-1 text-[11px] font-mono font-bold text-accent hover:text-accent/80 transition-colors uppercase tracking-widest shrink-0"
           >
             <span>Details</span>
-            <Icons.ExternalLink size={11} />
+            <ExternalLink size={11} />
           </a>
         ) : null}
       </div>

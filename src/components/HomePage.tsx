@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import * as Icons from "lucide-react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -10,8 +9,9 @@ import {
   CheckCircle2,
   BookOpen,
 } from "lucide-react";
+import { CmsIcon } from "./CmsIcon";
 import { PortfolioData, AboutProfile, SiteSettings, Service } from "../models/portfolio.model";
-import { getAboutProfile, getSiteSettings, getServices } from "../services/api";
+import { getAboutProfile, getSiteSettings, getServices, onContentRefresh } from "../services/api";
 import { DEFAULT_HIRING_STRENGTHS, DEFAULT_CREDIBILITY_NOTES, fillYears } from "../config/home-content";
 import { LoadingScreen } from "./LoadingScreen";
 import { SectionError } from "./SectionState";
@@ -21,10 +21,6 @@ interface HomePageProps {
   handleNavClick: (tab: any, targetId?: string) => void;
 }
 
-const resolveIcon = (name?: string) => {
-  const Cmp = name ? (Icons as any)[name] : null;
-  return Cmp || Icons.Layers;
-};
 
 export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) => {
   const [profile, setProfile] = useState<AboutProfile | null>(null);
@@ -52,8 +48,16 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
       .finally(() => {
         if (isMounted) setLoading(false);
       });
+    // Fresh content after an instant snapshot render — swap in silently (no loading screen).
+    const unsubscribe = onContentRefresh((c) => {
+      if (!isMounted) return;
+      setSettings(c.settings);
+      setProfile(c.about);
+      setServices(c.services || []);
+    });
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, [reloadKey]);
 
@@ -92,9 +96,9 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
 
   const activeServices = services.filter((s) => s.status === "Active");
   const capabilities = activeServices.length
-    ? activeServices.slice(0, 3).map((s) => ({ icon: resolveIcon(s.icon), title: s.name, desc: s.tagline }))
+    ? activeServices.slice(0, 3).map((s) => ({ iconName: s.icon as string | undefined, title: s.name, desc: s.tagline }))
     : (profile?.skills ?? []).slice(0, 3).map((g) => ({
-        icon: Icons.Layers,
+        iconName: undefined as string | undefined,
         title: g.category,
         desc: g.items.join(" · "),
       }));
@@ -129,7 +133,13 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
           <div className="absolute inset-0 z-0" aria-hidden="true">
             <picture>
               {heroMobile && <source media="(max-width: 767px)" srcSet={heroMobile} />}
-              <img src={heroDesktop} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <img
+                src={heroDesktop}
+                alt=""
+                fetchPriority="high"
+                decoding="async"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
             </picture>
             {/* Theme-aware scrim keeps name/role legible over any photo, light or dark. */}
             <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/70 to-background/95" />
@@ -150,7 +160,15 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
             {hasProfile ? (
               <picture>
                 {profileMobile && <source media="(max-width: 767px)" srcSet={profileMobile} />}
-                <img src={profileDesktop} alt={name} className="w-full h-full object-cover" />
+                <img
+                  src={profileDesktop}
+                  alt={name}
+                  width={224}
+                  height={224}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
               </picture>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/15 to-surface">
@@ -297,11 +315,10 @@ export const HomePage: React.FC<HomePageProps> = ({ master, handleNavClick }) =>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
               {capabilities.map((c, idx) => {
-                const Icon = c.icon;
                 return (
                   <div key={idx} className="bg-surface border border-border rounded-2xl p-7 md:p-8 hover:border-accent/40 transition-colors">
                     <div className="w-11 h-11 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center mb-5">
-                      <Icon size={18} />
+                      <CmsIcon name={c.iconName} size={18} />
                     </div>
                     <h3 className="text-lg md:text-xl font-bold text-text-primary">{c.title}</h3>
                     {c.desc && <p className="mt-2 text-base md:text-[17px] text-text-secondary font-medium leading-relaxed">{c.desc}</p>}

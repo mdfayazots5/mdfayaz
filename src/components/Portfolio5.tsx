@@ -18,7 +18,7 @@ import { Github, Linkedin, BookOpen, User, Wrench, Shield, HelpCircle, ChevronDo
 import { useTheme } from "./ThemeProvider";
 import { ThemeToggle } from "./ThemeToggle";
 import { SiteSettings, CompanyProfile } from "../models/portfolio.model";
-import { getSiteSettings, getCompanies, isAuthenticated } from "../services/api";
+import { getSiteSettings, getCompanies, isAuthenticated, onContentRefresh } from "../services/api";
 
 interface Portfolio5Props {
   data: PortfolioData;
@@ -163,8 +163,15 @@ export const Portfolio5: React.FC<Portfolio5Props> = ({ data }) => {
     getCompanies()
       .then((result) => isMounted && setCompanies(result || []))
       .catch(() => isMounted && setCompanies([]));
+    // Fresh content after an instant snapshot render.
+    const unsubscribe = onContentRefresh((c) => {
+      if (!isMounted) return;
+      setSettings(c.settings);
+      setCompanies(c.companies || []);
+    });
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 

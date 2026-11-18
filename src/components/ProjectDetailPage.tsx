@@ -145,7 +145,7 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ project, o
         {/* Cover */}
         {cover && (
           <div className="mt-8 rounded-2xl overflow-hidden border border-border">
-            <img src={cover} alt={title} className="w-full max-h-[420px] object-cover" loading="lazy" />
+            <img src={cover} alt={title} className="w-full max-h-[420px] object-cover" loading="lazy" decoding="async" />
           </div>
         )}
 

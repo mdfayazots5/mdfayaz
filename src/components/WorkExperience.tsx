@@ -62,7 +62,7 @@ export const WorkExperience: React.FC<WorkExperienceProps> = ({ entries, compani
               <div className="flex items-start gap-4">
                 <span className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0 overflow-hidden">
                   {c?.logo ? (
-                    <img src={c.logo} alt={name} className="w-full h-full object-cover" />
+                    <img src={c.logo} alt={name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   ) : (
                     <Building2 size={20} />
                   )}

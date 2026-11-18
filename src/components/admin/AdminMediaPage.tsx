@@ -172,7 +172,11 @@ export const AdminMediaPage: React.FC = () => {
     if (!session || !croppedAreaPixels) return;
     setBusy(true);
     try {
-      const blob = await getCroppedBlob(session.imageSrc, croppedAreaPixels, "image/webp", 0.9);
+      // Size exports to how they're displayed: the profile renders ≤224px (512 covers 2x screens),
+      // hero desktop is full-bleed, hero mobile ≤ ~430 CSS px wide. WebP q0.8 is visually lossless here.
+      const maxDimension =
+        session.slot.key === "profileImage" ? 512 : session.variant === "mobile" ? 1080 : 1920;
+      const blob = await getCroppedBlob(session.imageSrc, croppedAreaPixels, "image/webp", 0.8, maxDimension);
 
       // Final guard: the compressed export must also fit the Worker's 5 MB cap.
       if (blob.size > MAX_BYTES) {

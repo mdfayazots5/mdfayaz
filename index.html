@@ -2,6 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Start DNS/TLS to the CMS API (content + media) before the JS bundle runs. -->
+    <link rel="preconnect" href="%VITE_API_BASE_URL%" crossorigin />
+    <link rel="dns-prefetch" href="%VITE_API_BASE_URL%" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mohammed Fayaz | .NET Full Stack Developer</title>
     <meta name="description" content="Mohammed Fayaz - .NET Full Stack Developer building scalable enterprise systems with ASP.NET Core, Angular, SQL Server, EF Core, and cloud-ready architecture." />

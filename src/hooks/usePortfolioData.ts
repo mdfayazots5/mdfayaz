@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MasterData, PortfolioData } from "../models/portfolio.model";
-import { getAboutProfile, getEntries, getSiteSettings } from "../services/api";
+import { loadPublicContent, onContentRefresh, PublicContent } from "../services/api";
 
 function locationShort(location: string): string {
   return location
@@ -18,8 +18,7 @@ export const usePortfolioData = (portfolioType: number) => {
 
   useEffect(() => {
     let isMounted = true;
-    Promise.all([getEntries(), getSiteSettings(), getAboutProfile()])
-      .then(([allEntries, settings, about]) => {
+    const apply = ({ entries: allEntries, settings, about }: PublicContent) => {
         if (isMounted) {
           const timeline = about.experienceTimeline?.[0];
           // Only published entries reach the public portal (absent flag = published).
@@ -94,16 +93,22 @@ export const usePortfolioData = (portfolioType: number) => {
           });
           setLoading(false);
         }
-      })
+    };
+
+    // One /bootstrap request (or an instant snapshot render + background refresh).
+    loadPublicContent()
+      .then(apply)
       .catch((err: any) => {
         if (isMounted) {
           setError(err.message || "Failed to fetch portfolio data");
           setLoading(false);
         }
       });
+    const unsubscribe = onContentRefresh(apply);
 
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, [portfolioType]);
 
