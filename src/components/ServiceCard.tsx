@@ -1,5 +1,6 @@
 import React from "react";
-import * as Icons from "lucide-react";
+import { HelpCircle, ChevronDown, CheckCircle } from "lucide-react";
+import { CmsIcon } from "./CmsIcon";
 import { Service } from "../models/portfolio.model";
 
 interface ServiceCardProps {
@@ -31,11 +32,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
   };
 
   const renderIcon = (iconName: string) => {
-    const IconComponent = (Icons as any)[iconName];
-    if (IconComponent) {
-      return <IconComponent className="w-6 h-6 text-accent" />;
-    }
-    return <Icons.HelpCircle className="w-6 h-6 text-accent" />;
+    return <CmsIcon name={iconName} fallback={HelpCircle} className="w-6 h-6 text-accent" />;
   };
 
   const isActive = service.status === "Active";
@@ -82,7 +79,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
           </p>
           <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-text-secondary">
             <span>Click for scope</span>
-            <Icons.ChevronDown
+            <ChevronDown
               size={13}
               className={`transition-transform duration-300 ${expanded ? "rotate-180 text-accent" : ""}`}
             />
@@ -100,7 +97,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
             <ul className="space-y-2">
               {service.highlights.slice(0, 4).map((highlight, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-xs text-text-secondary font-medium leading-relaxed">
-                  <Icons.CheckCircle size={13} className="text-accent shrink-0 mt-0.5" />
+                  <CheckCircle size={13} className="text-accent shrink-0 mt-0.5" />
                   <span>{highlight}</span>
                 </li>
               ))}

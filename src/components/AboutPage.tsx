@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import * as Icons from "lucide-react";
+import { CmsIcon } from "./CmsIcon";
 import { ArrowRight, Download, Briefcase, TrendingUp, Clock, GraduationCap, MapPin } from "lucide-react";
 import { AboutProfile, SiteSettings, Service } from "../models/portfolio.model";
 import { getAboutProfile, getSiteSettings, getServices } from "../services/api";
@@ -9,10 +9,6 @@ interface AboutPageProps {
   handleNavClick: (tab: any, targetId?: string) => void;
 }
 
-const resolveIcon = (name?: string) => {
-  const Cmp = name ? (Icons as any)[name] : null;
-  return Cmp || Icons.Layers;
-};
 
 export const AboutPage: React.FC<AboutPageProps> = ({ handleNavClick }) => {
   const [profile, setProfile] = useState<AboutProfile | null>(null);
@@ -78,9 +74,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ handleNavClick }) => {
   const activeServices = services.filter((s) => s.status === "Active");
   const capabilities =
     activeServices.length > 0
-      ? activeServices.slice(0, 6).map((s) => ({ icon: resolveIcon(s.icon), title: s.name, desc: s.tagline }))
+      ? activeServices.slice(0, 6).map((s) => ({ iconName: s.icon as string | undefined, title: s.name, desc: s.tagline }))
       : (profile.skills ?? []).slice(0, 6).map((g) => ({
-          icon: Icons.Layers,
+          iconName: undefined as string | undefined,
           title: g.category,
           desc: g.items.join(" · "),
         }));
@@ -183,11 +179,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ handleNavClick }) => {
             </p>
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {capabilities.map((c, idx) => {
-                const Icon = c.icon;
                 return (
                   <div key={idx} className="bg-surface border border-border rounded-2xl p-6 hover:border-accent/40 transition-colors">
                     <div className="w-11 h-11 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center mb-5">
-                      <Icon size={18} />
+                      <CmsIcon name={c.iconName} size={18} />
                     </div>
                     <h3 className="text-base font-bold text-text-primary">{c.title}</h3>
                     {c.desc && (

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import * as Icons from "lucide-react";
+import { HelpCircle, X, Sparkles, Check, ChevronRight } from "lucide-react";
+import { CmsIcon } from "./CmsIcon";
 import { Service } from "../models/portfolio.model";
 
 interface ServiceDetailModalProps {
@@ -33,11 +34,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ service,
 
   // Render icon dynamically
   const renderIcon = (iconName: string) => {
-    const IconComponent = (Icons as any)[iconName];
-    if (IconComponent) {
-      return <IconComponent className="w-8 h-8 text-accent shrink-0" />;
-    }
-    return <Icons.HelpCircle className="w-8 h-8 text-accent shrink-0" />;
+    return <CmsIcon name={iconName} fallback={HelpCircle} className="w-8 h-8 text-accent shrink-0" />;
   };
 
   const statusColorClasses = service.status === "Active"
@@ -61,7 +58,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ service,
           className="absolute top-4 right-4 p-2 text-text-secondary hover:text-text-primary hover:bg-background/80 rounded-xl border border-transparent hover:border-border transition-all cursor-pointer"
           title="Close details"
         >
-          <Icons.X size={16} />
+          <X size={16} />
         </button>
 
         {/* Header Title Section */}
@@ -101,13 +98,13 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ service,
         {service.highlights && service.highlights.length > 0 && (
           <div className="space-y-2.5 bg-background/40 border border-border/80 rounded-2xl p-4">
             <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-text-primary flex items-center gap-1.5">
-              <Icons.Sparkles size={12} className="text-accent" />
+              <Sparkles size={12} className="text-accent" />
               <span>Core Highlights</span>
             </h3>
             <ul className="space-y-2">
               {service.highlights.map((highlight, idx) => (
                 <li key={idx} className="flex items-start gap-2.5 text-xs text-text-secondary">
-                  <Icons.Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                   <span className="leading-normal font-medium">{highlight}</span>
                 </li>
               ))}
@@ -130,7 +127,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ service,
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-text-primary text-background hover:bg-accent hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 shadow-md cursor-pointer animate-pulse"
           >
             <span>Get in touch</span>
-            <Icons.ChevronRight size={13} />
+            <ChevronRight size={13} />
           </a>
         </div>
       </div>

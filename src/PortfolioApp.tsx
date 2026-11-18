@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ReactLenis, useLenis } from "lenis/react";
 import { usePortfolioData } from "./hooks/usePortfolioData";
@@ -10,19 +10,20 @@ import { ThemeProvider } from "./components/ThemeProvider";
 
 // Admin Section Imports
 import { isAuthenticated } from "./services/api";
-import { AdminLoginPage } from "./components/admin/AdminLoginPage";
-import { AdminLayout } from "./components/admin/AdminLayout";
-import { AdminDashboardPage } from "./components/admin/AdminDashboardPage";
-import { AdminEntriesPage } from "./components/admin/AdminEntriesPage";
-import { EntryForm } from "./components/admin/EntryForm";
-import { AdminFaqPage } from "./components/admin/AdminFaqPage";
-import { AdminUsesPage } from "./components/admin/AdminUsesPage";
-import { AdminPrivacyPage } from "./components/admin/AdminPrivacyPage";
-import { AdminAboutPage } from "./components/admin/AdminAboutPage";
-import { AdminSettingsPage } from "./components/admin/AdminSettingsPage";
-import { AdminServicesPage } from "./components/admin/AdminServicesPage";
-import { AdminCompaniesPage } from "./components/admin/AdminCompaniesPage";
-import { AdminMediaPage } from "./components/admin/AdminMediaPage";
+// Admin CMS is code-split: public visitors never download it. Each page loads on first visit.
+const AdminLoginPage = lazy(() => import("./components/admin/AdminLoginPage").then((m) => ({ default: m.AdminLoginPage })));
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
+const AdminDashboardPage = lazy(() => import("./components/admin/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage })));
+const AdminEntriesPage = lazy(() => import("./components/admin/AdminEntriesPage").then((m) => ({ default: m.AdminEntriesPage })));
+const EntryForm = lazy(() => import("./components/admin/EntryForm").then((m) => ({ default: m.EntryForm })));
+const AdminFaqPage = lazy(() => import("./components/admin/AdminFaqPage").then((m) => ({ default: m.AdminFaqPage })));
+const AdminUsesPage = lazy(() => import("./components/admin/AdminUsesPage").then((m) => ({ default: m.AdminUsesPage })));
+const AdminPrivacyPage = lazy(() => import("./components/admin/AdminPrivacyPage").then((m) => ({ default: m.AdminPrivacyPage })));
+const AdminAboutPage = lazy(() => import("./components/admin/AdminAboutPage").then((m) => ({ default: m.AdminAboutPage })));
+const AdminSettingsPage = lazy(() => import("./components/admin/AdminSettingsPage").then((m) => ({ default: m.AdminSettingsPage })));
+const AdminServicesPage = lazy(() => import("./components/admin/AdminServicesPage").then((m) => ({ default: m.AdminServicesPage })));
+const AdminCompaniesPage = lazy(() => import("./components/admin/AdminCompaniesPage").then((m) => ({ default: m.AdminCompaniesPage })));
+const AdminMediaPage = lazy(() => import("./components/admin/AdminMediaPage").then((m) => ({ default: m.AdminMediaPage })));
 
 const AdminPlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div className="bg-surface p-12 rounded-3xl border border-border text-center space-y-4 animate-fade-in text-left max-w-xl mx-auto my-12">
@@ -102,7 +103,9 @@ function PortfolioRouter() {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
         >
-          <AdminLoginPage />
+          <Suspense fallback={<LoadingScreen />}>
+            <AdminLoginPage />
+          </Suspense>
         </motion.div>
       </AnimatePresence>
     );
@@ -184,19 +187,22 @@ function PortfolioRouter() {
     // every sidebar click, which flashed a full-screen loader and felt like a page refresh (#8).
     // Only the inner page content swaps now.
     return (
-      <AdminRouteWrapper activeSub={activeSub}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={hash}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.2 }}
-          >
-            {componentToRender}
-          </motion.div>
-        </AnimatePresence>
-      </AdminRouteWrapper>
+      <Suspense fallback={<LoadingScreen />}>
+        <AdminRouteWrapper activeSub={activeSub}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={hash}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Inner boundary: switching admin pages keeps the shell mounted while the page chunk loads. */}
+              <Suspense fallback={null}>{componentToRender}</Suspense>
+            </motion.div>
+          </AnimatePresence>
+        </AdminRouteWrapper>
+      </Suspense>
     );
   }
 
