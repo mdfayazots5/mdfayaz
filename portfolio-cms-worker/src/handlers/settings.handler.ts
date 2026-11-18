@@ -1,7 +1,7 @@
 import type { SiteSettings, Env } from '../types';
 import { R2_KEYS } from '../types';
 import { readJson, writeJson } from '../utils/store';
-import { jsonResponse, errorResponse, publicJsonResponse } from '../response';
+import { jsonResponse, errorResponse, cmsReadResponse } from '../response';
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   name: '',
@@ -25,7 +25,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
 export async function handleGetSettings(request: Request, env: Env): Promise<Response> {
   try {
     const settings = await readJson<SiteSettings>(env, R2_KEYS.SETTINGS, DEFAULT_SETTINGS);
-    return await publicJsonResponse(request, env, settings);
+    return await cmsReadResponse(request, env, settings);
   } catch (error) {
     return errorResponse(request, env, `Failed to read settings: ${(error as Error).message}`, 500);
   }

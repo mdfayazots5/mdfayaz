@@ -1,7 +1,7 @@
 import type { Env, Entry, Service, CompanyProfile, AboutProfile, SiteSettings } from '../types';
 import { R2_KEYS } from '../types';
 import { readJson } from '../utils/store';
-import { errorResponse, publicJsonResponse } from '../response';
+import { errorResponse, cmsReadResponse, isPublished } from '../response';
 import { DEFAULT_SETTINGS } from './settings.handler';
 import { DEFAULT_ABOUT } from './about.handler';
 
@@ -19,7 +19,12 @@ export async function handleGetBootstrap(request: Request, env: Env): Promise<Re
       readJson<Service[]>(env, R2_KEYS.SERVICES, []),
       readJson<CompanyProfile[]>(env, R2_KEYS.COMPANIES, []),
     ]);
-    return await publicJsonResponse(request, env, { settings, entries, about, services, companies });
+    // Public home payload: drafts and inactive services are removed server-side.
+    return await cmsReadResponse(request, env, { settings, entries, about, services, companies }, (d) => ({
+      ...d,
+      entries: d.entries.filter(isPublished),
+      services: d.services.filter((s) => s.status === 'Active'),
+    }));
   } catch (error) {
     return errorResponse(request, env, `Failed to read bootstrap: ${(error as Error).message}`, 500);
   }

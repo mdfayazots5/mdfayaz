@@ -1,7 +1,7 @@
 import type { AboutProfile, Env } from '../types';
 import { R2_KEYS } from '../types';
 import { readJson, writeJson } from '../utils/store';
-import { jsonResponse, errorResponse, publicJsonResponse } from '../response';
+import { jsonResponse, errorResponse, cmsReadResponse } from '../response';
 
 export const DEFAULT_ABOUT: AboutProfile = {
   tagline: '',
@@ -17,7 +17,7 @@ export const DEFAULT_ABOUT: AboutProfile = {
 export async function handleGetAbout(request: Request, env: Env): Promise<Response> {
   try {
     const about = await readJson<AboutProfile>(env, R2_KEYS.ABOUT, DEFAULT_ABOUT);
-    return await publicJsonResponse(request, env, about);
+    return await cmsReadResponse(request, env, about);
   } catch (error) {
     return errorResponse(request, env, `Failed to read about profile: ${(error as Error).message}`, 500);
   }

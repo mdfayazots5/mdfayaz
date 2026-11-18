@@ -4,14 +4,14 @@ import { readJson, updateCollection } from '../utils/store';
 import { prefixedId } from '../utils/id';
 import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
-import { jsonResponse, errorResponse, notFoundResponse, publicJsonResponse } from '../response';
+import { jsonResponse, errorResponse, notFoundResponse, cmsReadResponse, isPublished } from '../response';
 
 const EDITABLE_PRIVACY_FIELDS: readonly (keyof PrivacySection)[] = ['title', 'body', 'published'];
 
 export async function handleGetPrivacy(request: Request, env: Env): Promise<Response> {
   try {
     const privacy = await readJson<PrivacySection[]>(env, R2_KEYS.PRIVACY, []);
-    return await publicJsonResponse(request, env, privacy);
+    return await cmsReadResponse(request, env, privacy, (all) => all.filter(isPublished));
   } catch (error) {
     return errorResponse(request, env, `Failed to read privacy sections: ${(error as Error).message}`, 500);
   }

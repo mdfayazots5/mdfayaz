@@ -1,5 +1,6 @@
 import type { Env } from './types';
 import { corsHeaders } from './cors';
+import { requireAuth } from './middleware/auth-guard';
 
 // L1: applied to every response. Cheap defense-in-depth even for a JSON API.
 const SECURITY_HEADERS: Record<string, string> = {
@@ -8,11 +9,32 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
 };
 
-// L2: public CMS JSON may be cached briefly by browsers. The admin editor always requests with
-// `cache: "no-store"` (see src/services/api.ts), so saved changes still appear immediately there.
-// Public visitors reuse a response for 5 min, then revalidate via ETag (304 when unchanged), so
-// CMS edits reach visitors within ~5 min. `Vary: Origin` (cors.ts) keeps CORS responses separate.
-export const PUBLIC_CACHE = 'public, max-age=300, stale-while-revalidate=600';
+// L2: public CMS JSON: the browser may store it but must revalidate on EVERY use (`no-cache`).
+// The ETag below turns an unchanged revalidation into an empty 304, so CMS edits reach visitors on
+// their very next load at near-zero cost. Admin (authenticated) reads are `private, no-store`.
+export const PUBLIC_CACHE = 'no-cache';
+const ADMIN_CACHE = 'private, no-store';
+
+/** Public visibility rule shared by every read: drafts (`published: false`) are admin-only. */
+export const isPublished = (item: { published?: boolean }): boolean => item.published !== false;
+
+/**
+ * CMS read response. Authenticated admin requests get the full data (drafts included, never cached);
+ * everyone else gets `publicView(data)` with ETag revalidation. Drafts never leave the Worker publicly.
+ */
+export async function cmsReadResponse<T>(
+  request: Request,
+  env: Env,
+  data: T,
+  publicView: (data: T) => T = (d) => d,
+): Promise<Response> {
+  if (await requireAuth(request, env)) {
+    const res = jsonResponse(request, env, data, 200, ADMIN_CACHE);
+    res.headers.set('Vary', 'Origin, Authorization');
+    return res;
+  }
+  return publicJsonResponse(request, env, publicView(data));
+}
 const NO_STORE = 'no-store';
 
 export function jsonResponse<T>(
@@ -49,6 +71,8 @@ export async function publicJsonResponse<T>(request: Request, env: Env, body: T)
     ETag: etag,
     ...SECURITY_HEADERS,
     ...corsHeaders(request, env),
+    // Public and admin views of the same URL differ — never let one stand in for the other.
+    Vary: 'Origin, Authorization',
   };
 
   const ifNoneMatch = request.headers.get('If-None-Match') || '';

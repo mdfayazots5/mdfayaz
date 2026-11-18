@@ -4,14 +4,14 @@ import { readJson, updateCollection } from '../utils/store';
 import { nextNumericId } from '../utils/id';
 import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
-import { jsonResponse, errorResponse, notFoundResponse, publicJsonResponse } from '../response';
+import { jsonResponse, errorResponse, notFoundResponse, cmsReadResponse, isPublished } from '../response';
 
 const EDITABLE_FAQ_FIELDS: readonly (keyof FaqItem)[] = ['question', 'answer', 'category', 'published'];
 
 export async function handleGetFaq(request: Request, env: Env): Promise<Response> {
   try {
     const faq = await readJson<FaqItem[]>(env, R2_KEYS.FAQ, []);
-    return await publicJsonResponse(request, env, faq);
+    return await cmsReadResponse(request, env, faq, (all) => all.filter(isPublished));
   } catch (error) {
     return errorResponse(request, env, `Failed to read FAQ: ${(error as Error).message}`, 500);
   }

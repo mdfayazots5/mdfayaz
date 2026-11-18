@@ -1,10 +1,11 @@
 import type { Entry, Env } from '../types';
 import { R2_KEYS } from '../types';
+import { requireAuth } from '../middleware/auth-guard';
 import { readJson, updateCollection } from '../utils/store';
 import { nextNumericId } from '../utils/id';
 import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
-import { jsonResponse, errorResponse, notFoundResponse, publicJsonResponse } from '../response';
+import { jsonResponse, errorResponse, notFoundResponse, cmsReadResponse, isPublished } from '../response';
 
 // Fields a client is allowed to set/change on an Entry. `id` is server-owned.
 const EDITABLE_ENTRY_FIELDS: readonly (keyof Entry)[] = [
@@ -17,7 +18,7 @@ const EDITABLE_ENTRY_FIELDS: readonly (keyof Entry)[] = [
 export async function handleGetEntries(request: Request, env: Env): Promise<Response> {
   try {
     const entries = await readJson<Entry[]>(env, R2_KEYS.ENTRIES, []);
-    return await publicJsonResponse(request, env, entries);
+    return await cmsReadResponse(request, env, entries, (all) => all.filter(isPublished));
   } catch (error) {
     return errorResponse(request, env, `Failed to read entries: ${(error as Error).message}`, 500);
   }
@@ -29,7 +30,9 @@ export async function handleGetEntry(request: Request, env: Env, id: string): Pr
     const entries = await readJson<Entry[]>(env, R2_KEYS.ENTRIES, []);
     const entry = entries.find((item) => item.id === numericId);
     if (!entry) return notFoundResponse(request, env, 'Entry');
-    return await publicJsonResponse(request, env, entry);
+    // Drafts 404 for the public (same as a missing entry) but stay readable by the admin.
+    if (!isPublished(entry) && !(await requireAuth(request, env))) return notFoundResponse(request, env, 'Entry');
+    return await cmsReadResponse(request, env, entry);
   } catch (error) {
     return errorResponse(request, env, `Failed to read entry: ${(error as Error).message}`, 500);
   }

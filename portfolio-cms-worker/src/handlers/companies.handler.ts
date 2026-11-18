@@ -4,7 +4,7 @@ import { readJson, updateCollection } from '../utils/store';
 import { nextNumericId } from '../utils/id';
 import { validateRequired } from '../utils/validator';
 import { pick } from '../utils/fields';
-import { jsonResponse, errorResponse, notFoundResponse, publicJsonResponse } from '../response';
+import { jsonResponse, errorResponse, notFoundResponse, cmsReadResponse } from '../response';
 
 const EDITABLE_COMPANY_FIELDS: readonly (keyof CompanyProfile)[] = [
   'name', 'role', 'location', 'startDate', 'endDate', 'description', 'website', 'logo', 'displayOrder',
@@ -13,7 +13,7 @@ const EDITABLE_COMPANY_FIELDS: readonly (keyof CompanyProfile)[] = [
 export async function handleGetCompanies(request: Request, env: Env): Promise<Response> {
   try {
     const companies = await readJson<CompanyProfile[]>(env, R2_KEYS.COMPANIES, []);
-    return await publicJsonResponse(request, env, companies);
+    return await cmsReadResponse(request, env, companies);
   } catch (error) {
     return errorResponse(request, env, `Failed to read companies: ${(error as Error).message}`, 500);
   }
